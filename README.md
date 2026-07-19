@@ -10,3 +10,5 @@ Entertainment Discovery & Branding Platform
 ## Team Members
 - Fahim
 - ...
+
+- Ayesha
