@@ -1,8 +1,10 @@
+import { HiOutlineMagnifyingGlass } from "react-icons/hi2";
+
 function Navbar() {
   return (
-    <nav className="bg-black px-8 py-5">
-      <div className="flex justify-between items-center">
-
+    <nav className="bg-black text-white px-8 py-4">
+      <div className="max-w-7xl mx-auto flex items-center justify-between">
+        
         {/* Logo */}
         <h1 className="text-3xl font-bold text-red-600 cursor-pointer">
           NexPlay
@@ -31,10 +33,28 @@ function Navbar() {
           </li>
         </ul>
 
-        <button className="bg-red-600 px-5 py-2 rounded-lg font-medium hover:bg-red-700 transition">
-          Login
-        </button>
+        {/* Right Side */}
+        <div className="flex items-center gap-4">
+          
+          {/* Search */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search movies..."
+              className="w-64 bg-gray-900 border border-gray-700 rounded-lg py-2 pl-4 pr-10 text-white placeholder-gray-400 focus:outline-none focus:border-red-500"
+            />
 
+            <HiOutlineMagnifyingGlass
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl hover:text-red-500 cursor-pointer transition"
+            />
+          </div>
+
+          {/* Login Button */}
+          <button className="bg-red-600 px-5 py-2 rounded-lg font-medium hover:bg-red-700 transition">
+            Login
+          </button>
+
+        </div>
       </div>
     </nav>
   );
