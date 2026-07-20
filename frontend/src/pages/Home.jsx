@@ -3,15 +3,28 @@ import Hero from "../components/Hero";
 import Browse from "./Browse";
 import Footer from "../components/Footer";
 
+
 function Home() {
   return (
+
     <>
+
       <Navbar />
-      <Hero />
-      <Browse />
+
+      <main>
+
+        <Hero />
+
+        <Browse />
+
+      </main>
+
       <Footer />
+
     </>
+
   );
 }
+
 
 export default Home;
