@@ -34,10 +34,10 @@ function Hero() {
         absolute
         top-20
         right-0
-        w-[250px]
-        h-[250px]
-        md:w-[450px]
-        md:h-[450px]
+        w-62.5
+        h-2.5
+        md:w-112.5
+        md:h-112.5
         bg-[#D4A017]/10
         blur-[100px]
         rounded-full

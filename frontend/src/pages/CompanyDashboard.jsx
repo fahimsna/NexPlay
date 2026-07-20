@@ -1,168 +1,231 @@
-import DashboardLayout from "../layouts/DashboardLayout";
-import StatsCard from "../components/StatsCard";
+import { useEffect, useState } from "react";
 
-import {
-  HiBuildingOffice2,
-  HiMegaphone,
-  HiFilm,
-  HiChartBar,
-} from "react-icons/hi2";
+import DashboardLayout from "../layouts/DashboardLayout";
+
+import StatsCard from "../components/dahboard/StatsCard";
+import RecentActivity from "../components/dahboard/RecentActivity";
+
+import CompanyProfileSummary from "../components/company/CompanyProfileSummary";
+import CompanyInfoCard from "../components/company/CompanyInfoCard";
+
+import { getCompanies } from "../services/companyService";
 
 function CompanyDashboard() {
+  const [company, setCompany] = useState(null);
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchCompany();
+  }, []);
+
+  const fetchCompany = async () => {
+    try {
+      const data = await getCompanies();
+
+      if (data.length > 0) {
+        setCompany(data[0]);
+      }
+    } catch (error) {
+      console.error("Error fetching company:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div
+          className="
+            min-h-screen
+            flex
+            items-center
+            justify-center
+          "
+        >
+          <p className="text-gray-400">Loading Dashboard...</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout>
-      {/* Welcome Banner */}
-      <section
+      <div
         className="
-          bg-linear-to-r
-          from-[#2A2D34]
-          to-[#1E2126]
-          border
-          border-white/10
-          rounded-3xl
-          p-6
-          lg:p-8
-          mb-8
+          space-y-8
         "
       >
-        <p className="text-sm uppercase tracking-[3px] text-[#D4A017]">
-          Welcome Back
-        </p>
+        {/* Company Header */}
 
-        <h1 className="mt-3 text-3xl lg:text-4xl font-black">
-          Company Dashboard
-        </h1>
+        {company && <CompanyProfileSummary company={company} dashboard />}
 
-        <p className="mt-3 max-w-2xl text-gray-400">
-          Manage your company profile, campaigns and entertainment content from
-          one central dashboard.
-        </p>
-      </section>
+        {/* Page Header */}
 
-      {/* Statistics */}
-      <section
-        className="
-          grid
-          grid-cols-1
-          sm:grid-cols-2
-          xl:grid-cols-4
-          gap-6
-        "
-      >
-        <StatsCard
-          title="Company"
-          value="1"
-          subtitle="Registered Company"
-          icon={<HiBuildingOffice2 size={28} />}
-        />
+        <div>
+          <h1
+            className="
+              text-3xl
+              font-bold
+              text-white
+            "
+          >
+            Company Dashboard
+          </h1>
 
-        <StatsCard
-          title="Campaigns"
-          value="0"
-          subtitle="Active Campaigns"
-          icon={<HiMegaphone size={28} />}
-        />
-
-        <StatsCard
-          title="Content"
-          value="0"
-          subtitle="Published Content"
-          icon={<HiFilm size={28} />}
-        />
-
-        <StatsCard
-          title="Views"
-          value="0"
-          subtitle="Total Views"
-          icon={<HiChartBar size={28} />}
-        />
-      </section>
-
-      {/* Lower Section */}
-      <section
-        className="
-          mt-8
-          grid
-          grid-cols-1
-          xl:grid-cols-3
-          gap-6
-        "
-      >
-        {/* Company Information */}
-        <div
-          className="
-            xl:col-span-2
-            bg-[#2A2D34]
-            rounded-3xl
-            border
-            border-white/10
-            p-6
-          "
-        >
-          <h2 className="text-2xl font-bold">Company Information</h2>
-
-          <p className="mt-2 text-gray-400">
-            Your company profile will appear here once connected to the backend.
+          <p
+            className="
+              text-gray-400
+              mt-2
+            "
+          >
+            Welcome back{" "}
+            <span
+              className="
+                text-[#D4A017]
+                font-semibold
+              "
+            >
+              {company?.companyName}
+            </span>
           </p>
-
-          <div className="mt-8 grid sm:grid-cols-2 gap-6">
-            <div>
-              <p className="text-gray-500 text-sm">Company Name</p>
-
-              <h3 className="mt-2 font-semibold">—</h3>
-            </div>
-
-            <div>
-              <p className="text-gray-500 text-sm">Industry</p>
-
-              <h3 className="mt-2 font-semibold">—</h3>
-            </div>
-
-            <div>
-              <p className="text-gray-500 text-sm">Website</p>
-
-              <h3 className="mt-2 font-semibold">—</h3>
-            </div>
-
-            <div>
-              <p className="text-gray-500 text-sm">Verification</p>
-
-              <h3 className="mt-2 text-[#D4A017] font-semibold">Pending</h3>
-            </div>
-          </div>
         </div>
 
-        {/* Recent Activity */}
+        {/* Statistics */}
+
         <div
           className="
-            bg-[#2A2D34]
-            rounded-3xl
-            border
-            border-white/10
-            p-6
+            grid
+            grid-cols-1
+            sm:grid-cols-2
+            xl:grid-cols-4
+            gap-6
           "
         >
-          <h2 className="text-2xl font-bold">Recent Activity</h2>
+          <StatsCard
+            title="Company Profile"
+            value="100%"
+            subtitle="Profile Completed"
+          />
 
-          <div className="mt-6 space-y-5">
-            <div className="border-l-2 border-[#D4A017] pl-4">
-              <h3 className="font-medium">Company profile created</h3>
+          <StatsCard
+            title="Advertisements"
+            value="0"
+            subtitle="Active Advertisements"
+          />
 
-              <p className="text-sm text-gray-400">Just now</p>
-            </div>
+          <StatsCard title="Campaigns" value="0" subtitle="Running Campaigns" />
 
-            <div className="border-l-2 border-white/10 pl-4">
-              <h3 className="font-medium text-gray-500">No campaigns yet</h3>
-            </div>
+          <StatsCard
+            title="Upcoming Content"
+            value="0"
+            subtitle="Scheduled Releases"
+          />
+        </div>
 
-            <div className="border-l-2 border-white/10 pl-4">
-              <h3 className="font-medium text-gray-500">
-                No entertainment content yet
-              </h3>
+        {/* Company Information */}
+
+        {company && <CompanyInfoCard company={company} />}
+
+        {/* Bottom Section */}
+
+        <div
+          className="
+            grid
+            grid-cols-1
+            xl:grid-cols-2
+            gap-6
+          "
+        >
+          <RecentActivity company={company} />
+
+          {/* Quick Actions */}
+
+          <div
+            className="
+              bg-[#1B1D22]
+              rounded-3xl
+              p-6
+              border
+              border-white/5
+            "
+          >
+            <h2
+              className="
+                text-2xl
+                font-bold
+                text-white
+                mb-6
+              "
+            >
+              Quick Actions
+            </h2>
+
+            <div
+              className="
+                grid
+                grid-cols-1
+                sm:grid-cols-2
+                gap-4
+              "
+            >
+              <button
+                className="
+                  bg-[#D4A017]
+                  text-[#17191D]
+                  font-semibold
+                  py-3
+                  rounded-xl
+                  hover:opacity-90
+                  transition
+                "
+              >
+                Edit Company
+              </button>
+
+              <button
+                className="
+                  bg-[#353941]
+                  text-white
+                  py-3
+                  rounded-xl
+                  hover:bg-[#40444D]
+                  transition
+                "
+              >
+                Add Advertisement
+              </button>
+
+              <button
+                className="
+                  bg-[#353941]
+                  text-white
+                  py-3
+                  rounded-xl
+                  hover:bg-[#40444D]
+                  transition
+                "
+              >
+                Create Campaign
+              </button>
+
+              <button
+                className="
+                  bg-[#353941]
+                  text-white
+                  py-3
+                  rounded-xl
+                  hover:bg-[#40444D]
+                  transition
+                "
+              >
+                Add Upcoming Content
+              </button>
             </div>
           </div>
         </div>
-      </section>
+      </div>
     </DashboardLayout>
   );
 }
