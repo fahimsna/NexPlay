@@ -21,8 +21,8 @@ function EntertainmentCard({ title, category, rating, image }) {
       <div
         className="
         relative
-        h-[360px]
-        sm:h-[380px]
+        h-90
+        sm:h-95
         overflow-hidden
         "
       >
@@ -48,7 +48,7 @@ function EntertainmentCard({ title, category, rating, image }) {
           className="
           absolute
           inset-0
-          bg-gradient-to-t
+          bg-linear-to-t
           from-[#17191D]
           via-transparent
           to-transparent
