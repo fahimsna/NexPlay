@@ -7,6 +7,8 @@ import Browse from "./pages/Browse";
 // Company Pages
 import CompanyDashboard from "./pages/CompanyDashboard";
 import CompanyProfile from "./pages/CompanyProfile";
+import Analytics from "./pages/Analytics";
+import CompanySettings from "./pages/CompanySettings";
 
 function App() {
   return (
@@ -17,15 +19,11 @@ function App() {
         <Route path="/browse" element={<Browse />} />
 
         {/* Company Routes */}
-        <Route
-          path="/company/dashboard"
-          element={<CompanyDashboard />}
-        />
+        <Route path="/company/dashboard" element={<CompanyDashboard />} />
 
-        <Route
-          path="/company/profile"
-          element={<CompanyProfile />}
-        />
+        <Route path="/company/profile" element={<CompanyProfile />} />
+        <Route path="/company/analytics" element={<Analytics />} />
+        <Route path="/company/settings" element={<CompanySettings />} />
       </Routes>
     </BrowserRouter>
   );
