@@ -1,72 +1,87 @@
+import { Link } from "react-router-dom";
 import { HiPlay } from "react-icons/hi2";
 
 function Hero() {
-
   const platforms = [
-    "Netflix",
-    "Prime Video",
-    "Disney+",
-    "Apple TV+",
-    "Max",
-    "Hulu",
+    {
+      name: "Netflix",
+      link: "https://www.netflix.com",
+    },
+    {
+      name: "Prime Video",
+      link: "https://www.primevideo.com",
+    },
+    {
+      name: "Disney+",
+      link: "https://www.disneyplus.com/",
+    },
+    {
+      name: "Apple TV+",
+      link: "https://tv.apple.com",
+    },
+    {
+      name: "Max",
+      link: "https://www.max.com",
+    },
+    {
+      name: "Hulu",
+      link: "https://www.hulu.com/",
+    },
   ];
-
 
   return (
     <section
       className="
-      min-h-screen
-      bg-[#1A1D23]
-      text-white
-      flex
-      items-center
       relative
       overflow-hidden
+      bg-[#17191D]
+      text-white
       pt-28
       pb-16
+      sm:pt-32
       "
     >
+      {/* Background Glow */}
 
-
-      {/* Glow */}
       <div
         className="
         absolute
-        top-20
+        top-10
         right-0
-        w-[250px]
-        h-[250px]
-        md:w-[450px]
-        md:h-[450px]
+        w-64
+        h-64
+        sm:w-96
+        sm:h-96
         bg-[#D4A017]/10
         blur-[100px]
         rounded-full
         "
-      ></div>
-
-
-
+      />
 
       <div
         className="
+        relative
         max-w-7xl
         mx-auto
-        px-5
-        sm:px-8
+        px-4
+        sm:px-6
+        lg:px-8
         grid
+        grid-cols-1
         lg:grid-cols-2
         gap-12
+        lg:gap-16
         items-center
         "
       >
+        {/* LEFT CONTENT */}
 
-
-
-        {/* LEFT */}
-
-        <div className="text-center lg:text-left">
-
-
+        <div
+          className="
+          text-center
+          lg:text-left
+          "
+        >
           <div
             className="
             inline-flex
@@ -76,63 +91,57 @@ function Hero() {
             bg-white/5
             border
             border-white/10
+            text-[#D4A017]
             text-[10px]
             sm:text-xs
             uppercase
             tracking-[2px]
-            text-[#D4A017]
             "
           >
             Entertainment Discovery Platform
           </div>
-
-
-
 
           <h1
             className="
             mt-6
             text-4xl
             sm:text-5xl
-            lg:text-6xl
+            lg:text-7xl
             font-black
-            leading-tight
+            leading-[1.05]
+            tracking-tight
             "
           >
-
             Discover Your Next
-
-            <span className="
+            <span
+              className="
               block
+              mt-2
               text-[#D4A017]
-            ">
+              "
+            >
               Favorite Entertainment
             </span>
-
           </h1>
-
-
-
 
           <p
             className="
-            mt-5
+            mt-6
+            max-w-xl
             mx-auto
             lg:mx-0
-            max-w-xl
-            text-base
-            sm:text-lg
-            leading-7
+            text-sm
+            sm:text-base
+            lg:text-lg
             text-gray-400
+            leading-7
             "
           >
-            Explore movies, TV shows, live sports and
-            upcoming releases from your favorite
-            streaming platforms in one place.
+            Explore movies, TV shows, live sports and upcoming releases from
+            your favorite streaming platforms in one place.
           </p>
 
-
-
+          {/* Buttons */}
 
           <div
             className="
@@ -140,41 +149,38 @@ function Hero() {
             flex
             flex-col
             sm:flex-row
+            gap-4
             justify-center
             lg:justify-start
-            gap-4
             "
           >
-
-
-            <button
+            <Link
+              to="/browse"
               className="
               flex
               justify-center
               items-center
               gap-2
-              bg-[#D4A017]
-              text-[#1A1D23]
               px-7
               py-3
               rounded-full
+              bg-[#D4A017]
+              text-[#17191D]
               font-semibold
               hover:scale-105
               transition
               "
             >
-
               <HiPlay />
-
               Explore Now
+            </Link>
 
-            </button>
-
-
-
-
-            <button
+            <Link
+              to="/movies"
               className="
+              flex
+              justify-center
+              items-center
               px-7
               py-3
               rounded-full
@@ -187,33 +193,23 @@ function Hero() {
               "
             >
               Browse Collection
-            </button>
-
-
+            </Link>
           </div>
-
-
         </div>
 
-
-
-
-
-
-        {/* RIGHT */}
+        {/* RIGHT CARD */}
 
         <div
           className="
           flex
           justify-center
+          w-full
           "
         >
-
-
           <div
             className="
             w-full
-            max-w-sm
+            max-w-md
             rounded-3xl
             bg-[#24272D]/70
             backdrop-blur-xl
@@ -223,45 +219,37 @@ function Hero() {
             sm:p-7
             "
           >
-
-
-
             <p
               className="
               text-xs
-              tracking-[3px]
               uppercase
+              tracking-[3px]
               text-[#D4A017]
               "
             >
               Where To Watch
             </p>
 
-
-
             <h2
               className="
               mt-3
               text-xl
-              sm:text-2xl
+              sm:text-3xl
               font-bold
               "
             >
               Available On
             </h2>
 
-
-
-            <p className="
+            <p
+              className="
               mt-2
               text-sm
               text-gray-400
-            ">
+              "
+            >
               Official streaming platforms
             </p>
-
-
-
 
             <div
               className="
@@ -271,36 +259,34 @@ function Hero() {
               gap-3
               "
             >
-
-              {platforms.map((platform)=>(
-
-                <div
-                  key={platform}
+              {platforms.map((platform) => (
+                <a
+                  key={platform.name}
+                  href={platform.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="
-                  h-14
-                  flex
-                  items-center
-                  justify-center
-                  rounded-xl
-                  bg-white/5
-                  border
-                  border-white/10
-                  text-xs
-                  sm:text-sm
-                  hover:border-[#D4A017]
-                  hover:text-[#D4A017]
-                  transition
-                  "
+                    h-12
+                    sm:h-14
+                    flex
+                    items-center
+                    justify-center
+                    rounded-xl
+                    bg-white/5
+                    border
+                    border-white/10
+                    text-xs
+                    sm:text-sm
+                    hover:border-[#D4A017]
+                    hover:text-[#D4A017]
+                    transition
+                    cursor-pointer
+                    "
                 >
-                  {platform}
-                </div>
-
+                  {platform.name}
+                </a>
               ))}
-
             </div>
-
-
-
 
             <div
               className="
@@ -313,31 +299,15 @@ function Hero() {
               text-sm
               "
             >
+              <span className="text-gray-400">More platforms</span>
 
-              <span className="text-gray-400">
-                More platforms
-              </span>
-
-              <span className="text-[#D4A017]">
-                +20
-              </span>
-
-
+              <span className="text-[#D4A017]">+20</span>
             </div>
-
-
           </div>
-
-
         </div>
-
-
       </div>
-
-
     </section>
   );
 }
-
 
 export default Hero;

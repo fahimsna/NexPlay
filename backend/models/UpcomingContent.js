@@ -1,44 +1,44 @@
 const mongoose = require("mongoose");
 
-const upcomingContentSchema = new mongoose.Schema(
-{
-title: {
-type: String,
-required: true,
-},
 
-description: {
-type: String,
-required: true,
-},
+const upcomingSchema = new mongoose.Schema({
 
-releaseDate: {
-type: Date,
-required: true,
-},
+    title:{
+        type:String,
+        required:true
+    },
 
-genre: {
-type: String,
-required: true,
-},
+    category:{
+        type:String,
+        required:true
+    },
 
-image: {
-type: String,
-default: "",
-},
+    genre:{
+        type:String,
+        required:true
+    },
 
-status: {
-type: String,
-enum: ["Coming Soon", "Released"],
-default: "Coming Soon",
-},
-},
-{
-timestamps: true,
-}
-);
+    poster:{
+        type:String,
+        required:true
+    },
+
+    trailerURL:{
+        type:String
+    },
+
+    releaseDate:{
+        type:String
+    },
+
+    description:{
+        type:String
+    }
+
+});
+
 
 module.exports = mongoose.model(
-"UpcomingContent",
-upcomingContentSchema
+    "Upcoming",
+    upcomingSchema
 );
