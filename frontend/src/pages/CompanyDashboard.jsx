@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 import DashboardLayout from "../layouts/DashboardLayout";
 
@@ -7,6 +8,13 @@ import RecentActivity from "../components/dahboard/RecentActivity";
 
 import CompanyProfileSummary from "../components/company/CompanyProfileSummary";
 import CompanyInfoCard from "../components/company/CompanyInfoCard";
+
+import {
+  HiBuildingOffice2,
+  HiMegaphone,
+  HiRocketLaunch,
+  HiFilm,
+} from "react-icons/hi2";
 
 import { getCompanies } from "../services/companyService";
 
@@ -27,7 +35,7 @@ function CompanyDashboard() {
         setCompany(data[0]);
       }
     } catch (error) {
-      console.error("Error fetching company:", error);
+      console.log("Error fetching company:", error);
     } finally {
       setLoading(false);
     }
@@ -35,18 +43,25 @@ function CompanyDashboard() {
 
   if (loading) {
     return (
-      <DashboardLayout>
-        <div
-          className="
-            min-h-screen
-            flex
-            items-center
-            justify-center
-          "
-        >
-          <p className="text-gray-400">Loading Dashboard...</p>
-        </div>
-      </DashboardLayout>
+      <div
+        className="
+
+min-h-screen
+
+bg-[#17191D]
+
+flex
+
+items-center
+
+justify-center
+
+text-white
+
+"
+      >
+        Loading Dashboard...
+      </div>
     );
   }
 
@@ -54,54 +69,74 @@ function CompanyDashboard() {
     <DashboardLayout>
       <div
         className="
-          space-y-8
-        "
+
+space-y-8
+
+"
       >
         {/* Company Header */}
 
         {company && <CompanyProfileSummary company={company} dashboard />}
 
-        {/* Page Header */}
+        {/* Page Heading */}
 
         <div>
           <h1
             className="
-              text-3xl
-              font-bold
-              text-white
-            "
+
+text-3xl
+
+sm:text-4xl
+
+font-black
+
+text-white
+
+"
           >
             Company Dashboard
           </h1>
 
           <p
             className="
-              text-gray-400
-              mt-2
-            "
+
+text-gray-400
+
+mt-2
+
+"
           >
             Welcome back{" "}
             <span
               className="
-                text-[#D4A017]
-                font-semibold
-              "
+
+text-[#D4A017]
+
+font-semibold
+
+"
             >
               {company?.companyName}
             </span>
           </p>
         </div>
 
-        {/* Statistics */}
+        {/* Stats */}
 
         <div
           className="
-            grid
-            grid-cols-1
-            sm:grid-cols-2
-            xl:grid-cols-4
-            gap-6
-          "
+
+grid
+
+grid-cols-1
+
+sm:grid-cols-2
+
+xl:grid-cols-4
+
+gap-6
+
+"
         >
           <StatsCard
             title="Company Profile"
@@ -128,105 +163,241 @@ function CompanyDashboard() {
 
         {company && <CompanyInfoCard company={company} />}
 
-        {/* Bottom Section */}
+        {/* Bottom Grid */}
 
         <div
           className="
-            grid
-            grid-cols-1
-            xl:grid-cols-2
-            gap-6
-          "
+
+grid
+
+grid-cols-1
+
+xl:grid-cols-2
+
+gap-6
+
+"
         >
+          {/* Activity */}
+
           <RecentActivity company={company} />
 
           {/* Quick Actions */}
 
           <div
             className="
-              bg-[#1B1D22]
-              rounded-3xl
-              p-6
-              border
-              border-white/5
-            "
+
+bg-[#1B1D22]
+
+border
+
+border-white/10
+
+rounded-3xl
+
+p-6
+
+sm:p-8
+
+"
           >
-            <h2
+            <div
               className="
-                text-2xl
-                font-bold
-                text-white
-                mb-6
-              "
+
+mb-6
+
+"
             >
-              Quick Actions
-            </h2>
+              <h2
+                className="
+
+text-2xl
+
+font-bold
+
+text-white
+
+"
+              >
+                Quick Actions
+              </h2>
+
+              <p
+                className="
+
+text-gray-400
+
+text-sm
+
+mt-1
+
+"
+              >
+                Manage your company activities
+              </p>
+            </div>
 
             <div
               className="
-                grid
-                grid-cols-1
-                sm:grid-cols-2
-                gap-4
-              "
+
+grid
+
+grid-cols-1
+
+sm:grid-cols-2
+
+gap-5
+
+"
             >
-              <button
-                className="
-                  bg-[#D4A017]
-                  text-[#17191D]
-                  font-semibold
-                  py-3
-                  rounded-xl
-                  hover:opacity-90
-                  transition
-                "
-              >
-                Edit Company
-              </button>
+              <ActionCard
+                title="Edit Company"
+                description="Update your company profile information"
+                path="/company/profile"
+                icon={HiBuildingOffice2}
+              />
 
-              <button
-                className="
-                  bg-[#353941]
-                  text-white
-                  py-3
-                  rounded-xl
-                  hover:bg-[#40444D]
-                  transition
-                "
-              >
-                Add Advertisement
-              </button>
+              <ActionCard
+                title="Create Advertisement"
+                description="Promote movies, shows and content"
+                path="/company/advertisement"
+                icon={HiMegaphone}
+              />
 
-              <button
-                className="
-                  bg-[#353941]
-                  text-white
-                  py-3
-                  rounded-xl
-                  hover:bg-[#40444D]
-                  transition
-                "
-              >
-                Create Campaign
-              </button>
+              <ActionCard
+                title="Create Campaign"
+                description="Manage marketing campaigns"
+                path="/company/campaigns"
+                icon={HiRocketLaunch}
+              />
 
-              <button
-                className="
-                  bg-[#353941]
-                  text-white
-                  py-3
-                  rounded-xl
-                  hover:bg-[#40444D]
-                  transition
-                "
-              >
-                Add Upcoming Content
-              </button>
+              <ActionCard
+                title="Add Content"
+                description="Manage upcoming entertainment releases"
+                path="/company/content"
+                icon={HiFilm}
+              />
             </div>
           </div>
         </div>
       </div>
     </DashboardLayout>
+  );
+}
+
+function ActionCard({
+  title,
+
+  description,
+
+  path,
+
+  icon: Icon,
+}) {
+  return (
+    <Link
+      to={path}
+      className="
+
+group
+
+bg-[#24272D]
+
+border
+
+border-white/10
+
+rounded-2xl
+
+p-5
+
+hover:border-[#D4A017]
+
+hover:-translate-y-1
+
+transition
+
+"
+    >
+      <div
+        className="
+
+flex
+
+items-start
+
+gap-4
+
+"
+      >
+        <div
+          className="
+
+w-12
+
+h-12
+
+rounded-xl
+
+bg-[#D4A017]/10
+
+flex
+
+items-center
+
+justify-center
+
+group-hover:bg-[#D4A017]
+
+transition
+
+"
+        >
+          <Icon
+            size={24}
+            className="
+
+text-[#D4A017]
+
+group-hover:text-[#17191D]
+
+transition
+
+"
+          />
+        </div>
+
+        <div>
+          <h3
+            className="
+
+text-white
+
+font-semibold
+
+"
+          >
+            {title}
+          </h3>
+
+          <p
+            className="
+
+text-gray-400
+
+text-sm
+
+mt-2
+
+leading-5
+
+"
+          >
+            {description}
+          </p>
+        </div>
+      </div>
+    </Link>
   );
 }
 

@@ -1,12 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
 
 import {
-  HiBars3,
   HiXMark,
   HiHome,
   HiBuildingOffice2,
-  HiMegaphone,
   HiRectangleStack,
+  HiMegaphone,
   HiFilm,
   HiCalendarDays,
   HiChartBar,
@@ -68,132 +67,261 @@ function DashboardSidebar({ isOpen, setIsOpen }) {
   ];
 
   return (
-    <aside
-      className={`
-        fixed
-        top-0
-        left-0
-        h-screen
-        w-72
+    <>
+      {/* Mobile Overlay */}
 
-        bg-[#1B1D22]
-
-        border-r
-        border-white/5
-
-        flex
-        flex-col
-
-        z-50
-
-        transition-transform
-        duration-300
-
-        ${isOpen ? "translate-x-0" : "-translate-x-full"}
-
-        lg:translate-x-0
-        lg:sticky
-        lg:top-0
-
-      `}
-    >
-      {/* Logo */}
-
-      <div
-        className="
-          px-8
-          py-7
-          border-b
-          border-white/5
-        "
-      >
-        <Link
-          to="/company/dashboard"
+      {isOpen && (
+        <div
+          onClick={() => setIsOpen(false)}
           className="
-            text-3xl
-            font-black
-          "
-        >
-          <span className="text-[#D4A017]">Nex</span>
 
-          <span className="text-white">Play</span>
-        </Link>
-      </div>
+fixed
 
-      {/* Menu */}
+inset-0
 
-      <nav
-        className="
-          flex-1
-          px-5
-          py-8
-          space-y-2
-        "
+bg-black/50
+
+z-40
+
+lg:hidden
+
+"
+        />
+      )}
+
+      <aside
+        className={`
+
+fixed
+
+top-0
+
+left-0
+
+h-screen
+
+w-72
+
+bg-[#1B1D22]
+
+border-r
+
+border-white/10
+
+z-50
+
+flex
+
+flex-col
+
+transition-transform
+
+duration-300
+
+
+${isOpen ? "translate-x-0" : "-translate-x-full"}
+
+
+
+lg:translate-x-0
+
+`}
       >
-        {menuItems.map((item) => {
-          const Icon = item.icon;
+        {/* Logo */}
 
-          return (
-            <Link
-              key={item.name}
-              to={item.path}
-              className={`
-
-                  flex
-                  items-center
-                  gap-4
-
-                  px-5
-                  py-3.5
-
-                  rounded-xl
-
-                  transition
-
-
-                  ${
-                    location.pathname === item.path
-                      ? "bg-[#D4A017] text-[#17191D]"
-                      : "text-gray-400 hover:text-white hover:bg-white/5"
-                  }
-
-                `}
-            >
-              <Icon size={22} />
-
-              {item.name}
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* Logout */}
-
-      <div
-        className="
-          p-5
-          border-t
-          border-white/5
-        "
-      >
-        <button
+        <div
           className="
-            w-full
-            flex
-            items-center
-            gap-4
-            px-5
-            py-3.5
-            rounded-xl
-            text-red-400
-            hover:bg-red-500/10
-          "
+
+h-20
+
+px-7
+
+flex
+
+items-center
+
+justify-between
+
+border-b
+
+border-white/10
+
+"
         >
-          <HiArrowLeftOnRectangle size={22} />
-          Logout
-        </button>
-      </div>
-    </aside>
+          <Link
+            to="/company/dashboard"
+            className="
+
+text-3xl
+
+font-black
+
+"
+          >
+            <span className="text-[#D4A017]">Nex</span>
+
+            <span className="text-white">Play</span>
+          </Link>
+
+          <button
+            onClick={() => setIsOpen(false)}
+            className="
+
+lg:hidden
+
+text-gray-400
+
+"
+          >
+            <HiXMark size={26} />
+          </button>
+        </div>
+
+        {/* Navigation */}
+
+        <nav
+          className="
+
+flex-1
+
+px-5
+
+py-7
+
+overflow-y-auto
+
+"
+        >
+          <p
+            className="
+
+text-xs
+
+uppercase
+
+tracking-widest
+
+text-gray-500
+
+mb-4
+
+px-3
+
+"
+          >
+            Workspace
+          </p>
+
+          <div
+            className="
+
+space-y-2
+
+"
+          >
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+
+              const active = location.pathname === item.path;
+
+              return (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  onClick={() => setIsOpen(false)}
+                  className={`
+
+group
+
+flex
+
+items-center
+
+gap-4
+
+px-4
+
+py-3.5
+
+rounded-2xl
+
+transition-all
+
+
+
+${
+  active
+    ? "bg-[#D4A017] text-[#17191D] shadow-lg shadow-yellow-500/10"
+    : "text-gray-400 hover:text-white hover:bg-white/5"
+}
+
+
+`}
+                >
+                  <Icon
+                    size={22}
+                    className={`
+
+transition-transform
+
+group-hover:scale-110
+
+${active ? "" : "text-gray-400"}
+
+`}
+                  />
+
+                  <span className="font-medium">{item.name}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+
+        {/* Bottom Logout */}
+
+        <div
+          className="
+
+p-5
+
+border-t
+
+border-white/10
+
+"
+        >
+          <button
+            className="
+
+w-full
+
+flex
+
+items-center
+
+gap-4
+
+px-5
+
+py-3.5
+
+rounded-2xl
+
+text-red-400
+
+hover:bg-red-500/10
+
+transition
+
+"
+          >
+            <HiArrowLeftOnRectangle size={22} />
+            Logout
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }
 
