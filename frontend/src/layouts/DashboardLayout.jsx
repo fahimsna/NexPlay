@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import DashboardSidebar from "../components/dahboard/DashboardSidebar";
 import DashboardHeader from "../components/dahboard/DashboardHeader";
 
@@ -10,37 +11,33 @@ function DashboardLayout({ children }) {
       className="
         min-h-screen
         bg-[#17191D]
-        text-white
-        flex
       "
     >
       {/* Sidebar */}
 
       <DashboardSidebar isOpen={isOpen} setIsOpen={setIsOpen} />
 
-      {/* Right Side */}
+      {/* Main Content Area */}
 
       <div
         className="
-          flex-1
           min-h-screen
-          bg-[#17191D]
+          lg:ml-72
         "
       >
         {/* Header */}
 
         <DashboardHeader setIsOpen={setIsOpen} />
 
-        {/* Content */}
+        {/* Page Content */}
 
         <main
           className="
-            min-h-screen
             pt-24
             px-4
             sm:px-6
-            lg:px-10
-            xl:px-12
+            lg:px-8
+            xl:px-10
             pb-10
           "
         >
