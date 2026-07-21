@@ -1,30 +1,22 @@
-import Navbar from "../components/Navbar";
-import Hero from "../components/Hero";
+import Navbar from "../components/common/Navbar";
+import Hero from "../components/common/Hero";
+import Footer from "../components/common/Footer";
 import Browse from "./Browse";
-import Footer from "../components/Footer";
-
 
 function Home() {
   return (
-
     <>
-
       <Navbar />
 
       <main>
-
         <Hero />
 
         <Browse />
-
       </main>
 
       <Footer />
-
     </>
-
   );
 }
-
 
 export default Home;

@@ -2,14 +2,19 @@ import { useState } from "react";
 import { HiOutlineSearch, HiMenu, HiX } from "react-icons/hi";
 import { Link } from "react-router-dom";
 
-
 function Navbar() {
-
   const [open, setOpen] = useState(false);
 
+  const menuItems = [
+    { name: "Home", path: "/" },
+    { name: "Discover", path: "/browse" },
+    { name: "Movies", path: "/movies" },
+    { name: "Series", path: "/series" },
+    { name: "Sports", path: "/sports" },
+    { name: "Upcoming", path: "/upcoming" },
+  ];
 
   return (
-
     <nav
       className="
       fixed
@@ -22,8 +27,6 @@ function Navbar() {
       border-white/10
       "
     >
-
-
       <div
         className="
         max-w-7xl
@@ -35,9 +38,6 @@ function Navbar() {
         justify-between
         "
       >
-
-
-
         {/* Logo */}
         <Link
           to="/"
@@ -47,20 +47,10 @@ function Navbar() {
           tracking-tight
           "
         >
+          <span className="text-[#D4A017]">Nex</span>
 
-          <span className="text-[#D4A017]">
-            Nex
-          </span>
-
-          <span className="text-white">
-            Play
-          </span>
-
+          <span className="text-white">Play</span>
         </Link>
-
-
-
-
 
         {/* Desktop Menu */}
         <div
@@ -74,38 +64,22 @@ function Navbar() {
           text-gray-300
           "
         >
-
-          <Link className="text-[#D4A017]">
-            Home
-          </Link>
-
-          <Link className="hover:text-white transition">
-            Discover
-          </Link>
-
-          <Link className="hover:text-white transition">
-            Movies
-          </Link>
-
-          <Link className="hover:text-white transition">
-            Series
-          </Link>
-
-          <Link className="hover:text-white transition">
-            Sports
-          </Link>
-
-          <Link className="hover:text-white transition">
-            Upcoming
-          </Link>
-
+          {menuItems.map((item, index) => (
+            <Link
+              key={item.name}
+              to={item.path}
+              className={`
+                hover:text-white
+                transition
+                ${index === 0 ? "text-[#D4A017]" : ""}
+              `}
+            >
+              {item.name}
+            </Link>
+          ))}
         </div>
 
-
-
-
-
-        {/* Desktop Actions */}
+        {/* Actions */}
         <div
           className="
           hidden
@@ -114,8 +88,8 @@ function Navbar() {
           gap-4
           "
         >
-
-          <div
+          <Link
+            to="/browse"
             className="
             flex
             items-center
@@ -131,18 +105,13 @@ function Navbar() {
             transition
             "
           >
+            <HiOutlineSearch size={18} />
 
-            <HiOutlineSearch size={18}/>
+            <span className="text-sm">Search</span>
+          </Link>
 
-            <span className="text-sm">
-              Search
-            </span>
-
-          </div>
-
-
-
-          <button
+          <Link
+            to="/login"
             className="
             px-6
             py-2.5
@@ -155,16 +124,10 @@ function Navbar() {
             "
           >
             Login
-          </button>
-
-
+          </Link>
         </div>
 
-
-
-
-
-        {/* Mobile Menu Button */}
+        {/* Mobile Button */}
         <button
           onClick={() => setOpen(!open)}
           className="
@@ -172,29 +135,15 @@ function Navbar() {
           text-white
           "
         >
-
-          {
-            open 
-            ? <HiX size={28}/>
-            : <HiMenu size={28}/>
-          }
-
+          {open ? <HiX size={28} /> : <HiMenu size={28} />}
         </button>
-
-
-
       </div>
 
+      {/* Mobile Menu */}
 
-
-
-
-      {/* Mobile Dropdown */}
-      {
-        open && (
-
-          <div
-            className="
+      {open && (
+        <div
+          className="
             lg:hidden
             bg-[#1E2126]
             border-t
@@ -202,45 +151,32 @@ function Navbar() {
             px-6
             py-6
             "
-          >
-
-            <div
-              className="
+        >
+          <div
+            className="
               flex
               flex-col
               gap-5
               text-gray-300
               "
-            >
-
-              <Link>
-                Home
-              </Link>
-
-              <Link>
-                Discover
-              </Link>
-
-              <Link>
-                Movies
-              </Link>
-
-              <Link>
-                Series
-              </Link>
-
-              <Link>
-                Sports
-              </Link>
-
-              <Link>
-                Upcoming
-              </Link>
-
-
-
-              <div
+          >
+            {menuItems.map((item) => (
+              <Link
+                key={item.name}
+                to={item.path}
+                onClick={() => setOpen(false)}
                 className="
+                    hover:text-[#D4A017]
+                    transition
+                    "
+              >
+                {item.name}
+              </Link>
+            ))}
+
+            <Link
+              to="/browse"
+              className="
                 flex
                 items-center
                 gap-2
@@ -251,44 +187,29 @@ function Navbar() {
                 px-4
                 py-2
                 "
-              >
+            >
+              <HiOutlineSearch />
+              Search
+            </Link>
 
-                <HiOutlineSearch/>
-
-                <span>
-                  Search
-                </span>
-
-              </div>
-
-
-
-              <button
-                className="
+            <Link
+              to="/login"
+              className="
                 bg-[#D4A017]
                 text-[#17191D]
                 py-2.5
                 rounded-full
+                text-center
                 font-semibold
                 "
-              >
-                Login
-              </button>
-
-
-            </div>
-
-
+            >
+              Login
+            </Link>
           </div>
-
-        )
-      }
-
-
+        </div>
+      )}
     </nav>
-
   );
 }
-
 
 export default Navbar;
