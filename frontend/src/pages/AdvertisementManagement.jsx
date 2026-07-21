@@ -1,17 +1,24 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./AdvertisementManagement.css";
 
-function AdvertisementManagement() {
-  const [ads, setAds] = useState([
-    {
-      id: 1,
-      title: "New Movie Promotion",
-      startDate: "2026-07-20",
-      endDate: "2026-07-30",
-      status: "Active",
-    },
-  ]);
+const STORAGE_KEY = "nexplayAdvertisements";
 
+function getSavedAdvertisements() {
+  try {
+    const savedAdvertisements = localStorage.getItem(STORAGE_KEY);
+
+    if (savedAdvertisements) {
+      return JSON.parse(savedAdvertisements);
+    }
+  } catch (error) {
+    console.error("Could not read saved advertisements:", error);
+  }
+
+  return [];
+}
+
+function AdvertisementManagement() {
+  const [ads, setAds] = useState(getSavedAdvertisements);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
@@ -22,45 +29,20 @@ function AdvertisementManagement() {
     status: "Active",
   });
 
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(ads));
+  }, [ads]);
+
   const handleInputChange = (event) => {
     const { name, value } = event.target;
 
-    setFormData({
-      ...formData,
+    setFormData((previousData) => ({
+      ...previousData,
       [name]: value,
-    });
+    }));
   };
 
-  const saveAdvertisement = (event) => {
-    event.preventDefault();
-
-    if (editingId !== null) {
-      const updatedAds = ads.map((ad) =>
-        ad.id === editingId
-          ? {
-              ...ad,
-              title: formData.title,
-              startDate: formData.startDate,
-              endDate: formData.endDate,
-              status: formData.status,
-            }
-          : ad
-      );
-
-      setAds(updatedAds);
-      setEditingId(null);
-    } else {
-      const newAdvertisement = {
-        id: Date.now(),
-        title: formData.title,
-        startDate: formData.startDate,
-        endDate: formData.endDate,
-        status: formData.status,
-      };
-
-      setAds([...ads, newAdvertisement]);
-    }
-
+  const resetForm = () => {
     setFormData({
       title: "",
       startDate: "",
@@ -68,7 +50,46 @@ function AdvertisementManagement() {
       status: "Active",
     });
 
+    setEditingId(null);
     setShowForm(false);
+  };
+
+  const openCreateForm = () => {
+    setFormData({
+      title: "",
+      startDate: "",
+      endDate: "",
+      status: "Active",
+    });
+
+    setEditingId(null);
+    setShowForm(true);
+  };
+
+  const saveAdvertisement = (event) => {
+    event.preventDefault();
+
+    if (editingId !== null) {
+      setAds((previousAds) =>
+        previousAds.map((ad) =>
+          ad.id === editingId
+            ? {
+                ...ad,
+                ...formData,
+              }
+            : ad
+        )
+      );
+    } else {
+      const newAdvertisement = {
+        id: Date.now(),
+        ...formData,
+      };
+
+      setAds((previousAds) => [...previousAds, newAdvertisement]);
+    }
+
+    resetForm();
   };
 
   const editAdvertisement = (ad) => {
@@ -84,34 +105,48 @@ function AdvertisementManagement() {
   };
 
   const deleteAdvertisement = (id) => {
-    const updatedAds = ads.filter((ad) => ad.id !== id);
-    setAds(updatedAds);
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this advertisement?"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setAds((previousAds) =>
+      previousAds.filter((ad) => ad.id !== id)
+    );
+
+    if (editingId === id) {
+      resetForm();
+    }
   };
 
-  const closeForm = () => {
-    setShowForm(false);
-    setEditingId(null);
-
-    setFormData({
-      title: "",
-      startDate: "",
-      endDate: "",
-      status: "Active",
-    });
+  const changeAdvertisementStatus = (id, newStatus) => {
+    setAds((previousAds) =>
+      previousAds.map((ad) =>
+        ad.id === id
+          ? {
+              ...ad,
+              status: newStatus,
+            }
+          : ad
+      )
+    );
   };
 
   return (
     <div className="advertisement-page">
-      <h1>Advertisement & Campaign Management</h1>
+      <h1>Advertisement Management</h1>
 
       <button
         type="button"
         className="create-ad-button"
         onClick={() => {
           if (showForm) {
-            closeForm();
+            resetForm();
           } else {
-            setShowForm(true);
+            openCreateForm();
           }
         }}
       >
@@ -119,7 +154,10 @@ function AdvertisementManagement() {
       </button>
 
       {showForm && (
-        <form className="advertisement-form" onSubmit={saveAdvertisement}>
+        <form
+          className="advertisement-form"
+          onSubmit={saveAdvertisement}
+        >
           <h2>
             {editingId !== null
               ? "Edit Advertisement"
@@ -127,7 +165,6 @@ function AdvertisementManagement() {
           </h2>
 
           <label htmlFor="title">Advertisement Title</label>
-
           <input
             id="title"
             type="text"
@@ -139,7 +176,6 @@ function AdvertisementManagement() {
           />
 
           <label htmlFor="startDate">Start Date</label>
-
           <input
             id="startDate"
             type="date"
@@ -150,7 +186,6 @@ function AdvertisementManagement() {
           />
 
           <label htmlFor="endDate">End Date</label>
-
           <input
             id="endDate"
             type="date"
@@ -161,7 +196,6 @@ function AdvertisementManagement() {
           />
 
           <label htmlFor="status">Status</label>
-
           <select
             id="status"
             name="status"
@@ -170,7 +204,9 @@ function AdvertisementManagement() {
           >
             <option value="Active">Active</option>
             <option value="Scheduled">Scheduled</option>
+            <option value="Paused">Paused</option>
             <option value="Inactive">Inactive</option>
+            <option value="Ended">Ended</option>
           </select>
 
           <button type="submit" className="save-ad-button">
@@ -182,41 +218,81 @@ function AdvertisementManagement() {
       )}
 
       <div className="advertisement-list">
-        {ads.map((ad) => (
-          <div className="advertisement-card" key={ad.id}>
-            <h2>{ad.title}</h2>
+        {ads.length === 0 ? (
+          <p>No advertisements created yet.</p>
+        ) : (
+          ads.map((ad) => (
+            <div className="advertisement-card" key={ad.id}>
+              <h2>{ad.title}</h2>
 
-            <p>
-              <strong>Start Date:</strong> {ad.startDate}
-            </p>
+              <p>
+                <strong>Start Date:</strong> {ad.startDate}
+              </p>
 
-            <p>
-              <strong>End Date:</strong> {ad.endDate}
-            </p>
+              <p>
+                <strong>End Date:</strong> {ad.endDate}
+              </p>
 
-            <p>
-              <strong>Status:</strong> {ad.status}
-            </p>
+              <p>
+                <strong>Status:</strong> {ad.status}
+              </p>
 
-            <div className="action-buttons">
-              <button
-                type="button"
-                className="edit-button"
-                onClick={() => editAdvertisement(ad)}
-              >
-                Edit
-              </button>
+              <div className="action-buttons">
+                {ad.status !== "Active" && (
+                  <button
+                    type="button"
+                    className="edit-button"
+                    onClick={() =>
+                      changeAdvertisementStatus(ad.id, "Active")
+                    }
+                  >
+                    Start
+                  </button>
+                )}
 
-              <button
-                type="button"
-                className="delete-button"
-                onClick={() => deleteAdvertisement(ad.id)}
-              >
-                Delete
-              </button>
+                {ad.status === "Active" && (
+                  <button
+                    type="button"
+                    className="edit-button"
+                    onClick={() =>
+                      changeAdvertisementStatus(ad.id, "Paused")
+                    }
+                  >
+                    Pause
+                  </button>
+                )}
+
+                {ad.status !== "Ended" && (
+                  <button
+                    type="button"
+                    className="delete-button"
+                    onClick={() =>
+                      changeAdvertisementStatus(ad.id, "Ended")
+                    }
+                  >
+                    End
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  className="edit-button"
+                  onClick={() => editAdvertisement(ad)}
+                >
+                  Edit
+                </button>
+
+                <button
+                  type="button"
+                  className="delete-button"
+                  onClick={() => deleteAdvertisement(ad.id)}
+                >
+                  Delete
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

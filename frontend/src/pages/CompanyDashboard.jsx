@@ -18,20 +18,58 @@ import {
 
 import { getCompanies } from "../services/companyService";
 
+function readStoredArray(key) {
+  try {
+    const savedValue = localStorage.getItem(key);
+
+    if (!savedValue) {
+      return [];
+    }
+
+    const parsedValue = JSON.parse(savedValue);
+
+    return Array.isArray(parsedValue) ? parsedValue : [];
+  } catch (error) {
+    console.error(`Could not read ${key}:`, error);
+    return [];
+  }
+}
+
 function CompanyDashboard() {
   const [company, setCompany] = useState(null);
-
   const [loading, setLoading] = useState(true);
+
+  const [advertisementCount, setAdvertisementCount] = useState(0);
+  const [campaignCount, setCampaignCount] = useState(0);
 
   useEffect(() => {
     fetchCompany();
+    updateDashboardCounts();
   }, []);
+
+  const updateDashboardCounts = () => {
+    const advertisements = readStoredArray("nexplayAdvertisements");
+    const campaigns = readStoredArray("nexplayCampaigns");
+
+    const activeAdvertisements = advertisements.filter(
+      (advertisement) =>
+        String(advertisement.status).trim().toLowerCase() === "active"
+    );
+
+    const activeCampaigns = campaigns.filter(
+      (campaign) =>
+        String(campaign.status).trim().toLowerCase() === "active"
+    );
+
+    setAdvertisementCount(activeAdvertisements.length);
+    setCampaignCount(activeCampaigns.length);
+  };
 
   const fetchCompany = async () => {
     try {
       const data = await getCompanies();
 
-      if (data.length > 0) {
+      if (Array.isArray(data) && data.length > 0) {
         setCompany(data[0]);
       }
     } catch (error) {
@@ -45,20 +83,13 @@ function CompanyDashboard() {
     return (
       <div
         className="
-
-min-h-screen
-
-bg-[#17191D]
-
-flex
-
-items-center
-
-justify-center
-
-text-white
-
-"
+          min-h-screen
+          bg-[#17191D]
+          flex
+          items-center
+          justify-center
+          text-white
+        "
       >
         Loading Dashboard...
       </div>
@@ -67,76 +98,30 @@ text-white
 
   return (
     <DashboardLayout>
-      <div
-        className="
-
-space-y-8
-
-"
-      >
-        {/* Company Header */}
-
+      <div className="space-y-8">
         {company && <CompanyProfileSummary company={company} dashboard />}
 
-        {/* Page Heading */}
-
         <div>
-          <h1
-            className="
-
-text-3xl
-
-sm:text-4xl
-
-font-black
-
-text-white
-
-"
-          >
+          <h1 className="text-3xl sm:text-4xl font-black text-white">
             Company Dashboard
           </h1>
 
-          <p
-            className="
-
-text-gray-400
-
-mt-2
-
-"
-          >
+          <p className="text-gray-400 mt-2">
             Welcome back{" "}
-            <span
-              className="
-
-text-[#D4A017]
-
-font-semibold
-
-"
-            >
+            <span className="text-[#D4A017] font-semibold">
               {company?.companyName}
             </span>
           </p>
         </div>
 
-        {/* Stats */}
-
         <div
           className="
-
-grid
-
-grid-cols-1
-
-sm:grid-cols-2
-
-xl:grid-cols-4
-
-gap-6
-
-"
+            grid
+            grid-cols-1
+            sm:grid-cols-2
+            xl:grid-cols-4
+            gap-6
+          "
         >
           <StatsCard
             title="Company Profile"
@@ -146,11 +131,15 @@ gap-6
 
           <StatsCard
             title="Advertisements"
-            value="0"
+            value={advertisementCount}
             subtitle="Active Advertisements"
           />
 
-          <StatsCard title="Campaigns" value="0" subtitle="Running Campaigns" />
+          <StatsCard
+            title="Campaigns"
+            value={campaignCount}
+            subtitle="Running Campaigns"
+          />
 
           <StatsCard
             title="Upcoming Content"
@@ -159,96 +148,45 @@ gap-6
           />
         </div>
 
-        {/* Company Information */}
-
         {company && <CompanyInfoCard company={company} />}
-
-        {/* Bottom Grid */}
 
         <div
           className="
-
-grid
-
-grid-cols-1
-
-xl:grid-cols-2
-
-gap-6
-
-"
+            grid
+            grid-cols-1
+            xl:grid-cols-2
+            gap-6
+          "
         >
-          {/* Activity */}
-
           <RecentActivity company={company} />
-
-          {/* Quick Actions */}
 
           <div
             className="
-
-bg-[#1B1D22]
-
-border
-
-border-white/10
-
-rounded-3xl
-
-p-6
-
-sm:p-8
-
-"
+              bg-[#1B1D22]
+              border
+              border-white/10
+              rounded-3xl
+              p-6
+              sm:p-8
+            "
           >
-            <div
-              className="
-
-mb-6
-
-"
-            >
-              <h2
-                className="
-
-text-2xl
-
-font-bold
-
-text-white
-
-"
-              >
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-white">
                 Quick Actions
               </h2>
 
-              <p
-                className="
-
-text-gray-400
-
-text-sm
-
-mt-1
-
-"
-              >
+              <p className="text-gray-400 text-sm mt-1">
                 Manage your company activities
               </p>
             </div>
 
             <div
               className="
-
-grid
-
-grid-cols-1
-
-sm:grid-cols-2
-
-gap-5
-
-"
+                grid
+                grid-cols-1
+                sm:grid-cols-2
+                gap-5
+              "
             >
               <ActionCard
                 title="Edit Company"
@@ -260,7 +198,7 @@ gap-5
               <ActionCard
                 title="Create Advertisement"
                 description="Promote movies, shows and content"
-                path="/company/advertisement"
+                path="/company/advertisements"
                 icon={HiMegaphone}
               />
 
@@ -285,114 +223,50 @@ gap-5
   );
 }
 
-function ActionCard({
-  title,
-
-  description,
-
-  path,
-
-  icon: Icon,
-}) {
+function ActionCard({ title, description, path, icon: Icon }) {
   return (
     <Link
       to={path}
       className="
-
-group
-
-bg-[#24272D]
-
-border
-
-border-white/10
-
-rounded-2xl
-
-p-5
-
-hover:border-[#D4A017]
-
-hover:-translate-y-1
-
-transition
-
-"
+        group
+        bg-[#24272D]
+        border
+        border-white/10
+        rounded-2xl
+        p-5
+        hover:border-[#D4A017]
+        hover:-translate-y-1
+        transition
+      "
     >
-      <div
-        className="
-
-flex
-
-items-start
-
-gap-4
-
-"
-      >
+      <div className="flex items-start gap-4">
         <div
           className="
-
-w-12
-
-h-12
-
-rounded-xl
-
-bg-[#D4A017]/10
-
-flex
-
-items-center
-
-justify-center
-
-group-hover:bg-[#D4A017]
-
-transition
-
-"
+            w-12
+            h-12
+            rounded-xl
+            bg-[#D4A017]/10
+            flex
+            items-center
+            justify-center
+            group-hover:bg-[#D4A017]
+            transition
+          "
         >
           <Icon
             size={24}
             className="
-
-text-[#D4A017]
-
-group-hover:text-[#17191D]
-
-transition
-
-"
+              text-[#D4A017]
+              group-hover:text-[#17191D]
+              transition
+            "
           />
         </div>
 
         <div>
-          <h3
-            className="
+          <h3 className="text-white font-semibold">{title}</h3>
 
-text-white
-
-font-semibold
-
-"
-          >
-            {title}
-          </h3>
-
-          <p
-            className="
-
-text-gray-400
-
-text-sm
-
-mt-2
-
-leading-5
-
-"
-          >
+          <p className="text-gray-400 text-sm mt-2 leading-5">
             {description}
           </p>
         </div>

@@ -1,20 +1,24 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./CampaignManagement.css";
 
-function CampaignManagement() {
-  const [campaigns, setCampaigns] = useState([
-    {
-      id: 1,
-      name: "Summer Movie Promotion",
-      description: "Promote upcoming summer movie releases.",
-      startDate: "2026-08-01",
-      endDate: "2026-08-20",
-      budget: "50000",
-      audience: "Movie Fans",
-      status: "Active",
-    },
-  ]);
+const STORAGE_KEY = "nexplayCampaigns";
 
+function getSavedCampaigns() {
+  try {
+    const savedCampaigns = localStorage.getItem(STORAGE_KEY);
+
+    if (savedCampaigns) {
+      return JSON.parse(savedCampaigns);
+    }
+  } catch (error) {
+    console.error("Could not read saved campaigns:", error);
+  }
+
+  return [];
+}
+
+function CampaignManagement() {
+  const [campaigns, setCampaigns] = useState(getSavedCampaigns);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
@@ -28,40 +32,76 @@ function CampaignManagement() {
     status: "Draft",
   });
 
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(campaigns));
+  }, [campaigns]);
+
   const handleInputChange = (event) => {
     const { name, value } = event.target;
 
-    setFormData({
-      ...formData,
+    setFormData((previousData) => ({
+      ...previousData,
       [name]: value,
+    }));
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      description: "",
+      startDate: "",
+      endDate: "",
+      budget: "",
+      audience: "All Users",
+      status: "Draft",
     });
+
+    setEditingId(null);
+    setShowForm(false);
+  };
+
+  const openCreateForm = () => {
+    setFormData({
+      name: "",
+      description: "",
+      startDate: "",
+      endDate: "",
+      budget: "",
+      audience: "All Users",
+      status: "Draft",
+    });
+
+    setEditingId(null);
+    setShowForm(true);
   };
 
   const saveCampaign = (event) => {
     event.preventDefault();
 
     if (editingId !== null) {
-      const updatedCampaigns = campaigns.map((campaign) =>
-        campaign.id === editingId
-          ? {
-              ...campaign,
-              ...formData,
-            }
-          : campaign
+      setCampaigns((previousCampaigns) =>
+        previousCampaigns.map((campaign) =>
+          campaign.id === editingId
+            ? {
+                ...campaign,
+                ...formData,
+              }
+            : campaign
+        )
       );
-
-      setCampaigns(updatedCampaigns);
-      setEditingId(null);
     } else {
       const newCampaign = {
         id: Date.now(),
         ...formData,
       };
 
-      setCampaigns([...campaigns, newCampaign]);
+      setCampaigns((previousCampaigns) => [
+        ...previousCampaigns,
+        newCampaign,
+      ]);
     }
 
-    clearForm();
+    resetForm();
   };
 
   const editCampaign = (campaign) => {
@@ -80,26 +120,34 @@ function CampaignManagement() {
   };
 
   const deleteCampaign = (id) => {
-    const updatedCampaigns = campaigns.filter(
-      (campaign) => campaign.id !== id
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this campaign?"
     );
 
-    setCampaigns(updatedCampaigns);
+    if (!confirmed) {
+      return;
+    }
+
+    setCampaigns((previousCampaigns) =>
+      previousCampaigns.filter((campaign) => campaign.id !== id)
+    );
+
+    if (editingId === id) {
+      resetForm();
+    }
   };
 
-  const clearForm = () => {
-    setFormData({
-      name: "",
-      description: "",
-      startDate: "",
-      endDate: "",
-      budget: "",
-      audience: "All Users",
-      status: "Draft",
-    });
-
-    setEditingId(null);
-    setShowForm(false);
+  const changeCampaignStatus = (id, newStatus) => {
+    setCampaigns((previousCampaigns) =>
+      previousCampaigns.map((campaign) =>
+        campaign.id === id
+          ? {
+              ...campaign,
+              status: newStatus,
+            }
+          : campaign
+      )
+    );
   };
 
   return (
@@ -111,9 +159,9 @@ function CampaignManagement() {
         className="create-campaign-button"
         onClick={() => {
           if (showForm) {
-            clearForm();
+            resetForm();
           } else {
-            setShowForm(true);
+            openCreateForm();
           }
         }}
       >
@@ -127,7 +175,6 @@ function CampaignManagement() {
           </h2>
 
           <label htmlFor="name">Campaign Name</label>
-
           <input
             id="name"
             type="text"
@@ -139,7 +186,6 @@ function CampaignManagement() {
           />
 
           <label htmlFor="description">Description</label>
-
           <textarea
             id="description"
             name="description"
@@ -150,7 +196,6 @@ function CampaignManagement() {
           />
 
           <label htmlFor="startDate">Start Date</label>
-
           <input
             id="startDate"
             type="date"
@@ -161,7 +206,6 @@ function CampaignManagement() {
           />
 
           <label htmlFor="endDate">End Date</label>
-
           <input
             id="endDate"
             type="date"
@@ -172,7 +216,6 @@ function CampaignManagement() {
           />
 
           <label htmlFor="budget">Budget</label>
-
           <input
             id="budget"
             type="number"
@@ -185,7 +228,6 @@ function CampaignManagement() {
           />
 
           <label htmlFor="audience">Target Audience</label>
-
           <select
             id="audience"
             name="audience"
@@ -200,7 +242,6 @@ function CampaignManagement() {
           </select>
 
           <label htmlFor="status">Status</label>
-
           <select
             id="status"
             name="status"
@@ -212,6 +253,7 @@ function CampaignManagement() {
             <option value="Active">Active</option>
             <option value="Paused">Paused</option>
             <option value="Completed">Completed</option>
+            <option value="Ended">Ended</option>
           </select>
 
           <button type="submit" className="save-campaign-button">
@@ -221,51 +263,91 @@ function CampaignManagement() {
       )}
 
       <div className="campaign-list">
-        {campaigns.map((campaign) => (
-          <div className="campaign-card" key={campaign.id}>
-            <h2>{campaign.name}</h2>
+        {campaigns.length === 0 ? (
+          <p>No campaigns created yet.</p>
+        ) : (
+          campaigns.map((campaign) => (
+            <div className="campaign-card" key={campaign.id}>
+              <h2>{campaign.name}</h2>
 
-            <p>{campaign.description}</p>
+              <p>{campaign.description}</p>
 
-            <p>
-              <strong>Start Date:</strong> {campaign.startDate}
-            </p>
+              <p>
+                <strong>Start Date:</strong> {campaign.startDate}
+              </p>
 
-            <p>
-              <strong>End Date:</strong> {campaign.endDate}
-            </p>
+              <p>
+                <strong>End Date:</strong> {campaign.endDate}
+              </p>
 
-            <p>
-              <strong>Budget:</strong> ৳{campaign.budget}
-            </p>
+              <p>
+                <strong>Budget:</strong> ৳{campaign.budget}
+              </p>
 
-            <p>
-              <strong>Target Audience:</strong> {campaign.audience}
-            </p>
+              <p>
+                <strong>Target Audience:</strong> {campaign.audience}
+              </p>
 
-            <p>
-              <strong>Status:</strong> {campaign.status}
-            </p>
+              <p>
+                <strong>Status:</strong> {campaign.status}
+              </p>
 
-            <div className="campaign-action-buttons">
-              <button
-                type="button"
-                className="campaign-edit-button"
-                onClick={() => editCampaign(campaign)}
-              >
-                Edit
-              </button>
+              <div className="campaign-action-buttons">
+                {campaign.status !== "Active" && (
+                  <button
+                    type="button"
+                    className="campaign-edit-button"
+                    onClick={() =>
+                      changeCampaignStatus(campaign.id, "Active")
+                    }
+                  >
+                    Start
+                  </button>
+                )}
 
-              <button
-                type="button"
-                className="campaign-delete-button"
-                onClick={() => deleteCampaign(campaign.id)}
-              >
-                Delete
-              </button>
+                {campaign.status === "Active" && (
+                  <button
+                    type="button"
+                    className="campaign-edit-button"
+                    onClick={() =>
+                      changeCampaignStatus(campaign.id, "Paused")
+                    }
+                  >
+                    Pause
+                  </button>
+                )}
+
+                {campaign.status !== "Ended" && (
+                  <button
+                    type="button"
+                    className="campaign-delete-button"
+                    onClick={() =>
+                      changeCampaignStatus(campaign.id, "Ended")
+                    }
+                  >
+                    End
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  className="campaign-edit-button"
+                  onClick={() => editCampaign(campaign)}
+                >
+                  Edit
+                </button>
+
+                <button
+                  type="button"
+                  className="campaign-delete-button"
+                  onClick={() => deleteCampaign(campaign.id)}
+                >
+                  Delete
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );
