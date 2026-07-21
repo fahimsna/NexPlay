@@ -9,6 +9,11 @@ Entertainment Discovery & Branding Platform
 
 ## Team Members
 - Fahim
-- ...
+- 
+- 
 
 - Ayesha
+
+After cloning please bash npm install 
+Then npm run dev in both backend and frontend.
+Thank you.
