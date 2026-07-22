@@ -16,6 +16,7 @@ import CompanyDashboard from "./pages/CompanyDashboard";
 import CompanyProfile from "./pages/CompanyProfile";
 import Analytics from "./pages/Analytics";
 import CompanySettings from "./pages/CompanySettings";
+import CompanyUpcomingContent from "./pages/CompanyUpcomingContent";
 
 // Campaign and advertisement pages
 import CampaignManagement from "./pages/CampaignManagement";
@@ -40,7 +41,7 @@ function App() {
         <Route path="/partner" element={<Partner />} />
         <Route path="/contact" element={<Contact />} />
 
-        {/* Upcoming Content module */}
+        {/* Public Upcoming Content page */}
         <Route path="/upcoming" element={<UpcomingContent />} />
 
         {/* Company routes */}
@@ -62,6 +63,12 @@ function App() {
         <Route
           path="/company/settings"
           element={<CompanySettings />}
+        />
+
+        {/* Member 4: Company Upcoming Content Management */}
+        <Route
+          path="/company/upcoming-content"
+          element={<CompanyUpcomingContent />}
         />
 
         {/* Sidebar management pages */}

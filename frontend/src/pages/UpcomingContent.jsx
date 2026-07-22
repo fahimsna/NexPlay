@@ -1,427 +1,245 @@
-import React, { useEffect, useState } from "react";
-import {
-  getUpcomingContent,
-  addUpcomingContent,
-  updateUpcomingContent,
-  deleteUpcomingContent,
-} from "../api/upcomingApi";
+import { useEffect, useMemo, useState } from "react";
+
+import Navbar from "../components/common/Navbar";
+import Footer from "../components/common/Footer";
+import { getUpcomingContent } from "../api/upcomingApi";
+
+const categories = [
+  "All",
+  "Movie",
+  "TV Series",
+  "Web Series",
+  "Anime",
+  "Documentary",
+  "Sports",
+];
 
 function UpcomingContent() {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("Movie");
-  const [genre, setGenre] = useState("Action");
-  const [releaseDate, setReleaseDate] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [trailerUrl, setTrailerUrl] = useState("");
-  const [status, setStatus] = useState("Coming Soon");
-
+  const [contentList, setContentList] = useState([]);
   const [search, setSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("All");
-
-  const [contentList, setContentList] = useState([]);
-
-  const [isEditing, setIsEditing] = useState(false);
-  const [editId, setEditId] = useState(null);
-
-  const [imagePreviewError, setImagePreviewError] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
   const [brokenImageIds, setBrokenImageIds] = useState({});
 
   useEffect(() => {
+    const fetchContents = async () => {
+      try {
+        setLoading(true);
+        setErrorMessage("");
+
+        const response = await getUpcomingContent();
+        setContentList(Array.isArray(response.data) ? response.data : []);
+      } catch (error) {
+        console.error("Could not load upcoming content:", error);
+        setErrorMessage(
+          error?.response?.data?.message ||
+            "Upcoming content could not be loaded. Please try again."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchContents();
   }, []);
 
-  const fetchContents = async () => {
-    try {
-      const res = await getUpcomingContent();
-      setContentList(res.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  const filteredContent = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
 
-  const resetForm = () => {
-    setTitle("");
-    setDescription("");
-    setCategory("Movie");
-    setGenre("Action");
-    setReleaseDate("");
-    setImageUrl("");
-    setTrailerUrl("");
-    setStatus("Coming Soon");
+    return contentList.filter((item) => {
+      const matchesSearch =
+        !normalizedSearch ||
+        item.title?.toLowerCase().includes(normalizedSearch) ||
+        item.genre?.toLowerCase().includes(normalizedSearch) ||
+        item.description?.toLowerCase().includes(normalizedSearch);
 
-    setIsEditing(false);
-    setEditId(null);
-    setImagePreviewError(false);
-  };
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+      const matchesCategory =
+        filterCategory === "All" || item.category === filterCategory;
 
-    const newContent = {
-      title,
-      description,
-      category,
-      genre,
-      releaseDate,
-      imageUrl,
-      trailerUrl,
-      status,
-    };
-
-    try {
-      if (isEditing) {
-        await updateUpcomingContent(editId, newContent);
-        alert("Content Updated Successfully!");
-      } else {
-        await addUpcomingContent(newContent);
-        alert("Content Added Successfully!");
-      }
-
-      resetForm();
-      fetchContents();
-    } catch (err) {
-      console.error(err);
-      alert("Operation Failed!");
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this content?")) {
-      return;
-    }
-
-    try {
-      await deleteUpcomingContent(id);
-      fetchContents();
-    } catch (err) {
-      console.error(err);
-      alert("Delete Failed!");
-    }
-  };
-
-  const handleEdit = (item) => {
-    setTitle(item.title);
-    setDescription(item.description);
-    setCategory(item.category);
-    setGenre(item.genre);
-    setReleaseDate(item.releaseDate?.split("T")[0] || "");
-    setImageUrl(item.imageUrl);
-    setTrailerUrl(item.trailerUrl);
-    setStatus(item.status);
-
-    setEditId(item._id);
-    setIsEditing(true);
-    setImagePreviewError(false);
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
+      return matchesSearch && matchesCategory;
     });
+  }, [contentList, search, filterCategory]);
+
+  const formatReleaseDate = (value) => {
+    if (!value) {
+      return "Release date not announced";
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return value;
+    }
+
+    return new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(date);
   };
-
-  const filteredContent = contentList.filter((item) => {
-    const matchesSearch = item.title
-      ?.toLowerCase()
-      .includes(search.toLowerCase());
-
-    const matchesCategory =
-      filterCategory === "All" ||
-      item.category === filterCategory;
-
-    return matchesSearch && matchesCategory;
-  });
 
   return (
-    <div className="p-8 text-white">
+    <div className="min-h-screen bg-[#14161a] text-white">
+      <Navbar />
 
-      <h1 className="text-4xl font-bold mb-2">
-        Upcoming Content Management
-      </h1>
-
-      <p className="text-gray-400 mb-8">
-        Manage upcoming movies, TV series, anime, documentaries and sports events.
-      </p>
-
-      <div className="bg-[#2d2f39] rounded-xl p-8 shadow-lg">
-
-        <h2 className="text-2xl font-semibold mb-6">
-          {isEditing ? "Update Content" : "Add New Content"}
-        </h2>
-
-        <form onSubmit={handleSubmit} className="space-y-5">
-
-          <input
-            type="text"
-            placeholder="Content Title"
-            className="w-full p-3 rounded-lg bg-[#1f2029] border border-gray-600"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
-
-          <textarea
-            rows="4"
-            placeholder="Description"
-            className="w-full p-3 rounded-lg bg-[#1f2029] border border-gray-600"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-          />
-
-          <select
-            className="w-full p-3 rounded-lg bg-[#1f2029] border border-gray-600"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          >
-            <option>Movie</option>
-            <option>TV Series</option>
-            <option>Web Series</option>
-            <option>Anime</option>
-            <option>Documentary</option>
-            <option>Sports</option>
-          </select>
-
-          <select
-            className="w-full p-3 rounded-lg bg-[#1f2029] border border-gray-600"
-            value={genre}
-            onChange={(e) => setGenre(e.target.value)}
-          >
-            <option>Action</option>
-            <option>Adventure</option>
-            <option>Comedy</option>
-            <option>Drama</option>
-            <option>Fantasy</option>
-            <option>Horror</option>
-            <option>Romance</option>
-            <option>Sci-Fi</option>
-            <option>Thriller</option>
-            <option>Sports</option>
-          </select>
-
-          <input
-            type="date"
-            className="w-full p-3 rounded-lg bg-[#1f2029] border border-gray-600"
-            value={releaseDate}
-            onChange={(e) => setReleaseDate(e.target.value)}
-            required
-          />
-          <div>
-            <input
-              type="text"
-              placeholder="Poster Image URL (must end in .jpg, .png, .webp etc.)"
-              className="w-full p-3 rounded-lg bg-[#1f2029] border border-gray-600"
-              value={imageUrl}
-              onChange={(e) => {
-                setImageUrl(e.target.value);
-                setImagePreviewError(false);
-              }}
-            />
-
-            {imageUrl && (
-              <div className="mt-3 flex items-center gap-4">
-                {imagePreviewError ? (
-                  <div className="w-32 h-20 flex items-center justify-center rounded-lg bg-[#1f2029] border border-red-500 text-red-400 text-xs text-center px-2">
-                    Invalid image URL
-                  </div>
-                ) : (
-                  <img
-                    src={imageUrl}
-                    alt="Poster preview"
-                    className="w-32 h-20 object-cover rounded-lg border border-gray-600"
-                    onError={() => setImagePreviewError(true)}
-                    onLoad={() => setImagePreviewError(false)}
-                  />
-                )}
-
-                <span
-                  className={
-                    imagePreviewError
-                      ? "text-red-400 text-sm"
-                      : "text-green-400 text-sm"
-                  }
-                >
-                  {imagePreviewError
-                    ? "❌ This link isn't loading as an image. Use a direct image link ending in .jpg/.png/.webp."
-                    : "✅ Preview looks good"}
-                </span>
-              </div>
-            )}
-          </div>
-
-          <input
-            type="url"
-            placeholder="Trailer URL (YouTube)"
-            className="w-full p-3 rounded-lg bg-[#1f2029] border border-gray-600"
-            value={trailerUrl}
-            onChange={(e) => setTrailerUrl(e.target.value)}
-          />
-
-          <select
-            className="w-full p-3 rounded-lg bg-[#1f2029] border border-gray-600"
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-          >
-            <option>Coming Soon</option>
-            <option>Released</option>
-          </select>
-
-          <button
-            type="submit"
-            className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-8 py-3 rounded-lg"
-          >
-            {isEditing ? "Update Content" : "Add Content"}
-          </button>
-
-        </form>
-
-      </div>
-
-      {/* Search & Filter */}
-
-      <div className="bg-[#2d2f39] rounded-xl p-6 shadow-lg mt-8 flex flex-col md:flex-row gap-4">
-
-        <input
-          type="text"
-          placeholder="Search by Title..."
-          className="flex-1 p-3 rounded-lg bg-[#1f2029] border border-gray-600"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-
-        <select
-          className="p-3 rounded-lg bg-[#1f2029] border border-gray-600"
-          value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value)}
-        >
-          <option>All</option>
-          <option>Movie</option>
-          <option>TV Series</option>
-          <option>Web Series</option>
-          <option>Anime</option>
-          <option>Documentary</option>
-          <option>Sports</option>
-        </select>
-
-      </div>
-      {/* Content List */}
-
-      <div className="bg-[#2d2f39] rounded-xl p-8 shadow-lg mt-8">
-
-        <h2 className="text-2xl font-semibold mb-6">
-          Upcoming Content List
-        </h2>
-
-        {filteredContent.length === 0 ? (
-
-          <p className="text-gray-400">
-            No content found.
+      <main className="mx-auto max-w-7xl px-4 pb-20 pt-28 sm:px-6 lg:px-8">
+        <section className="mb-10">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-[#D4A017]">
+            Coming to NexPlay
           </p>
 
-        ) : (
+          <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
+            <div>
+              <h1 className="text-4xl font-black tracking-tight sm:text-5xl">
+                Upcoming Content
+              </h1>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-gray-400 sm:text-base">
+                Discover upcoming movies, series, anime, documentaries and sports
+                events from entertainment companies.
+              </p>
+            </div>
 
-            {filteredContent.map((item) => (
-
-              <div
-                key={item._id}
-                className="bg-[#1f2029] rounded-xl border border-gray-700 overflow-hidden"
-              >
-
-                {item.imageUrl && !brokenImageIds[item._id] && (
-                  <img
-                    src={item.imageUrl}
-                    alt={item.title}
-                    className="w-full h-56 object-cover"
-                    onError={() =>
-                      setBrokenImageIds((prev) => ({
-                        ...prev,
-                        [item._id]: true,
-                      }))
-                    }
-                  />
-                )}
-
-                {(!item.imageUrl || brokenImageIds[item._id]) && (
-                  <div className="w-full h-56 flex flex-col items-center justify-center bg-[#2d2f39] text-gray-500 text-sm gap-2">
-                    <span className="text-3xl">🖼️</span>
-                    <span>No poster available</span>
-                  </div>
-                )}
-
-                <div className="p-5">
-
-                  <h3 className="text-xl font-bold">
-                    {item.title}
-                  </h3>
-
-                  <p className="text-gray-400 mt-2">
-                    {item.description}
-                  </p>
-
-                  <div className="mt-4 space-y-2 text-sm">
-
-                    <p>
-                      <strong>Category:</strong> {item.category}
-                    </p>
-
-                    <p>
-                      <strong>Genre:</strong> {item.genre}
-                    </p>
-
-                    <p>
-                      <strong>Release:</strong>{" "}
-                      {item.releaseDate?.split("T")[0]}
-                    </p>
-
-                    <p>
-                      <strong>Status:</strong> {item.status}
-                    </p>
-
-                  </div>
-
-                  <div className="flex flex-wrap gap-3 mt-6">
-                    {item.trailerUrl && (
-                      <a
-                        href={item.trailerUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg"
-                      >
-                        ▶ Watch Trailer
-                      </a>
-                    )}
-
-                    <button
-                      onClick={() => handleEdit(item)}
-                      className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg"
-                    >
-                      Edit
-                    </button>
-
-                    <button
-                      onClick={() => handleDelete(item._id)}
-                      className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg"
-                    >
-                      Delete
-                    </button>
-                  </div>
-
-                </div>
-
-              </div>
-
-            ))}
-
+            <div className="rounded-2xl border border-white/10 bg-[#1B1D22] px-5 py-4">
+              <p className="text-xs uppercase tracking-widest text-gray-500">
+                Available titles
+              </p>
+              <p className="mt-1 text-3xl font-black text-[#D4A017]">
+                {contentList.length}
+              </p>
+            </div>
           </div>
+        </section>
 
+        <section className="mb-8 rounded-2xl border border-white/10 bg-[#1B1D22] p-4 shadow-xl shadow-black/10">
+          <div className="flex flex-col gap-4 md:flex-row">
+            <input
+              type="search"
+              placeholder="Search by title, genre or description..."
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              className="min-w-0 flex-1 rounded-xl border border-white/10 bg-[#111318] px-4 py-3 text-sm text-white outline-none transition placeholder:text-gray-600 focus:border-[#D4A017]"
+            />
+
+            <select
+              value={filterCategory}
+              onChange={(event) => setFilterCategory(event.target.value)}
+              className="rounded-xl border border-white/10 bg-[#111318] px-4 py-3 text-sm text-white outline-none transition focus:border-[#D4A017] md:w-56"
+            >
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </div>
+        </section>
+
+        {loading && (
+          <div className="rounded-2xl border border-white/10 bg-[#1B1D22] px-6 py-16 text-center">
+            <p className="text-gray-400">Loading upcoming content...</p>
+          </div>
         )}
 
-      </div>
+        {!loading && errorMessage && (
+          <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-6 py-5 text-sm text-red-300">
+            {errorMessage}
+          </div>
+        )}
 
+        {!loading && !errorMessage && filteredContent.length === 0 && (
+          <div className="rounded-2xl border border-white/10 bg-[#1B1D22] px-6 py-16 text-center">
+            <p className="text-lg font-semibold">No upcoming content found</p>
+            <p className="mt-2 text-sm text-gray-500">
+              Try changing your search or category filter.
+            </p>
+          </div>
+        )}
+
+        {!loading && !errorMessage && filteredContent.length > 0 && (
+          <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {filteredContent.map((item) => {
+              const trailerUrl = item.trailerUrl || item.trailerURL;
+
+              return (
+                <article
+                  key={item._id}
+                  className="group overflow-hidden rounded-2xl border border-white/10 bg-[#1B1D22] shadow-xl shadow-black/10 transition duration-300 hover:-translate-y-1 hover:border-[#D4A017]/50"
+                >
+                  <div className="relative aspect-[2/3] overflow-hidden bg-[#24272e]">
+                    {item.imageUrl && !brokenImageIds[item._id] ? (
+                      <img
+                        src={item.imageUrl}
+                        alt={`${item.title} poster`}
+                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                        onError={() =>
+                          setBrokenImageIds((previous) => ({
+                            ...previous,
+                            [item._id]: true,
+                          }))
+                        }
+                      />
+                    ) : (
+                      <div className="flex h-full flex-col items-center justify-center gap-3 text-center text-gray-500">
+                        <span className="text-4xl" aria-hidden="true">
+                          🎬
+                        </span>
+                        <span className="text-sm">Poster unavailable</span>
+                      </div>
+                    )}
+
+                    <div className="absolute left-3 top-3 rounded-full bg-black/75 px-3 py-1 text-xs font-semibold backdrop-blur">
+                      {item.category || "Entertainment"}
+                    </div>
+
+                    <div className="absolute right-3 top-3 rounded-full bg-[#D4A017] px-3 py-1 text-xs font-bold text-[#17191D]">
+                      {item.status || "Coming Soon"}
+                    </div>
+                  </div>
+
+                  <div className="p-5">
+                    <h2 className="line-clamp-1 text-xl font-bold">
+                      {item.title}
+                    </h2>
+
+                    <p className="mt-2 text-sm font-medium text-[#D4A017]">
+                      {item.genre || "Genre not specified"}
+                    </p>
+
+                    <p className="mt-3 line-clamp-3 min-h-[60px] text-sm leading-5 text-gray-400">
+                      {item.description || "No description available."}
+                    </p>
+
+                    <div className="mt-5 border-t border-white/10 pt-4">
+                      <p className="text-xs uppercase tracking-wider text-gray-500">
+                        Release date
+                      </p>
+                      <p className="mt-1 text-sm font-semibold">
+                        {formatReleaseDate(item.releaseDate)}
+                      </p>
+                    </div>
+
+                    {trailerUrl && (
+                      <a
+                        href={trailerUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-[#D4A017] px-4 py-3 text-sm font-bold text-[#17191D] transition hover:bg-[#e8b423]"
+                      >
+                        Watch Trailer
+                      </a>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
+          </section>
+        )}
+      </main>
+
+      <Footer />
     </div>
-
-
   );
 }
 
