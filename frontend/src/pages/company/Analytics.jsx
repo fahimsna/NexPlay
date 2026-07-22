@@ -1,7 +1,5 @@
-import DashboardLayout from "../layouts/DashboardLayout";
-
-import AnalyticsCard from "../components/analytics/AnalyticsCard";
-
+import CompanyDashboardLayout from "../../layouts/CompanyDashboardLayout";
+import AnalyticsCard from "../../components/analytics/AnalyticsCard";
 import {
   HiMegaphone,
   HiFilm,
@@ -41,7 +39,7 @@ function Analytics() {
   ];
 
   return (
-    <DashboardLayout>
+    <CompanyDashboardLayout>
       <div className="space-y-8">
         {/* Header */}
 
@@ -128,7 +126,7 @@ function Analytics() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </CompanyDashboardLayout>
   );
 }
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import DashboardLayout from "../layouts/DashboardLayout";
+import { useLocation } from "react-router-dom";
+import CompanyDashboardLayout from "../../layouts/CompanyDashboardLayout";
 import "./CampaignManagement.css";
 
 const STORAGE_KEY = "nexplayCampaigns";
@@ -10,7 +11,6 @@ function getSavedCampaigns() {
 
     if (savedCampaigns) {
       const parsedCampaigns = JSON.parse(savedCampaigns);
-
       return Array.isArray(parsedCampaigns) ? parsedCampaigns : [];
     }
   } catch (error) {
@@ -20,7 +20,11 @@ function getSavedCampaigns() {
   return [];
 }
 
-function CampaignManagement({ allowCreate = true }) {
+function CampaignManagement() {
+  const location = useLocation();
+
+  const isManagementPage = location.pathname === "/company/campaigns";
+
   const [campaigns, setCampaigns] = useState(getSavedCampaigns);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -66,17 +70,7 @@ function CampaignManagement({ allowCreate = true }) {
   };
 
   const openCreateForm = () => {
-    setFormData({
-      name: "",
-      description: "",
-      startDate: "",
-      endDate: "",
-      budget: "",
-      audience: "All Users",
-      status: "Draft",
-    });
-
-    setEditingId(null);
+    resetForm();
     setShowForm(true);
   };
 
@@ -91,8 +85,8 @@ function CampaignManagement({ allowCreate = true }) {
                 ...campaign,
                 ...formData,
               }
-            : campaign
-        )
+            : campaign,
+        ),
       );
     } else {
       const newCampaign = {
@@ -100,10 +94,7 @@ function CampaignManagement({ allowCreate = true }) {
         ...formData,
       };
 
-      setCampaigns((previousCampaigns) => [
-        ...previousCampaigns,
-        newCampaign,
-      ]);
+      setCampaigns((previousCampaigns) => [...previousCampaigns, newCampaign]);
     }
 
     resetForm();
@@ -126,7 +117,7 @@ function CampaignManagement({ allowCreate = true }) {
 
   const deleteCampaign = (id) => {
     const confirmed = window.confirm(
-      "Are you sure you want to delete this campaign?"
+      "Are you sure you want to delete this campaign?",
     );
 
     if (!confirmed) {
@@ -134,7 +125,7 @@ function CampaignManagement({ allowCreate = true }) {
     }
 
     setCampaigns((previousCampaigns) =>
-      previousCampaigns.filter((campaign) => campaign.id !== id)
+      previousCampaigns.filter((campaign) => campaign.id !== id),
     );
 
     if (editingId === id) {
@@ -150,17 +141,17 @@ function CampaignManagement({ allowCreate = true }) {
               ...campaign,
               status: newStatus,
             }
-          : campaign
-      )
+          : campaign,
+      ),
     );
   };
 
   return (
-    <DashboardLayout>
+    <CompanyDashboardLayout>
       <div className="campaign-page">
         <h1>Campaign Management</h1>
 
-        {allowCreate && (
+        {isManagementPage && (
           <button
             type="button"
             className="create-campaign-button"
@@ -178,9 +169,7 @@ function CampaignManagement({ allowCreate = true }) {
 
         {showForm && (
           <form className="campaign-form" onSubmit={saveCampaign}>
-            <h2>
-              {editingId !== null ? "Edit Campaign" : "Create Campaign"}
-            </h2>
+            <h2>{editingId !== null ? "Edit Campaign" : "Create Campaign"}</h2>
 
             <label htmlFor="name">Campaign Name</label>
 
@@ -249,9 +238,13 @@ function CampaignManagement({ allowCreate = true }) {
               onChange={handleInputChange}
             >
               <option value="All Users">All Users</option>
+
               <option value="Movie Fans">Movie Fans</option>
+
               <option value="Anime Fans">Anime Fans</option>
+
               <option value="Sports Fans">Sports Fans</option>
+
               <option value="Bangladesh Users">Bangladesh Users</option>
             </select>
 
@@ -264,10 +257,15 @@ function CampaignManagement({ allowCreate = true }) {
               onChange={handleInputChange}
             >
               <option value="Draft">Draft</option>
+
               <option value="Scheduled">Scheduled</option>
+
               <option value="Active">Active</option>
+
               <option value="Paused">Paused</option>
+
               <option value="Completed">Completed</option>
+
               <option value="Ended">Ended</option>
             </select>
 
@@ -336,9 +334,7 @@ function CampaignManagement({ allowCreate = true }) {
                     <button
                       type="button"
                       className="campaign-delete-button"
-                      onClick={() =>
-                        changeCampaignStatus(campaign.id, "Ended")
-                      }
+                      onClick={() => changeCampaignStatus(campaign.id, "Ended")}
                     >
                       End
                     </button>
@@ -365,7 +361,7 @@ function CampaignManagement({ allowCreate = true }) {
           )}
         </div>
       </div>
-    </DashboardLayout>
+    </CompanyDashboardLayout>
   );
 }
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import EntertainmentCard from "../EntertainmentCard";
+import EntertainmentCard from "../components/entertainment/EntertainmentCard";
 import { getTrendingMovies } from "../services/tmdbService";
 
 function Movies() {

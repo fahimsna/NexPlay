@@ -1,4 +1,4 @@
-import DashboardLayout from "../layouts/DashboardLayout";
+import CompanyDashboardLayout from "../../layouts/CompanyDashboardLayout";
 import "./AdvertisementManagement.css";
 
 function AdvertisementList() {
@@ -6,14 +6,14 @@ function AdvertisementList() {
 
   try {
     advertisements = JSON.parse(
-      localStorage.getItem("nexplayAdvertisements") || "[]"
+      localStorage.getItem("nexplayAdvertisements") || "[]",
     );
   } catch (error) {
     console.error("Could not read advertisements:", error);
   }
 
   return (
-    <DashboardLayout>
+    <CompanyDashboardLayout>
       <div className="advertisement-page">
         <h1>Saved Advertisements</h1>
 
@@ -41,7 +41,7 @@ function AdvertisementList() {
           )}
         </div>
       </div>
-    </DashboardLayout>
+    </CompanyDashboardLayout>
   );
 }
 

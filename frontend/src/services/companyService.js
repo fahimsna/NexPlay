@@ -1,4 +1,4 @@
-import axios from "../api/axios";
+import axios from "../api/axiosInstance";
 
 // Create Company
 export const createCompany = async (companyData) => {
