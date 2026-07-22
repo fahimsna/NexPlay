@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
 import "./AdvertisementManagement.css";
 
@@ -9,7 +10,11 @@ function getSavedAdvertisements() {
     const savedAdvertisements = localStorage.getItem(STORAGE_KEY);
 
     if (savedAdvertisements) {
-      return JSON.parse(savedAdvertisements);
+      const parsedAdvertisements = JSON.parse(savedAdvertisements);
+
+      return Array.isArray(parsedAdvertisements)
+        ? parsedAdvertisements
+        : [];
     }
   } catch (error) {
     console.error("Could not read saved advertisements:", error);
@@ -19,6 +24,11 @@ function getSavedAdvertisements() {
 }
 
 function AdvertisementManagement() {
+  const location = useLocation();
+
+  const isManagementPage =
+    location.pathname === "/company/advertisements";
+
   const [ads, setAds] = useState(getSavedAdvertisements);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -32,6 +42,8 @@ function AdvertisementManagement() {
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(ads));
+
+    window.dispatchEvent(new Event("dashboardDataChanged"));
   }, [ads]);
 
   const handleInputChange = (event) => {
@@ -56,7 +68,14 @@ function AdvertisementManagement() {
   };
 
   const openCreateForm = () => {
-    resetForm();
+    setFormData({
+      title: "",
+      startDate: "",
+      endDate: "",
+      status: "Active",
+    });
+
+    setEditingId(null);
     setShowForm(true);
   };
 
@@ -80,7 +99,10 @@ function AdvertisementManagement() {
         ...formData,
       };
 
-      setAds((previousAds) => [...previousAds, newAdvertisement]);
+      setAds((previousAds) => [
+        ...previousAds,
+        newAdvertisement,
+      ]);
     }
 
     resetForm();
@@ -134,19 +156,24 @@ function AdvertisementManagement() {
       <div className="advertisement-page">
         <h1>Advertisement Management</h1>
 
-        <button
-          type="button"
-          className="create-ad-button"
-          onClick={() => {
-            if (showForm) {
-              resetForm();
-            } else {
-              openCreateForm();
-            }
-          }}
-        >
-          {showForm ? "Close Form" : "Create New Advertisement"}
-        </button>
+        {/* Create button appears only from the sidebar page */}
+        {isManagementPage && (
+          <button
+            type="button"
+            className="create-ad-button"
+            onClick={() => {
+              if (showForm) {
+                resetForm();
+              } else {
+                openCreateForm();
+              }
+            }}
+          >
+            {showForm
+              ? "Close Form"
+              : "Create New Advertisement"}
+          </button>
+        )}
 
         {showForm && (
           <form
@@ -159,7 +186,9 @@ function AdvertisementManagement() {
                 : "Create Advertisement"}
             </h2>
 
-            <label htmlFor="title">Advertisement Title</label>
+            <label htmlFor="title">
+              Advertisement Title
+            </label>
 
             <input
               id="title"
@@ -208,7 +237,10 @@ function AdvertisementManagement() {
               <option value="Ended">Ended</option>
             </select>
 
-            <button type="submit" className="save-ad-button">
+            <button
+              type="submit"
+              className="save-ad-button"
+            >
               {editingId !== null
                 ? "Update Advertisement"
                 : "Save Advertisement"}
@@ -221,15 +253,20 @@ function AdvertisementManagement() {
             <p>No advertisements created yet.</p>
           ) : (
             ads.map((ad) => (
-              <div className="advertisement-card" key={ad.id}>
+              <div
+                className="advertisement-card"
+                key={ad.id}
+              >
                 <h2>{ad.title}</h2>
 
                 <p>
-                  <strong>Start Date:</strong> {ad.startDate}
+                  <strong>Start Date:</strong>{" "}
+                  {ad.startDate}
                 </p>
 
                 <p>
-                  <strong>End Date:</strong> {ad.endDate}
+                  <strong>End Date:</strong>{" "}
+                  {ad.endDate}
                 </p>
 
                 <p>
@@ -242,7 +279,10 @@ function AdvertisementManagement() {
                       type="button"
                       className="edit-button"
                       onClick={() =>
-                        changeAdvertisementStatus(ad.id, "Active")
+                        changeAdvertisementStatus(
+                          ad.id,
+                          "Active"
+                        )
                       }
                     >
                       Start
@@ -254,7 +294,10 @@ function AdvertisementManagement() {
                       type="button"
                       className="edit-button"
                       onClick={() =>
-                        changeAdvertisementStatus(ad.id, "Paused")
+                        changeAdvertisementStatus(
+                          ad.id,
+                          "Paused"
+                        )
                       }
                     >
                       Pause
@@ -266,7 +309,10 @@ function AdvertisementManagement() {
                       type="button"
                       className="delete-button"
                       onClick={() =>
-                        changeAdvertisementStatus(ad.id, "Ended")
+                        changeAdvertisementStatus(
+                          ad.id,
+                          "Ended"
+                        )
                       }
                     >
                       End
@@ -276,7 +322,9 @@ function AdvertisementManagement() {
                   <button
                     type="button"
                     className="edit-button"
-                    onClick={() => editAdvertisement(ad)}
+                    onClick={() =>
+                      editAdvertisement(ad)
+                    }
                   >
                     Edit
                   </button>
@@ -284,7 +332,9 @@ function AdvertisementManagement() {
                   <button
                     type="button"
                     className="delete-button"
-                    onClick={() => deleteAdvertisement(ad.id)}
+                    onClick={() =>
+                      deleteAdvertisement(ad.id)
+                    }
                   >
                     Delete
                   </button>

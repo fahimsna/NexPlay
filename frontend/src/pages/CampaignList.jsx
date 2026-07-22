@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
 import "./CampaignManagement.css";
 
@@ -11,6 +10,7 @@ function getSavedCampaigns() {
 
     if (savedCampaigns) {
       const parsedCampaigns = JSON.parse(savedCampaigns);
+
       return Array.isArray(parsedCampaigns) ? parsedCampaigns : [];
     }
   } catch (error) {
@@ -20,12 +20,7 @@ function getSavedCampaigns() {
   return [];
 }
 
-function CampaignManagement() {
-  const location = useLocation();
-
-  const isManagementPage =
-    location.pathname === "/company/campaigns";
-
+function CampaignManagement({ allowCreate = true }) {
   const [campaigns, setCampaigns] = useState(getSavedCampaigns);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -41,14 +36,9 @@ function CampaignManagement() {
   });
 
   useEffect(() => {
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(campaigns)
-    );
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(campaigns));
 
-    window.dispatchEvent(
-      new Event("dashboardDataChanged")
-    );
+    window.dispatchEvent(new Event("dashboardDataChanged"));
   }, [campaigns]);
 
   const handleInputChange = (event) => {
@@ -76,7 +66,17 @@ function CampaignManagement() {
   };
 
   const openCreateForm = () => {
-    resetForm();
+    setFormData({
+      name: "",
+      description: "",
+      startDate: "",
+      endDate: "",
+      budget: "",
+      audience: "All Users",
+      status: "Draft",
+    });
+
+    setEditingId(null);
     setShowForm(true);
   };
 
@@ -134,9 +134,7 @@ function CampaignManagement() {
     }
 
     setCampaigns((previousCampaigns) =>
-      previousCampaigns.filter(
-        (campaign) => campaign.id !== id
-      )
+      previousCampaigns.filter((campaign) => campaign.id !== id)
     );
 
     if (editingId === id) {
@@ -162,7 +160,7 @@ function CampaignManagement() {
       <div className="campaign-page">
         <h1>Campaign Management</h1>
 
-        {isManagementPage && (
+        {allowCreate && (
           <button
             type="button"
             className="create-campaign-button"
@@ -174,26 +172,17 @@ function CampaignManagement() {
               }
             }}
           >
-            {showForm
-              ? "Close Form"
-              : "Create New Campaign"}
+            {showForm ? "Close Form" : "Create New Campaign"}
           </button>
         )}
 
         {showForm && (
-          <form
-            className="campaign-form"
-            onSubmit={saveCampaign}
-          >
+          <form className="campaign-form" onSubmit={saveCampaign}>
             <h2>
-              {editingId !== null
-                ? "Edit Campaign"
-                : "Create Campaign"}
+              {editingId !== null ? "Edit Campaign" : "Create Campaign"}
             </h2>
 
-            <label htmlFor="name">
-              Campaign Name
-            </label>
+            <label htmlFor="name">Campaign Name</label>
 
             <input
               id="name"
@@ -205,9 +194,7 @@ function CampaignManagement() {
               required
             />
 
-            <label htmlFor="description">
-              Description
-            </label>
+            <label htmlFor="description">Description</label>
 
             <textarea
               id="description"
@@ -218,9 +205,7 @@ function CampaignManagement() {
               required
             />
 
-            <label htmlFor="startDate">
-              Start Date
-            </label>
+            <label htmlFor="startDate">Start Date</label>
 
             <input
               id="startDate"
@@ -231,9 +216,7 @@ function CampaignManagement() {
               required
             />
 
-            <label htmlFor="endDate">
-              End Date
-            </label>
+            <label htmlFor="endDate">End Date</label>
 
             <input
               id="endDate"
@@ -244,9 +227,7 @@ function CampaignManagement() {
               required
             />
 
-            <label htmlFor="budget">
-              Budget
-            </label>
+            <label htmlFor="budget">Budget</label>
 
             <input
               id="budget"
@@ -259,9 +240,7 @@ function CampaignManagement() {
               required
             />
 
-            <label htmlFor="audience">
-              Target Audience
-            </label>
+            <label htmlFor="audience">Target Audience</label>
 
             <select
               id="audience"
@@ -269,30 +248,14 @@ function CampaignManagement() {
               value={formData.audience}
               onChange={handleInputChange}
             >
-              <option value="All Users">
-                All Users
-              </option>
-
-              <option value="Movie Fans">
-                Movie Fans
-              </option>
-
-              <option value="Anime Fans">
-                Anime Fans
-              </option>
-
-              <option value="Sports Fans">
-                Sports Fans
-              </option>
-
-              <option value="Bangladesh Users">
-                Bangladesh Users
-              </option>
+              <option value="All Users">All Users</option>
+              <option value="Movie Fans">Movie Fans</option>
+              <option value="Anime Fans">Anime Fans</option>
+              <option value="Sports Fans">Sports Fans</option>
+              <option value="Bangladesh Users">Bangladesh Users</option>
             </select>
 
-            <label htmlFor="status">
-              Status
-            </label>
+            <label htmlFor="status">Status</label>
 
             <select
               id="status"
@@ -300,38 +263,16 @@ function CampaignManagement() {
               value={formData.status}
               onChange={handleInputChange}
             >
-              <option value="Draft">
-                Draft
-              </option>
-
-              <option value="Scheduled">
-                Scheduled
-              </option>
-
-              <option value="Active">
-                Active
-              </option>
-
-              <option value="Paused">
-                Paused
-              </option>
-
-              <option value="Completed">
-                Completed
-              </option>
-
-              <option value="Ended">
-                Ended
-              </option>
+              <option value="Draft">Draft</option>
+              <option value="Scheduled">Scheduled</option>
+              <option value="Active">Active</option>
+              <option value="Paused">Paused</option>
+              <option value="Completed">Completed</option>
+              <option value="Ended">Ended</option>
             </select>
 
-            <button
-              type="submit"
-              className="save-campaign-button"
-            >
-              {editingId !== null
-                ? "Update Campaign"
-                : "Save Campaign"}
+            <button type="submit" className="save-campaign-button">
+              {editingId !== null ? "Update Campaign" : "Save Campaign"}
             </button>
           </form>
         )}
@@ -341,37 +282,29 @@ function CampaignManagement() {
             <p>No campaigns created yet.</p>
           ) : (
             campaigns.map((campaign) => (
-              <div
-                className="campaign-card"
-                key={campaign.id}
-              >
+              <div className="campaign-card" key={campaign.id}>
                 <h2>{campaign.name}</h2>
 
                 <p>{campaign.description}</p>
 
                 <p>
-                  <strong>Start Date:</strong>{" "}
-                  {campaign.startDate}
+                  <strong>Start Date:</strong> {campaign.startDate}
                 </p>
 
                 <p>
-                  <strong>End Date:</strong>{" "}
-                  {campaign.endDate}
+                  <strong>End Date:</strong> {campaign.endDate}
                 </p>
 
                 <p>
-                  <strong>Budget:</strong>{" "}
-                  ৳{campaign.budget}
+                  <strong>Budget:</strong> ৳{campaign.budget}
                 </p>
 
                 <p>
-                  <strong>Target Audience:</strong>{" "}
-                  {campaign.audience}
+                  <strong>Target Audience:</strong> {campaign.audience}
                 </p>
 
                 <p>
-                  <strong>Status:</strong>{" "}
-                  {campaign.status}
+                  <strong>Status:</strong> {campaign.status}
                 </p>
 
                 <div className="campaign-action-buttons">
@@ -380,10 +313,7 @@ function CampaignManagement() {
                       type="button"
                       className="campaign-edit-button"
                       onClick={() =>
-                        changeCampaignStatus(
-                          campaign.id,
-                          "Active"
-                        )
+                        changeCampaignStatus(campaign.id, "Active")
                       }
                     >
                       Start
@@ -395,10 +325,7 @@ function CampaignManagement() {
                       type="button"
                       className="campaign-edit-button"
                       onClick={() =>
-                        changeCampaignStatus(
-                          campaign.id,
-                          "Paused"
-                        )
+                        changeCampaignStatus(campaign.id, "Paused")
                       }
                     >
                       Pause
@@ -410,10 +337,7 @@ function CampaignManagement() {
                       type="button"
                       className="campaign-delete-button"
                       onClick={() =>
-                        changeCampaignStatus(
-                          campaign.id,
-                          "Ended"
-                        )
+                        changeCampaignStatus(campaign.id, "Ended")
                       }
                     >
                       End
@@ -423,9 +347,7 @@ function CampaignManagement() {
                   <button
                     type="button"
                     className="campaign-edit-button"
-                    onClick={() =>
-                      editCampaign(campaign)
-                    }
+                    onClick={() => editCampaign(campaign)}
                   >
                     Edit
                   </button>
@@ -433,9 +355,7 @@ function CampaignManagement() {
                   <button
                     type="button"
                     className="campaign-delete-button"
-                    onClick={() =>
-                      deleteCampaign(campaign.id)
-                    }
+                    onClick={() => deleteCampaign(campaign.id)}
                   >
                     Delete
                   </button>
