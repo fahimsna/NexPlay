@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import DashboardLayout from "../layouts/DashboardLayout";
 import "./AdvertisementManagement.css";
 
 const STORAGE_KEY = "nexplayAdvertisements";
@@ -55,14 +56,7 @@ function AdvertisementManagement() {
   };
 
   const openCreateForm = () => {
-    setFormData({
-      title: "",
-      startDate: "",
-      endDate: "",
-      status: "Active",
-    });
-
-    setEditingId(null);
+    resetForm();
     setShowForm(true);
   };
 
@@ -136,165 +130,171 @@ function AdvertisementManagement() {
   };
 
   return (
-    <div className="advertisement-page">
-      <h1>Advertisement Management</h1>
+    <DashboardLayout>
+      <div className="advertisement-page">
+        <h1>Advertisement Management</h1>
 
-      <button
-        type="button"
-        className="create-ad-button"
-        onClick={() => {
-          if (showForm) {
-            resetForm();
-          } else {
-            openCreateForm();
-          }
-        }}
-      >
-        {showForm ? "Close Form" : "Create New Advertisement"}
-      </button>
-
-      {showForm && (
-        <form
-          className="advertisement-form"
-          onSubmit={saveAdvertisement}
+        <button
+          type="button"
+          className="create-ad-button"
+          onClick={() => {
+            if (showForm) {
+              resetForm();
+            } else {
+              openCreateForm();
+            }
+          }}
         >
-          <h2>
-            {editingId !== null
-              ? "Edit Advertisement"
-              : "Create Advertisement"}
-          </h2>
+          {showForm ? "Close Form" : "Create New Advertisement"}
+        </button>
 
-          <label htmlFor="title">Advertisement Title</label>
-          <input
-            id="title"
-            type="text"
-            name="title"
-            value={formData.title}
-            onChange={handleInputChange}
-            placeholder="Enter advertisement title"
-            required
-          />
-
-          <label htmlFor="startDate">Start Date</label>
-          <input
-            id="startDate"
-            type="date"
-            name="startDate"
-            value={formData.startDate}
-            onChange={handleInputChange}
-            required
-          />
-
-          <label htmlFor="endDate">End Date</label>
-          <input
-            id="endDate"
-            type="date"
-            name="endDate"
-            value={formData.endDate}
-            onChange={handleInputChange}
-            required
-          />
-
-          <label htmlFor="status">Status</label>
-          <select
-            id="status"
-            name="status"
-            value={formData.status}
-            onChange={handleInputChange}
+        {showForm && (
+          <form
+            className="advertisement-form"
+            onSubmit={saveAdvertisement}
           >
-            <option value="Active">Active</option>
-            <option value="Scheduled">Scheduled</option>
-            <option value="Paused">Paused</option>
-            <option value="Inactive">Inactive</option>
-            <option value="Ended">Ended</option>
-          </select>
+            <h2>
+              {editingId !== null
+                ? "Edit Advertisement"
+                : "Create Advertisement"}
+            </h2>
 
-          <button type="submit" className="save-ad-button">
-            {editingId !== null
-              ? "Update Advertisement"
-              : "Save Advertisement"}
-          </button>
-        </form>
-      )}
+            <label htmlFor="title">Advertisement Title</label>
 
-      <div className="advertisement-list">
-        {ads.length === 0 ? (
-          <p>No advertisements created yet.</p>
-        ) : (
-          ads.map((ad) => (
-            <div className="advertisement-card" key={ad.id}>
-              <h2>{ad.title}</h2>
+            <input
+              id="title"
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleInputChange}
+              placeholder="Enter advertisement title"
+              required
+            />
 
-              <p>
-                <strong>Start Date:</strong> {ad.startDate}
-              </p>
+            <label htmlFor="startDate">Start Date</label>
 
-              <p>
-                <strong>End Date:</strong> {ad.endDate}
-              </p>
+            <input
+              id="startDate"
+              type="date"
+              name="startDate"
+              value={formData.startDate}
+              onChange={handleInputChange}
+              required
+            />
 
-              <p>
-                <strong>Status:</strong> {ad.status}
-              </p>
+            <label htmlFor="endDate">End Date</label>
 
-              <div className="action-buttons">
-                {ad.status !== "Active" && (
+            <input
+              id="endDate"
+              type="date"
+              name="endDate"
+              value={formData.endDate}
+              onChange={handleInputChange}
+              required
+            />
+
+            <label htmlFor="status">Status</label>
+
+            <select
+              id="status"
+              name="status"
+              value={formData.status}
+              onChange={handleInputChange}
+            >
+              <option value="Active">Active</option>
+              <option value="Scheduled">Scheduled</option>
+              <option value="Paused">Paused</option>
+              <option value="Inactive">Inactive</option>
+              <option value="Ended">Ended</option>
+            </select>
+
+            <button type="submit" className="save-ad-button">
+              {editingId !== null
+                ? "Update Advertisement"
+                : "Save Advertisement"}
+            </button>
+          </form>
+        )}
+
+        <div className="advertisement-list">
+          {ads.length === 0 ? (
+            <p>No advertisements created yet.</p>
+          ) : (
+            ads.map((ad) => (
+              <div className="advertisement-card" key={ad.id}>
+                <h2>{ad.title}</h2>
+
+                <p>
+                  <strong>Start Date:</strong> {ad.startDate}
+                </p>
+
+                <p>
+                  <strong>End Date:</strong> {ad.endDate}
+                </p>
+
+                <p>
+                  <strong>Status:</strong> {ad.status}
+                </p>
+
+                <div className="action-buttons">
+                  {ad.status !== "Active" && (
+                    <button
+                      type="button"
+                      className="edit-button"
+                      onClick={() =>
+                        changeAdvertisementStatus(ad.id, "Active")
+                      }
+                    >
+                      Start
+                    </button>
+                  )}
+
+                  {ad.status === "Active" && (
+                    <button
+                      type="button"
+                      className="edit-button"
+                      onClick={() =>
+                        changeAdvertisementStatus(ad.id, "Paused")
+                      }
+                    >
+                      Pause
+                    </button>
+                  )}
+
+                  {ad.status !== "Ended" && (
+                    <button
+                      type="button"
+                      className="delete-button"
+                      onClick={() =>
+                        changeAdvertisementStatus(ad.id, "Ended")
+                      }
+                    >
+                      End
+                    </button>
+                  )}
+
                   <button
                     type="button"
                     className="edit-button"
-                    onClick={() =>
-                      changeAdvertisementStatus(ad.id, "Active")
-                    }
+                    onClick={() => editAdvertisement(ad)}
                   >
-                    Start
+                    Edit
                   </button>
-                )}
 
-                {ad.status === "Active" && (
-                  <button
-                    type="button"
-                    className="edit-button"
-                    onClick={() =>
-                      changeAdvertisementStatus(ad.id, "Paused")
-                    }
-                  >
-                    Pause
-                  </button>
-                )}
-
-                {ad.status !== "Ended" && (
                   <button
                     type="button"
                     className="delete-button"
-                    onClick={() =>
-                      changeAdvertisementStatus(ad.id, "Ended")
-                    }
+                    onClick={() => deleteAdvertisement(ad.id)}
                   >
-                    End
+                    Delete
                   </button>
-                )}
-
-                <button
-                  type="button"
-                  className="edit-button"
-                  onClick={() => editAdvertisement(ad)}
-                >
-                  Edit
-                </button>
-
-                <button
-                  type="button"
-                  className="delete-button"
-                  onClick={() => deleteAdvertisement(ad.id)}
-                >
-                  Delete
-                </button>
+                </div>
               </div>
-            </div>
-          ))
-        )}
+            ))
+          )}
+        </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }
 

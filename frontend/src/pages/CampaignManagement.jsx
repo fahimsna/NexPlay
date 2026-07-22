@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import DashboardLayout from "../layouts/DashboardLayout";
 import "./CampaignManagement.css";
 
 const STORAGE_KEY = "nexplayCampaigns";
@@ -61,17 +62,7 @@ function CampaignManagement() {
   };
 
   const openCreateForm = () => {
-    setFormData({
-      name: "",
-      description: "",
-      startDate: "",
-      endDate: "",
-      budget: "",
-      audience: "All Users",
-      status: "Draft",
-    });
-
-    setEditingId(null);
+    resetForm();
     setShowForm(true);
   };
 
@@ -151,205 +142,214 @@ function CampaignManagement() {
   };
 
   return (
-    <div className="campaign-page">
-      <h1>Campaign Management</h1>
+    <DashboardLayout>
+      <div className="campaign-page">
+        <h1>Campaign Management</h1>
 
-      <button
-        type="button"
-        className="create-campaign-button"
-        onClick={() => {
-          if (showForm) {
-            resetForm();
-          } else {
-            openCreateForm();
-          }
-        }}
-      >
-        {showForm ? "Close Form" : "Create New Campaign"}
-      </button>
+        <button
+          type="button"
+          className="create-campaign-button"
+          onClick={() => {
+            if (showForm) {
+              resetForm();
+            } else {
+              openCreateForm();
+            }
+          }}
+        >
+          {showForm ? "Close Form" : "Create New Campaign"}
+        </button>
 
-      {showForm && (
-        <form className="campaign-form" onSubmit={saveCampaign}>
-          <h2>
-            {editingId !== null ? "Edit Campaign" : "Create Campaign"}
-          </h2>
+        {showForm && (
+          <form className="campaign-form" onSubmit={saveCampaign}>
+            <h2>
+              {editingId !== null ? "Edit Campaign" : "Create Campaign"}
+            </h2>
 
-          <label htmlFor="name">Campaign Name</label>
-          <input
-            id="name"
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleInputChange}
-            placeholder="Enter campaign name"
-            required
-          />
+            <label htmlFor="name">Campaign Name</label>
 
-          <label htmlFor="description">Description</label>
-          <textarea
-            id="description"
-            name="description"
-            value={formData.description}
-            onChange={handleInputChange}
-            placeholder="Enter campaign description"
-            required
-          />
+            <input
+              id="name"
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              placeholder="Enter campaign name"
+              required
+            />
 
-          <label htmlFor="startDate">Start Date</label>
-          <input
-            id="startDate"
-            type="date"
-            name="startDate"
-            value={formData.startDate}
-            onChange={handleInputChange}
-            required
-          />
+            <label htmlFor="description">Description</label>
 
-          <label htmlFor="endDate">End Date</label>
-          <input
-            id="endDate"
-            type="date"
-            name="endDate"
-            value={formData.endDate}
-            onChange={handleInputChange}
-            required
-          />
+            <textarea
+              id="description"
+              name="description"
+              value={formData.description}
+              onChange={handleInputChange}
+              placeholder="Enter campaign description"
+              required
+            />
 
-          <label htmlFor="budget">Budget</label>
-          <input
-            id="budget"
-            type="number"
-            name="budget"
-            value={formData.budget}
-            onChange={handleInputChange}
-            placeholder="Enter budget"
-            min="0"
-            required
-          />
+            <label htmlFor="startDate">Start Date</label>
 
-          <label htmlFor="audience">Target Audience</label>
-          <select
-            id="audience"
-            name="audience"
-            value={formData.audience}
-            onChange={handleInputChange}
-          >
-            <option value="All Users">All Users</option>
-            <option value="Movie Fans">Movie Fans</option>
-            <option value="Anime Fans">Anime Fans</option>
-            <option value="Sports Fans">Sports Fans</option>
-            <option value="Bangladesh Users">Bangladesh Users</option>
-          </select>
+            <input
+              id="startDate"
+              type="date"
+              name="startDate"
+              value={formData.startDate}
+              onChange={handleInputChange}
+              required
+            />
 
-          <label htmlFor="status">Status</label>
-          <select
-            id="status"
-            name="status"
-            value={formData.status}
-            onChange={handleInputChange}
-          >
-            <option value="Draft">Draft</option>
-            <option value="Scheduled">Scheduled</option>
-            <option value="Active">Active</option>
-            <option value="Paused">Paused</option>
-            <option value="Completed">Completed</option>
-            <option value="Ended">Ended</option>
-          </select>
+            <label htmlFor="endDate">End Date</label>
 
-          <button type="submit" className="save-campaign-button">
-            {editingId !== null ? "Update Campaign" : "Save Campaign"}
-          </button>
-        </form>
-      )}
+            <input
+              id="endDate"
+              type="date"
+              name="endDate"
+              value={formData.endDate}
+              onChange={handleInputChange}
+              required
+            />
 
-      <div className="campaign-list">
-        {campaigns.length === 0 ? (
-          <p>No campaigns created yet.</p>
-        ) : (
-          campaigns.map((campaign) => (
-            <div className="campaign-card" key={campaign.id}>
-              <h2>{campaign.name}</h2>
+            <label htmlFor="budget">Budget</label>
 
-              <p>{campaign.description}</p>
+            <input
+              id="budget"
+              type="number"
+              name="budget"
+              value={formData.budget}
+              onChange={handleInputChange}
+              placeholder="Enter budget"
+              min="0"
+              required
+            />
 
-              <p>
-                <strong>Start Date:</strong> {campaign.startDate}
-              </p>
+            <label htmlFor="audience">Target Audience</label>
 
-              <p>
-                <strong>End Date:</strong> {campaign.endDate}
-              </p>
+            <select
+              id="audience"
+              name="audience"
+              value={formData.audience}
+              onChange={handleInputChange}
+            >
+              <option value="All Users">All Users</option>
+              <option value="Movie Fans">Movie Fans</option>
+              <option value="Anime Fans">Anime Fans</option>
+              <option value="Sports Fans">Sports Fans</option>
+              <option value="Bangladesh Users">Bangladesh Users</option>
+            </select>
 
-              <p>
-                <strong>Budget:</strong> ৳{campaign.budget}
-              </p>
+            <label htmlFor="status">Status</label>
 
-              <p>
-                <strong>Target Audience:</strong> {campaign.audience}
-              </p>
+            <select
+              id="status"
+              name="status"
+              value={formData.status}
+              onChange={handleInputChange}
+            >
+              <option value="Draft">Draft</option>
+              <option value="Scheduled">Scheduled</option>
+              <option value="Active">Active</option>
+              <option value="Paused">Paused</option>
+              <option value="Completed">Completed</option>
+              <option value="Ended">Ended</option>
+            </select>
 
-              <p>
-                <strong>Status:</strong> {campaign.status}
-              </p>
+            <button type="submit" className="save-campaign-button">
+              {editingId !== null ? "Update Campaign" : "Save Campaign"}
+            </button>
+          </form>
+        )}
 
-              <div className="campaign-action-buttons">
-                {campaign.status !== "Active" && (
+        <div className="campaign-list">
+          {campaigns.length === 0 ? (
+            <p>No campaigns created yet.</p>
+          ) : (
+            campaigns.map((campaign) => (
+              <div className="campaign-card" key={campaign.id}>
+                <h2>{campaign.name}</h2>
+
+                <p>{campaign.description}</p>
+
+                <p>
+                  <strong>Start Date:</strong> {campaign.startDate}
+                </p>
+
+                <p>
+                  <strong>End Date:</strong> {campaign.endDate}
+                </p>
+
+                <p>
+                  <strong>Budget:</strong> ৳{campaign.budget}
+                </p>
+
+                <p>
+                  <strong>Target Audience:</strong> {campaign.audience}
+                </p>
+
+                <p>
+                  <strong>Status:</strong> {campaign.status}
+                </p>
+
+                <div className="campaign-action-buttons">
+                  {campaign.status !== "Active" && (
+                    <button
+                      type="button"
+                      className="campaign-edit-button"
+                      onClick={() =>
+                        changeCampaignStatus(campaign.id, "Active")
+                      }
+                    >
+                      Start
+                    </button>
+                  )}
+
+                  {campaign.status === "Active" && (
+                    <button
+                      type="button"
+                      className="campaign-edit-button"
+                      onClick={() =>
+                        changeCampaignStatus(campaign.id, "Paused")
+                      }
+                    >
+                      Pause
+                    </button>
+                  )}
+
+                  {campaign.status !== "Ended" && (
+                    <button
+                      type="button"
+                      className="campaign-delete-button"
+                      onClick={() =>
+                        changeCampaignStatus(campaign.id, "Ended")
+                      }
+                    >
+                      End
+                    </button>
+                  )}
+
                   <button
                     type="button"
                     className="campaign-edit-button"
-                    onClick={() =>
-                      changeCampaignStatus(campaign.id, "Active")
-                    }
+                    onClick={() => editCampaign(campaign)}
                   >
-                    Start
+                    Edit
                   </button>
-                )}
 
-                {campaign.status === "Active" && (
-                  <button
-                    type="button"
-                    className="campaign-edit-button"
-                    onClick={() =>
-                      changeCampaignStatus(campaign.id, "Paused")
-                    }
-                  >
-                    Pause
-                  </button>
-                )}
-
-                {campaign.status !== "Ended" && (
                   <button
                     type="button"
                     className="campaign-delete-button"
-                    onClick={() =>
-                      changeCampaignStatus(campaign.id, "Ended")
-                    }
+                    onClick={() => deleteCampaign(campaign.id)}
                   >
-                    End
+                    Delete
                   </button>
-                )}
-
-                <button
-                  type="button"
-                  className="campaign-edit-button"
-                  onClick={() => editCampaign(campaign)}
-                >
-                  Edit
-                </button>
-
-                <button
-                  type="button"
-                  className="campaign-delete-button"
-                  onClick={() => deleteCampaign(campaign.id)}
-                >
-                  Delete
-                </button>
+                </div>
               </div>
-            </div>
-          ))
-        )}
+            ))
+          )}
+        </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }
 
