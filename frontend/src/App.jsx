@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 
-// Public Pages
+// Public pages
 import Home from "./pages/Home";
 import Browse from "./pages/Browse";
 import Details from "./pages/Details";
@@ -11,13 +11,17 @@ import Partner from "./pages/Partner";
 import Contact from "./pages/Contact";
 import UpcomingContent from "./pages/UpcomingContent";
 
-// Company Pages
+// Company pages
 import CompanyDashboard from "./pages/CompanyDashboard";
 import CompanyProfile from "./pages/CompanyProfile";
 import Analytics from "./pages/Analytics";
 import CompanySettings from "./pages/CompanySettings";
 
-// Components
+// Campaign and advertisement pages
+import CampaignManagement from "./pages/CampaignManagement";
+import AdvertisementManagement from "./pages/AdvertisementManagement";
+
+// Shared component
 import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
@@ -26,7 +30,7 @@ function App() {
       <ScrollToTop />
 
       <Routes>
-        {/* Public Routes */}
+        {/* Public routes */}
         <Route path="/" element={<Home />} />
         <Route path="/browse" element={<Browse />} />
         <Route path="/movies" element={<Movies />} />
@@ -36,14 +40,51 @@ function App() {
         <Route path="/partner" element={<Partner />} />
         <Route path="/contact" element={<Contact />} />
 
-        {/* Your Module */}
+        {/* Upcoming Content module */}
         <Route path="/upcoming" element={<UpcomingContent />} />
 
-        {/* Company Routes */}
-        <Route path="/company/dashboard" element={<CompanyDashboard />} />
-        <Route path="/company/profile" element={<CompanyProfile />} />
-        <Route path="/company/analytics" element={<Analytics />} />
-        <Route path="/company/settings" element={<CompanySettings />} />
+        {/* Company routes */}
+        <Route
+          path="/company/dashboard"
+          element={<CompanyDashboard />}
+        />
+
+        <Route
+          path="/company/profile"
+          element={<CompanyProfile />}
+        />
+
+        <Route
+          path="/company/analytics"
+          element={<Analytics />}
+        />
+
+        <Route
+          path="/company/settings"
+          element={<CompanySettings />}
+        />
+
+        {/* Sidebar management pages */}
+        <Route
+          path="/company/campaigns"
+          element={<CampaignManagement />}
+        />
+
+        <Route
+          path="/company/advertisements"
+          element={<AdvertisementManagement />}
+        />
+
+        {/* Dashboard count-card pages */}
+        <Route
+          path="/company/campaign-list"
+          element={<CampaignManagement />}
+        />
+
+        <Route
+          path="/company/advertisement-list"
+          element={<AdvertisementManagement />}
+        />
       </Routes>
     </>
   );

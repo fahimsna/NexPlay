@@ -1,0 +1,193 @@
+.advertisement-page {
+  min-height: 100vh;
+  background: #22252b;
+  color: white;
+  padding: 40px;
+  font-family: Arial, sans-serif;
+}
+
+/* Main title */
+.advertisement-page h1 {
+  width: 100%;
+  max-width: 650px;
+  margin: 0 auto 30px;
+  text-align: center;
+
+  color: #ffffff;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+/* Gold line under title */
+.advertisement-page h1::after {
+  content: "";
+  display: block;
+  width: 90px;
+  height: 4px;
+  margin: 12px auto 0;
+  border-radius: 20px;
+  background: #d4a017;
+}
+
+/* Create button */
+.create-ad-button {
+  display: block;
+  width: fit-content;
+  margin: 0 auto 30px;
+
+  background: #d4a017;
+  color: #1b1d22;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Advertisement form */
+.advertisement-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  width: 100%;
+  max-width: 650px;
+  margin: 0 auto 30px;
+
+  background: #2a2d34;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.advertisement-form h2 {
+  color: #d4a017;
+  margin-top: 0;
+}
+
+.advertisement-form label {
+  font-weight: bold;
+}
+
+.advertisement-form input,
+.advertisement-form textarea,
+.advertisement-form select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 7px;
+  background: #1b1d22;
+  color: white;
+  font-size: 15px;
+}
+
+.advertisement-form textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Save button */
+.save-ad-button {
+  background: #d4a017;
+  color: #1b1d22;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+/* Advertisement list */
+.advertisement-list {
+  display: grid;
+  gap: 20px;
+
+  width: 100%;
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+/* Advertisement card */
+.advertisement-card {
+  width: 100%;
+  background: #2a2d34;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.advertisement-card h2 {
+  color: #d4a017;
+  margin-top: 0;
+}
+
+.advertisement-card p {
+  margin: 10px 0;
+  line-height: 1.5;
+}
+
+/* Action buttons area */
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.edit-button,
+.delete-button {
+  border-radius: 7px;
+  padding: 10px 18px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Gold buttons */
+.edit-button {
+  background: #d4a017;
+  color: #1b1d22;
+  border: none;
+}
+
+/* Dark buttons */
+.delete-button {
+  background: #1b1d22;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Hover effects */
+.create-ad-button:hover,
+.save-ad-button:hover,
+.edit-button:hover,
+.delete-button:hover {
+  opacity: 0.9;
+}
+
+/* Mobile design */
+@media (max-width: 768px) {
+  .advertisement-page {
+    padding: 25px 16px;
+  }
+
+  .advertisement-page h1 {
+    font-size: 27px;
+  }
+
+  .advertisement-form,
+  .advertisement-card {
+    padding: 20px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .edit-button,
+  .delete-button {
+    width: 100%;
+  }
+}

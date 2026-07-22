@@ -1,0 +1,193 @@
+.campaign-page {
+  min-height: 100vh;
+  background: #22252b;
+  color: white;
+  padding: 40px;
+  font-family: Arial, sans-serif;
+}
+
+/* Main title */
+.campaign-page h1 {
+  width: 100%;
+  max-width: 650px;
+  margin: 0 auto 30px;
+  text-align: center;
+
+  color: #ffffff;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+/* Gold line under title */
+.campaign-page h1::after {
+  content: "";
+  display: block;
+  width: 90px;
+  height: 4px;
+  margin: 12px auto 0;
+  border-radius: 20px;
+  background: #d4a017;
+}
+
+/* Create button */
+.create-campaign-button {
+  display: block;
+  width: fit-content;
+  margin: 0 auto 30px;
+
+  background: #d4a017;
+  color: #1b1d22;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Campaign form */
+.campaign-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  width: 100%;
+  max-width: 650px;
+  margin: 0 auto 30px;
+
+  background: #2a2d34;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.campaign-form h2 {
+  color: #d4a017;
+  margin-top: 0;
+}
+
+.campaign-form label {
+  font-weight: bold;
+}
+
+.campaign-form input,
+.campaign-form textarea,
+.campaign-form select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 7px;
+  background: #1b1d22;
+  color: white;
+  font-size: 15px;
+}
+
+.campaign-form textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Save button */
+.save-campaign-button {
+  background: #d4a017;
+  color: #1b1d22;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+/* Campaign list */
+.campaign-list {
+  display: grid;
+  gap: 20px;
+
+  width: 100%;
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+/* Campaign card */
+.campaign-card {
+  width: 100%;
+  background: #2a2d34;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.campaign-card h2 {
+  color: #d4a017;
+  margin-top: 0;
+}
+
+.campaign-card p {
+  margin: 10px 0;
+  line-height: 1.5;
+}
+
+/* Action buttons area */
+.campaign-action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.campaign-edit-button,
+.campaign-delete-button {
+  border-radius: 7px;
+  padding: 10px 18px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Gold buttons */
+.campaign-edit-button {
+  background: #d4a017;
+  color: #1b1d22;
+  border: none;
+}
+
+/* Dark buttons */
+.campaign-delete-button {
+  background: #1b1d22;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Hover effects */
+.create-campaign-button:hover,
+.save-campaign-button:hover,
+.campaign-edit-button:hover,
+.campaign-delete-button:hover {
+  opacity: 0.9;
+}
+
+/* Mobile design */
+@media (max-width: 768px) {
+  .campaign-page {
+    padding: 25px 16px;
+  }
+
+  .campaign-page h1 {
+    font-size: 27px;
+  }
+
+  .campaign-form,
+  .campaign-card {
+    padding: 20px;
+  }
+
+  .campaign-action-buttons {
+    flex-direction: column;
+  }
+
+  .campaign-edit-button,
+  .campaign-delete-button {
+    width: 100%;
+  }
+}
