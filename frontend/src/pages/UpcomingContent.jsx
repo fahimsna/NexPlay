@@ -1,4 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import {
+  getUpcomingContent,
+  addUpcomingContent,
+  updateUpcomingContent,
+  deleteUpcomingContent,
+} from "../api/upcomingApi";
 
 function UpcomingContent() {
   const [title, setTitle] = useState("");
@@ -16,9 +22,39 @@ function UpcomingContent() {
   const [contentList, setContentList] = useState([]);
 
   const [isEditing, setIsEditing] = useState(false);
-  const [editIndex, setEditIndex] = useState(null);
+  const [editId, setEditId] = useState(null);
 
-  const handleSubmit = (e) => {
+  const [imagePreviewError, setImagePreviewError] = useState(false);
+  const [brokenImageIds, setBrokenImageIds] = useState({});
+
+  useEffect(() => {
+    fetchContents();
+  }, []);
+
+  const fetchContents = async () => {
+    try {
+      const res = await getUpcomingContent();
+      setContentList(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+    setCategory("Movie");
+    setGenre("Action");
+    setReleaseDate("");
+    setImageUrl("");
+    setTrailerUrl("");
+    setStatus("Coming Soon");
+
+    setIsEditing(false);
+    setEditId(null);
+    setImagePreviewError(false);
+  };
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const newContent = {
@@ -32,49 +68,50 @@ function UpcomingContent() {
       status,
     };
 
-    if (isEditing) {
-      const updated = [...contentList];
-      updated[editIndex] = newContent;
-      setContentList(updated);
+    try {
+      if (isEditing) {
+        await updateUpcomingContent(editId, newContent);
+        alert("Content Updated Successfully!");
+      } else {
+        await addUpcomingContent(newContent);
+        alert("Content Added Successfully!");
+      }
 
-      setIsEditing(false);
-      setEditIndex(null);
+      resetForm();
+      fetchContents();
+    } catch (err) {
+      console.error(err);
+      alert("Operation Failed!");
+    }
+  };
 
-      alert("Content Updated Successfully!");
-    } else {
-      setContentList([...contentList, newContent]);
-      alert("Content Added Successfully!");
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this content?")) {
+      return;
     }
 
-    setTitle("");
-    setDescription("");
-    setCategory("Movie");
-    setGenre("Action");
-    setReleaseDate("");
-    setImageUrl("");
-    setTrailerUrl("");
-    setStatus("Coming Soon");
+    try {
+      await deleteUpcomingContent(id);
+      fetchContents();
+    } catch (err) {
+      console.error(err);
+      alert("Delete Failed!");
+    }
   };
 
-  const handleDelete = (index) => {
-    const updated = contentList.filter((_, i) => i !== index);
-    setContentList(updated);
-  };
-
-  const handleEdit = (index) => {
-    const item = contentList[index];
-
+  const handleEdit = (item) => {
     setTitle(item.title);
     setDescription(item.description);
     setCategory(item.category);
     setGenre(item.genre);
-    setReleaseDate(item.releaseDate);
+    setReleaseDate(item.releaseDate?.split("T")[0] || "");
     setImageUrl(item.imageUrl);
     setTrailerUrl(item.trailerUrl);
     setStatus(item.status);
 
-    setEditIndex(index);
+    setEditId(item._id);
     setIsEditing(true);
+    setImagePreviewError(false);
 
     window.scrollTo({
       top: 0,
@@ -84,11 +121,12 @@ function UpcomingContent() {
 
   const filteredContent = contentList.filter((item) => {
     const matchesSearch = item.title
-      .toLowerCase()
+      ?.toLowerCase()
       .includes(search.toLowerCase());
 
     const matchesCategory =
-      filterCategory === "All" || item.category === filterCategory;
+      filterCategory === "All" ||
+      item.category === filterCategory;
 
     return matchesSearch && matchesCategory;
   });
@@ -167,14 +205,48 @@ function UpcomingContent() {
             onChange={(e) => setReleaseDate(e.target.value)}
             required
           />
+          <div>
+            <input
+              type="text"
+              placeholder="Poster Image URL (must end in .jpg, .png, .webp etc.)"
+              className="w-full p-3 rounded-lg bg-[#1f2029] border border-gray-600"
+              value={imageUrl}
+              onChange={(e) => {
+                setImageUrl(e.target.value);
+                setImagePreviewError(false);
+              }}
+            />
 
-          <input
-            type="text"
-            placeholder="Poster Image URL"
-            className="w-full p-3 rounded-lg bg-[#1f2029] border border-gray-600"
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-          />
+            {imageUrl && (
+              <div className="mt-3 flex items-center gap-4">
+                {imagePreviewError ? (
+                  <div className="w-32 h-20 flex items-center justify-center rounded-lg bg-[#1f2029] border border-red-500 text-red-400 text-xs text-center px-2">
+                    Invalid image URL
+                  </div>
+                ) : (
+                  <img
+                    src={imageUrl}
+                    alt="Poster preview"
+                    className="w-32 h-20 object-cover rounded-lg border border-gray-600"
+                    onError={() => setImagePreviewError(true)}
+                    onLoad={() => setImagePreviewError(false)}
+                  />
+                )}
+
+                <span
+                  className={
+                    imagePreviewError
+                      ? "text-red-400 text-sm"
+                      : "text-green-400 text-sm"
+                  }
+                >
+                  {imagePreviewError
+                    ? "❌ This link isn't loading as an image. Use a direct image link ending in .jpg/.png/.webp."
+                    : "✅ Preview looks good"}
+                </span>
+              </div>
+            )}
+          </div>
 
           <input
             type="url"
@@ -201,9 +273,11 @@ function UpcomingContent() {
           </button>
 
         </form>
-              </div>
+
+      </div>
 
       {/* Search & Filter */}
+
       <div className="bg-[#2d2f39] rounded-xl p-6 shadow-lg mt-8 flex flex-col md:flex-row gap-4">
 
         <input
@@ -229,7 +303,6 @@ function UpcomingContent() {
         </select>
 
       </div>
-
       {/* Content List */}
 
       <div className="bg-[#2d2f39] rounded-xl p-8 shadow-lg mt-8">
@@ -248,19 +321,32 @@ function UpcomingContent() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-            {filteredContent.map((item, index) => (
+            {filteredContent.map((item) => (
 
               <div
-                key={index}
+                key={item._id}
                 className="bg-[#1f2029] rounded-xl border border-gray-700 overflow-hidden"
               >
 
-                {item.imageUrl && (
+                {item.imageUrl && !brokenImageIds[item._id] && (
                   <img
                     src={item.imageUrl}
                     alt={item.title}
                     className="w-full h-56 object-cover"
+                    onError={() =>
+                      setBrokenImageIds((prev) => ({
+                        ...prev,
+                        [item._id]: true,
+                      }))
+                    }
                   />
+                )}
+
+                {(!item.imageUrl || brokenImageIds[item._id]) && (
+                  <div className="w-full h-56 flex flex-col items-center justify-center bg-[#2d2f39] text-gray-500 text-sm gap-2">
+                    <span className="text-3xl">🖼️</span>
+                    <span>No poster available</span>
+                  </div>
                 )}
 
                 <div className="p-5">
@@ -284,7 +370,8 @@ function UpcomingContent() {
                     </p>
 
                     <p>
-                      <strong>Release:</strong> {item.releaseDate}
+                      <strong>Release:</strong>{" "}
+                      {item.releaseDate?.split("T")[0]}
                     </p>
 
                     <p>
@@ -294,9 +381,7 @@ function UpcomingContent() {
                   </div>
 
                   <div className="flex flex-wrap gap-3 mt-6">
-
                     {item.trailerUrl && (
-
                       <a
                         href={item.trailerUrl}
                         target="_blank"
@@ -305,23 +390,21 @@ function UpcomingContent() {
                       >
                         ▶ Watch Trailer
                       </a>
-
                     )}
 
                     <button
-                      onClick={() => handleEdit(index)}
+                      onClick={() => handleEdit(item)}
                       className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg"
                     >
                       Edit
                     </button>
 
                     <button
-                      onClick={() => handleDelete(index)}
+                      onClick={() => handleDelete(item._id)}
                       className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg"
                     >
                       Delete
                     </button>
-
                   </div>
 
                 </div>
@@ -337,6 +420,8 @@ function UpcomingContent() {
       </div>
 
     </div>
+
+
   );
 }
 
