@@ -1,5 +1,11 @@
 import { NavLink } from "react-router-dom";
-import { FiHome, FiUser, FiLogOut, FiX } from "react-icons/fi";
+import {
+  FiHome,
+  FiUser,
+  FiCalendar,
+  FiLogOut,
+  FiX,
+} from "react-icons/fi";
 
 function CompanySidebar({ open, setOpen }) {
   const links = [
@@ -7,82 +13,55 @@ function CompanySidebar({ open, setOpen }) {
       name: "Dashboard",
       path: "/company",
       icon: <FiHome />,
+      end: true,
     },
-
     {
       name: "Company Profile",
       path: "/company/profile",
       icon: <FiUser />,
     },
+    {
+      name: "Upcoming Content",
+      path: "/company/upcoming-content",
+      icon: <FiCalendar />,
+    },
   ];
 
   return (
     <>
-      {/* Overlay Mobile */}
-
+      {/* Mobile Overlay */}
       {open && (
         <div
           onClick={() => setOpen(false)}
-          className="
-            fixed
-            inset-0
-            bg-black/40
-            z-40
-            md:hidden
-            "
+          className="fixed inset-0 z-40 bg-black/40 md:hidden"
         />
       )}
 
       <aside
         className={`
-        
-        fixed
-        md:static
-        z-50
-        
-        top-0
-        left-0
-        
-        h-screen
-        w-64
-        
-        bg-white
-        border-r
-        
-        p-5
-        
-        transform
-        
-        transition-transform
-        
-        duration-300
-        
-        ${open ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
-
+          fixed left-0 top-0 z-50
+          h-screen w-64
+          border-r bg-white p-5
+          transition-transform duration-300
+          md:static md:translate-x-0
+          ${
+            open
+              ? "translate-x-0"
+              : "-translate-x-full md:translate-x-0"
+          }
         `}
       >
-        {/* Mobile Close */}
-
+        {/* Mobile Close Button */}
         <button
+          type="button"
           onClick={() => setOpen(false)}
-          className="
-          md:hidden
-          absolute
-          right-4
-          top-4
-          "
+          className="absolute right-4 top-4 md:hidden"
+          aria-label="Close sidebar"
         >
           <FiX size={22} />
         </button>
 
-        <h1
-          className="
-          text-2xl
-          font-bold
-          text-purple-600
-          mb-10
-          "
-        >
+        <h1 className="mb-10 text-2xl font-bold text-purple-600">
           NexPlay
         </h1>
 
@@ -91,44 +70,38 @@ function CompanySidebar({ open, setOpen }) {
             <NavLink
               key={link.path}
               to={link.path}
+              end={link.end}
               onClick={() => setOpen(false)}
               className={({ isActive }) =>
                 `
-                  flex
-                  items-center
-                  gap-3
-                  px-4
-                  py-3
-                  rounded-lg
+                  flex items-center gap-3
+                  rounded-lg px-4 py-3
                   transition
-
                   ${
                     isActive
                       ? "bg-purple-600 text-white"
-                      : "hover:bg-gray-100 text-gray-700"
+                      : "text-gray-700 hover:bg-gray-100"
                   }
-
-                  `
+                `
               }
             >
-              {link.icon}
-
-              {link.name}
+              <span className="text-lg">{link.icon}</span>
+              <span>{link.name}</span>
             </NavLink>
           ))}
         </nav>
 
         <button
+          type="button"
           className="
-          flex
-          items-center
-          gap-3
-          mt-10
-          text-red-500
+            mt-10 flex items-center gap-3
+            rounded-lg px-4 py-3
+            text-red-500 transition
+            hover:bg-red-50
           "
         >
           <FiLogOut />
-          Logout
+          <span>Logout</span>
         </button>
       </aside>
     </>

@@ -107,7 +107,7 @@ function CompanyUpcomingContent() {
     setGenre(item.genre);
     setReleaseDate(item.releaseDate?.split("T")[0] || "");
     setImageUrl(item.imageUrl);
-    setTrailerUrl(item.trailerUrl);
+    setTrailerUrl(item.trailerUrl || item.trailerURL || "");
     setStatus(item.status);
 
     setEditId(item._id);
@@ -134,17 +134,17 @@ function CompanyUpcomingContent() {
 
   return (
     
-      <div className="text-white">
+      <div className="max-w-7xl mx-auto px-2 pb-10">
 
-      <h1 className="text-4xl font-bold mb-2">
+      <h1 className="text-3xl font-bold mb-2 text-gray-900">
         Upcoming Content Management
       </h1>
 
-      <p className="text-gray-400 mb-8">
+      <p className="text-gray-600 mb-8">
         Manage upcoming movies, TV series, anime, documentaries and sports events.
       </p>
 
-      <div className="bg-[#2d2f39] rounded-xl p-8 shadow-lg">
+      <div className="bg-[#2d2f39] text-white rounded-xl p-6 md:p-8 shadow-lg">
 
         <h2 className="text-2xl font-semibold mb-6">
           {isEditing ? "Update Content" : "Add New Content"}
@@ -280,7 +280,7 @@ function CompanyUpcomingContent() {
 
       {/* Search & Filter */}
 
-      <div className="bg-[#2d2f39] rounded-xl p-6 shadow-lg mt-8 flex flex-col md:flex-row gap-4">
+      <div className="bg-[#2d2f39] text-white rounded-xl p-6 shadow-lg mt-8 flex flex-col md:flex-row gap-4">
 
         <input
           type="text"
@@ -307,7 +307,7 @@ function CompanyUpcomingContent() {
       </div>
       {/* Content List */}
 
-      <div className="bg-[#2d2f39] rounded-xl p-8 shadow-lg mt-8">
+      <div className="bg-[#2d2f39] text-white rounded-xl p-6 md:p-8 shadow-lg mt-8">
 
         <h2 className="text-2xl font-semibold mb-6">
           Upcoming Content List
