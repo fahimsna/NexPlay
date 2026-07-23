@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import DashboardLayout from "../layouts/DashboardLayout";
+import CompanyDashboardLayout from "../../layouts/CompanyDashboardLayout";
 
 import {
   HiBuildingOffice2,
@@ -11,7 +11,7 @@ import {
   HiCheckBadge,
 } from "react-icons/hi2";
 
-import { getCompanies, updateCompany } from "../services/companyService";
+import { getCompanies, updateCompany } from "../../services/companyService";
 
 function CompanyProfile() {
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
@@ -154,7 +154,7 @@ function CompanyProfile() {
   const currentStatus = statusStyle[company.status] || statusStyle.pending;
 
   return (
-    <DashboardLayout>
+    <CompanyDashboardLayout>
       <div className="space-y-8">
         {/* HEADER */}
 
@@ -495,7 +495,7 @@ gap-6
           </section>
         )}
       </div>
-    </DashboardLayout>
+    </CompanyDashboardLayout>
   );
 }
 

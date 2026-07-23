@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import DashboardLayout from "../layouts/DashboardLayout";
-import StatsCard from "../components/dahboard/StatsCard";
-import RecentActivity from "../components/dahboard/RecentActivity";
+import CompanyDashboardLayout from "../../layouts/CompanyDashboardLayout";
+import StatsCard from "../../components/dashboard/StatsCard";
+import RecentActivity from "../../components/dashboard/RecentActivity";
 
-import CompanyProfileSummary from "../components/company/CompanyProfileSummary";
-import CompanyInfoCard from "../components/company/CompanyInfoCard";
+import CompanyProfileSummary from "../../components/company/CompanyProfileSummary";
+import CompanyInfoCard from "../../components/company/CompanyInfoCard";
 
 import {
   HiBuildingOffice2,
@@ -15,7 +15,7 @@ import {
   HiFilm,
 } from "react-icons/hi2";
 
-import { getCompanies } from "../services/companyService";
+import { getCompanies } from "../../services/companyService";
 
 function readStoredArray(key) {
   try {
@@ -27,9 +27,7 @@ function readStoredArray(key) {
 
     const parsedValue = JSON.parse(savedValue);
 
-    return Array.isArray(parsedValue)
-      ? parsedValue
-      : [];
+    return Array.isArray(parsedValue) ? parsedValue : [];
   } catch (error) {
     console.error(`Could not read ${key}:`, error);
     return [];
@@ -40,78 +38,49 @@ function CompanyDashboard() {
   const [company, setCompany] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const [advertisementCount, setAdvertisementCount] =
-    useState(0);
+  const [advertisementCount, setAdvertisementCount] = useState(0);
 
-  const [campaignCount, setCampaignCount] =
-    useState(0);
+  const [campaignCount, setCampaignCount] = useState(0);
 
   useEffect(() => {
     fetchCompany();
     updateDashboardCounts();
 
-    window.addEventListener(
-      "dashboardDataChanged",
-      updateDashboardCounts
-    );
+    window.addEventListener("dashboardDataChanged", updateDashboardCounts);
 
     return () => {
-      window.removeEventListener(
-        "dashboardDataChanged",
-        updateDashboardCounts
-      );
+      window.removeEventListener("dashboardDataChanged", updateDashboardCounts);
     };
   }, []);
 
   const updateDashboardCounts = () => {
-    const advertisements = readStoredArray(
-      "nexplayAdvertisements"
+    const advertisements = readStoredArray("nexplayAdvertisements");
+
+    const campaigns = readStoredArray("nexplayCampaigns");
+
+    const activeAdvertisements = advertisements.filter(
+      (advertisement) =>
+        String(advertisement.status).trim().toLowerCase() === "active",
     );
 
-    const campaigns = readStoredArray(
-      "nexplayCampaigns"
+    const activeCampaigns = campaigns.filter(
+      (campaign) => String(campaign.status).trim().toLowerCase() === "active",
     );
 
-    const activeAdvertisements =
-      advertisements.filter(
-        (advertisement) =>
-          String(advertisement.status)
-            .trim()
-            .toLowerCase() === "active"
-      );
+    setAdvertisementCount(activeAdvertisements.length);
 
-    const activeCampaigns =
-      campaigns.filter(
-        (campaign) =>
-          String(campaign.status)
-            .trim()
-            .toLowerCase() === "active"
-      );
-
-    setAdvertisementCount(
-      activeAdvertisements.length
-    );
-
-    setCampaignCount(
-      activeCampaigns.length
-    );
+    setCampaignCount(activeCampaigns.length);
   };
 
   const fetchCompany = async () => {
     try {
       const data = await getCompanies();
 
-      if (
-        Array.isArray(data) &&
-        data.length > 0
-      ) {
+      if (Array.isArray(data) && data.length > 0) {
         setCompany(data[0]);
       }
     } catch (error) {
-      console.log(
-        "Error fetching company:",
-        error
-      );
+      console.log("Error fetching company:", error);
     } finally {
       setLoading(false);
     }
@@ -126,14 +95,9 @@ function CompanyDashboard() {
   }
 
   return (
-    <DashboardLayout>
+    <CompanyDashboardLayout>
       <div className="space-y-8">
-        {company && (
-          <CompanyProfileSummary
-            company={company}
-            dashboard
-          />
-        )}
+        {company && <CompanyProfileSummary company={company} dashboard />}
 
         <div>
           <h1 className="text-3xl sm:text-4xl font-black text-white">
@@ -184,18 +148,14 @@ function CompanyDashboard() {
           />
         </div>
 
-        {company && (
-          <CompanyInfoCard company={company} />
-        )}
+        {company && <CompanyInfoCard company={company} />}
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           <RecentActivity company={company} />
 
           <div className="bg-[#1B1D22] border border-white/10 rounded-3xl p-6 sm:p-8">
             <div className="mb-6">
-              <h2 className="text-2xl font-bold text-white">
-                Quick Actions
-              </h2>
+              <h2 className="text-2xl font-bold text-white">Quick Actions</h2>
 
               <p className="text-gray-400 text-sm mt-1">
                 Manage your company activities
@@ -234,16 +194,11 @@ function CompanyDashboard() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </CompanyDashboardLayout>
   );
 }
 
-function ActionCard({
-  title,
-  description,
-  path,
-  icon: Icon,
-}) {
+function ActionCard({ title, description, path, icon: Icon }) {
   return (
     <Link
       to={path}
@@ -258,13 +213,9 @@ function ActionCard({
         </div>
 
         <div>
-          <h3 className="text-white font-semibold">
-            {title}
-          </h3>
+          <h3 className="text-white font-semibold">{title}</h3>
 
-          <p className="text-gray-400 text-sm mt-2 leading-5">
-            {description}
-          </p>
+          <p className="text-gray-400 text-sm mt-2 leading-5">{description}</p>
         </div>
       </div>
     </Link>

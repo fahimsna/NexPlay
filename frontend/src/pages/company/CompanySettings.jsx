@@ -1,10 +1,10 @@
-import DashboardLayout from "../layouts/DashboardLayout";
+import CompanyDashboardLayout from "../../layouts/CompanyDashboardLayout";
 
 import { HiLockClosed, HiBell, HiTrash, HiUserCircle } from "react-icons/hi2";
 
 function CompanySettings() {
   return (
-    <DashboardLayout>
+    <CompanyDashboardLayout>
       <div className="space-y-8">
         {/* Header */}
 
@@ -235,7 +235,7 @@ function CompanySettings() {
           </button>
         </section>
       </div>
-    </DashboardLayout>
+    </CompanyDashboardLayout>
   );
 }
 
