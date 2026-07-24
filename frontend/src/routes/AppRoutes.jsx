@@ -29,6 +29,7 @@ import CampaignManagement from "../pages/company/CampaignManagement";
 import AdvertisementManagement from "../pages/company/AdvertisementManagement";
 
 import Analytics from "../pages/company/Analytics";
+import ProtectedRoute from "./ProtectedRoute";
 
 function AppRoutes() {
   return (
@@ -64,7 +65,14 @@ function AppRoutes() {
 
         {/* Company Dashboard */}
 
-        <Route path="/company" element={<CompanyDashboardLayout />}>
+        <Route
+          path="/company"
+          element={
+            <ProtectedRoute allowedRoles={["company"]}>
+              <CompanyDashboardLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<CompanyDashboard />} />
 
           <Route path="profile" element={<CompanyProfile />} />

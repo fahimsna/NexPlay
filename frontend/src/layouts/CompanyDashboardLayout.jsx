@@ -1,28 +1,41 @@
 import { Outlet } from "react-router-dom";
 import { useState } from "react";
+
 import CompanySidebar from "../components/company/CompanySidebar";
+
 import { FiMenu } from "react-icons/fi";
 
 function CompanyDashboardLayout() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-100 flex">
-      {/* Mobile Menu Button */}
+    <div
+      className="
+min-h-screen
+bg-[#111318]
+"
+    >
+      {/* Mobile button */}
 
       <button
         onClick={() => setOpen(true)}
         className="
-        md:hidden
-        fixed
-        top-4
-        left-4
-        z-50
-        bg-purple-600
-        text-white
-        p-3
-        rounded-lg
-        "
+md:hidden
+
+fixed
+top-4
+left-4
+
+z-50
+
+bg-[#D4A017]
+text-black
+
+p-3
+
+rounded-xl
+
+"
       >
         <FiMenu size={22} />
       </button>
@@ -31,16 +44,19 @@ function CompanyDashboardLayout() {
 
       <CompanySidebar open={open} setOpen={setOpen} />
 
-      {/* Main Content */}
+      {/* Main */}
 
       <main
         className="
-        flex-1
-        p-4
-        md:p-8
-        mt-14
-        md:mt-0
-        "
+md:ml-64
+
+min-h-screen
+
+p-4
+sm:p-6
+lg:p-10
+
+"
       >
         <Outlet />
       </main>

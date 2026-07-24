@@ -1,58 +1,32 @@
 import { useEffect, useState } from "react";
 
-import CompanyDashboardLayout from "../../layouts/CompanyDashboardLayout";
-
 import {
   HiBuildingOffice2,
-  HiPencilSquare,
-  HiCheck,
-  HiXMark,
   HiGlobeAlt,
+  HiMapPin,
+  HiPencilSquare,
   HiCheckBadge,
 } from "react-icons/hi2";
 
-import { getCompanies, updateCompany } from "../../services/companyService";
+import { getMyCompany, updateMyCompany } from "../../services/companyService";
 
 function CompanyProfile() {
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
-
   const [company, setCompany] = useState(null);
 
   const [loading, setLoading] = useState(true);
 
-  const [editing, setEditing] = useState(false);
+  const [edit, setEdit] = useState(false);
 
-  const [saving, setSaving] = useState(false);
-
-  const [logo, setLogo] = useState(null);
+  const [logoFile, setLogoFile] = useState(null);
 
   const [preview, setPreview] = useState("");
 
-  const statusStyle = {
-    approved: {
-      bg: "bg-green-500/10",
-      border: "border-green-500/20",
-      text: "text-green-400",
-    },
-
-    pending: {
-      bg: "bg-yellow-500/10",
-      border: "border-yellow-500/20",
-      text: "text-yellow-400",
-    },
-
-    rejected: {
-      bg: "bg-red-500/10",
-      border: "border-red-500/20",
-      text: "text-red-400",
-    },
-  };
-
   const [formData, setFormData] = useState({
     companyName: "",
-    industry: "",
-    website: "",
     description: "",
+    website: "",
+    industry: "",
+    location: "",
   });
 
   useEffect(() => {
@@ -61,29 +35,23 @@ function CompanyProfile() {
 
   const fetchCompany = async () => {
     try {
-      const data = await getCompanies();
+      const data = await getMyCompany();
 
-      if (data.length > 0) {
-        const companyData = data[0];
+      setCompany(data);
 
-        setCompany(companyData);
+      setFormData({
+        companyName: data.companyName || "",
+        description: data.description || "",
+        website: data.website || "",
+        industry: data.industry || "",
+        location: data.location || "",
+      });
 
-        setFormData({
-          companyName: companyData.companyName || "",
-
-          industry: companyData.industry || "",
-
-          website: companyData.website || "",
-
-          description: companyData.description || "",
-        });
-
-        if (companyData.logo) {
-          setPreview(`${API_URL}${companyData.logo}`);
-        }
+      if (data.logo) {
+        setPreview(`http://localhost:8000/uploads/${data.logo}`);
       }
     } catch (error) {
-      console.log(error);
+      console.log(error.response?.data || error.message);
     } finally {
       setLoading(false);
     }
@@ -97,79 +65,80 @@ function CompanyProfile() {
     });
   };
 
-  const handleLogoChange = (e) => {
+  // LOGO SELECT
+
+  const handleLogo = (e) => {
     const file = e.target.files[0];
 
-    if (!file) return;
+    if (file) {
+      setLogoFile(file);
 
-    setLogo(file);
-
-    setPreview(URL.createObjectURL(file));
+      setPreview(URL.createObjectURL(file));
+    }
   };
+
+  // UPDATE
 
   const handleUpdate = async () => {
     try {
-      setSaving(true);
+      const data = new FormData();
 
-      const form = new FormData();
+      data.append("companyName", formData.companyName);
 
-      form.append("companyName", formData.companyName);
+      data.append("description", formData.description);
 
-      form.append("industry", formData.industry);
+      data.append("website", formData.website);
 
-      form.append("website", formData.website);
+      data.append("industry", formData.industry);
 
-      form.append("description", formData.description);
+      data.append("location", formData.location);
 
-      if (logo) {
-        form.append("logo", logo);
+      if (logoFile) {
+        data.append("logo", logoFile);
       }
 
-      const response = await updateCompany(company._id, form);
+      const updated = await updateMyCompany(data);
 
-      setCompany(response.company);
+      setCompany(updated);
 
-      setPreview(
-        response.company.logo ? `${API_URL}${response.company.logo}` : "",
-      );
+      setEdit(false);
 
-      setLogo(null);
-
-      setEditing(false);
+      alert("Company profile updated");
     } catch (error) {
-      console.log(error);
-    } finally {
-      setSaving(false);
+      console.log(error.response?.data || error.message);
     }
   };
 
   if (loading) {
-    return <div className="text-white">Loading...</div>;
+    return <div className="text-white">Loading Profile...</div>;
   }
-
-  if (!company) {
-    return <div className="text-white">No company profile found.</div>;
-  }
-
-  const currentStatus = statusStyle[company.status] || statusStyle.pending;
 
   return (
-    <CompanyDashboardLayout>
-      <div className="space-y-8">
-        {/* HEADER */}
+    <div className="space-y-6">
+      {/* HEADER */}
 
-        <section
-          className="
-bg-[#1B1D22]
-border
-border-white/10
+      <div>
+        <h1 className="text-3xl md:text-4xl font-bold text-white">
+          Company Profile
+        </h1>
+
+        <p className="text-gray-400 mt-2">Manage your company information</p>
+      </div>
+
+      {/* PROFILE CARD */}
+
+      <div
+        className="
+bg-[#393E46]
 rounded-3xl
 p-6
-sm:p-8
+md:p-8
+border
+border-white/10
 "
-        >
-          <div
-            className="
+      >
+        <div
+          className="
 flex
 flex-col
 md:flex-row
@@ -177,394 +146,257 @@ md:items-center
 justify-between
 gap-6
 "
-          >
-            <div
-              className="
-flex
-flex-col
-sm:flex-row
-sm:items-center
-gap-5
-w-full
-"
-            >
-              <div>
-                <div
-                  className="
-w-28
-h-28
-rounded-3xl
-bg-[#D4A017]
-overflow-hidden
+        >
+          <div
+            className="
 flex
 items-center
-justify-center
-"
-                >
-                  {preview ? (
-                    <img
-                      src={preview}
-                      alt="logo"
-                      className="
-w-full
-h-full
-object-cover
-"
-                    />
-                  ) : (
-                    <HiBuildingOffice2 size={50} className="text-[#17191D]" />
-                  )}
-                </div>
-
-                {editing && (
-                  <label
-                    className="
-block
-mt-3
-cursor-pointer
-text-center
-bg-[#24272D]
-text-gray-300
-px-4
-py-2
-rounded-xl
-text-sm
-border
-border-white/10
-"
-                  >
-                    Change Logo
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleLogoChange}
-                      className="hidden"
-                    />
-                  </label>
-                )}
-              </div>
-              <div>
-                <h1
-                  className="
-          text-2xl
-          sm:text-3xl
-          font-bold
-          text-white
-          "
-                >
-                  {company.companyName}
-                </h1>
-
-                <p
-                  className="
-          text-gray-400
-          mt-2
-          "
-                >
-                  {company.industry}
-                </p>
-
-                <div
-                  className="
-          flex
-          items-center
-          gap-2
-          mt-3
-          text-sm
-          text-gray-300
-          "
-                >
-                  <HiGlobeAlt className="text-[#D4A017]" />
-
-                  {company.website || "No website"}
-                </div>
-
-                {/* STATUS */}
-
-                <div
-                  className={`
-          inline-flex
-          items-center
-          gap-2
-          mt-4
-          px-4
-          py-2
-          rounded-full
-          border
-          text-sm
-          font-semibold
-          capitalize
-
-          ${currentStatus.bg}
-
-          ${currentStatus.border}
-
-          ${currentStatus.text}
-
-          `}
-                >
-                  <HiCheckBadge size={18} />
-
-                  {company.status}
-                </div>
-              </div>
-            </div>
-
-            {!editing && (
-              <button
-                onClick={() => setEditing(true)}
-                className="
-        flex
-        items-center
-        justify-center
-        gap-2
-        bg-[#D4A017]
-        text-[#17191D]
-        px-6
-        py-3
-        rounded-xl
-        font-semibold
-        "
-              >
-                <HiPencilSquare />
-                Edit Profile
-              </button>
-            )}
-          </div>
-        </section>
-
-        {/* EDIT SECTION */}
-
-        {editing && (
-          <section
-            className="
-bg-[#1B1D22]
-border
-border-white/10
-rounded-3xl
-p-6
-sm:p-8
-space-y-5
+gap-5
 "
           >
-            <Input
-              label="Company Name"
-              name="companyName"
-              value={formData.companyName}
-              onChange={handleChange}
-            />
-
-            <Input
-              label="Industry"
-              name="industry"
-              value={formData.industry}
-              onChange={handleChange}
-            />
-
-            <Input
-              label="Website"
-              name="website"
-              value={formData.website}
-              onChange={handleChange}
-            />
+            {/* LOGO */}
 
             <div>
-              <label
-                className="
-text-gray-400
-text-sm
+              <label className="cursor-pointer">
+                {preview ? (
+                  <img
+                    src={preview}
+                    className="
+w-20
+h-20
+rounded-2xl
+object-cover
 "
-              >
-                Description
-              </label>
-
-              <textarea
-                name="description"
-                rows="5"
-                value={formData.description}
-                onChange={handleChange}
-                className="
-mt-2
-w-full
-bg-[#24272D]
-border
-border-white/10
-rounded-xl
-p-4
-text-white
-outline-none
-resize-none
-focus:border-[#D4A017]
-"
-              />
-            </div>
-
-            <div
-              className="
-flex
-flex-col
-sm:flex-row
-gap-4
-"
-            >
-              <button
-                onClick={handleUpdate}
-                disabled={saving}
-                className="
+                  />
+                ) : (
+                  <div
+                    className="
+w-20
+h-20
+rounded-2xl
+bg-[#D4A017]
 flex
 items-center
 justify-center
+text-black
+"
+                  >
+                    <HiBuildingOffice2 size={40} />
+                  </div>
+                )}
+
+                {edit && (
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogo}
+                    className="hidden"
+                    id="logo"
+                  />
+                )}
+              </label>
+
+              {edit && (
+                <label
+                  htmlFor="logo"
+                  className="
+text-xs
+text-[#D4A017]
+cursor-pointer
+"
+                >
+                  Change Logo
+                </label>
+              )}
+            </div>
+
+            <div>
+              <h2
+                className="
+text-2xl
+font-bold
+text-white
+flex
+items-center
+gap-2
+"
+              >
+                {company?.companyName}
+
+                <HiCheckBadge className="text-[#D4A017]" />
+              </h2>
+
+              <p className="text-gray-300">{company?.industry}</p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setEdit(!edit)}
+            className="
+flex
+items-center
 gap-2
 bg-[#D4A017]
-text-[#17191D]
-px-6
+text-black
+px-5
 py-3
 rounded-xl
 font-semibold
 "
-              >
-                <HiCheck />
+          >
+            <HiPencilSquare />
 
-                {saving ? "Saving..." : "Save Changes"}
-              </button>
+            {edit ? "Cancel" : "Edit Profile"}
+          </button>
+        </div>
+      </div>
 
-              <button
-                onClick={() => setEditing(false)}
+      {/* INFORMATION */}
+
+      <div
+        className="
+bg-[#393E46]
+rounded-3xl
+p-6
+md:p-8
+border
+border-white/10
+"
+      >
+        {edit ? (
+          <div className="space-y-5">
+            {[
+              ["companyName", "Company Name"],
+
+              ["industry", "Industry"],
+
+              ["website", "Website"],
+
+              ["location", "Location"],
+            ].map(([name, label]) => (
+              <input
+                key={name}
+                name={name}
+                value={formData[name]}
+                onChange={handleChange}
+                placeholder={label}
                 className="
-flex
-items-center
-justify-center
-gap-2
-bg-[#353941]
+w-full
+bg-[#222831]
 text-white
-px-6
+px-4
 py-3
 rounded-xl
 "
-              >
-                <HiXMark />
-                Cancel
-              </button>
-            </div>
-          </section>
-        )}
+              />
+            ))}
 
-        {/* DETAILS */}
-
-        {!editing && (
-          <section
-            className="
-bg-[#1B1D22]
-border
-border-white/10
-rounded-3xl
-p-6
-sm:p-8
-"
-          >
-            <h2
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              placeholder="Description"
               className="
-text-xl
-font-bold
+w-full
+h-32
+bg-[#222831]
 text-white
-mb-6
+px-4
+py-3
+rounded-xl
+"
+            />
+
+            <button
+              onClick={handleUpdate}
+              className="
+bg-[#D4A017]
+text-black
+px-6
+py-3
+rounded-xl
+font-bold
 "
             >
-              Company Details
-            </h2>
-
-            <div
-              className="
+              Save Changes
+            </button>
+          </div>
+        ) : (
+          <div
+            className="
 grid
-grid-cols-1
 md:grid-cols-2
 gap-6
 "
-            >
-              <Info title="Industry" value={company.industry} />
+          >
+            <Info
+              icon={<HiBuildingOffice2 />}
+              title="Company"
+              value={company?.companyName}
+            />
 
-              <Info title="Website" value={company.website || "Not added"} />
-            </div>
+            <Info
+              icon={<HiGlobeAlt />}
+              title="Website"
+              value={company?.website}
+            />
 
-            <div className="mt-6">
-              <Info
-                title="Description"
-                value={company.description || "No description added"}
-              />
-            </div>
-          </section>
+            <Info
+              icon={<HiMapPin />}
+              title="Location"
+              value={company?.location}
+            />
+
+            <Info
+              icon={<HiBuildingOffice2 />}
+              title="Industry"
+              value={company?.industry}
+            />
+          </div>
         )}
       </div>
-    </CompanyDashboardLayout>
-  );
-}
 
-function Input({
-  label,
+      {/* DESCRIPTION */}
 
-  name,
-
-  value,
-
-  onChange,
-}) {
-  return (
-    <div>
-      <label
+      <div
         className="
-text-gray-400
-text-sm
-"
-      >
-        {label}
-      </label>
-
-      <input
-        name={name}
-        value={value}
-        onChange={onChange}
-        className="
-mt-2
-w-full
-bg-[#24272D]
+bg-[#393E46]
+rounded-3xl
+p-6
+md:p-8
 border
 border-white/10
-rounded-xl
-p-4
-text-white
-outline-none
-focus:border-[#D4A017]
 "
-      />
+      >
+        <h3
+          className="
+text-xl
+font-bold
+text-white
+mb-3
+"
+        >
+          About Company
+        </h3>
+
+        <p className="text-gray-300 leading-7">
+          {company?.description || "No description added yet."}
+        </p>
+      </div>
     </div>
   );
 }
 
-function Info({
-  title,
-
-  value,
-}) {
+function Info({ icon, title, value }) {
   return (
-    <div>
-      <p
-        className="
-text-gray-400
-text-sm
-"
-      >
-        {title}
-      </p>
+    <div className="flex gap-3 items-center">
+      <div className="text-[#D4A017]">{icon}</div>
 
-      <p
-        className="
-text-white
-mt-2
-wrap-break-words
-"
-      >
-        {value}
-      </p>
+      <div>
+        <p className="text-gray-400 text-sm">{title}</p>
+
+        <p className="text-white font-semibold">{value || "Not Added"}</p>
+      </div>
     </div>
   );
 }

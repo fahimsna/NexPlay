@@ -1,41 +1,79 @@
 import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import axios from "../../api/axiosInstance";
 
 function Register() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
-    name: "",
+    fullName: "",
+    username: "",
     email: "",
     password: "",
     role: "user",
+    companyName: "",
   });
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log(formData);
+    try {
+      const response = await axios.post("/api/auth/register", formData);
+
+      const data = response.data;
+
+      // Save authentication
+      localStorage.setItem("token", data.token);
+
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      alert("Registration successful");
+
+      if (data.user.role === "company") {
+        navigate("/company");
+      } else {
+        navigate("/");
+      }
+    } catch (error) {
+      console.log(error.response?.data || error.message);
+
+      alert(error.response?.data?.message || "Registration failed");
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
-        <h1 className="text-3xl font-bold text-center mb-6">Create Account</h1>
+    <div className="min-h-screen flex items-center justify-center bg-[#222831]">
+      <div className="w-full max-w-md bg-[#393E46] p-8 rounded-2xl">
+        <h1 className="text-3xl font-bold text-white text-center mb-6">
+          Create Account
+        </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
-            name="name"
+            name="fullName"
             placeholder="Full Name"
-            value={formData.name}
+            value={formData.fullName}
             onChange={handleChange}
-            className="w-full border rounded-lg px-4 py-3"
             required
+            className="w-full px-4 py-3 rounded-xl bg-white/10 text-white outline-none"
+          />
+
+          <input
+            type="text"
+            name="username"
+            placeholder="Username"
+            value={formData.username}
+            onChange={handleChange}
+            required
+            className="w-full px-4 py-3 rounded-xl bg-white/10 text-white outline-none"
           />
 
           <input
@@ -44,8 +82,8 @@ function Register() {
             placeholder="Email"
             value={formData.email}
             onChange={handleChange}
-            className="w-full border rounded-lg px-4 py-3"
             required
+            className="w-full px-4 py-3 rounded-xl bg-white/10 text-white outline-none"
           />
 
           <input
@@ -54,28 +92,47 @@ function Register() {
             placeholder="Password"
             value={formData.password}
             onChange={handleChange}
-            className="w-full border rounded-lg px-4 py-3"
             required
+            className="w-full px-4 py-3 rounded-xl bg-white/10 text-white outline-none"
           />
 
           <select
             name="role"
             value={formData.role}
             onChange={handleChange}
-            className="w-full border rounded-lg px-4 py-3"
+            className="w-full px-4 py-3 rounded-xl bg-white text-black"
           >
-            <option value="user">User</option>
+            <option value="user">Normal User</option>
 
-            <option value="company">Company</option>
+            <option value="company">Entertainment Company</option>
           </select>
+
+          {formData.role === "company" && (
+            <input
+              type="text"
+              name="companyName"
+              placeholder="Company Name"
+              value={formData.companyName}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-3 rounded-xl bg-white/10 text-white outline-none"
+            />
+          )}
 
           <button
             type="submit"
-            className="w-full bg-black text-white py-3 rounded-lg hover:opacity-90"
+            className="w-full bg-[#D4A017] text-black font-bold py-3 rounded-xl hover:opacity-90"
           >
             Register
           </button>
         </form>
+
+        <p className="text-center text-gray-300 mt-6">
+          Already have an account?
+          <Link to="/login" className="text-[#D4A017] ml-2 font-semibold">
+            Login
+          </Link>
+        </p>
       </div>
     </div>
   );

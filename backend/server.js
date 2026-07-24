@@ -1,34 +1,11 @@
-const express = require("express");
 const dotenv = require("dotenv");
-const cors = require("cors");
-
-const connectDB = require("./config/db");
-
 dotenv.config();
 
-const app = express();
+const connectDB = require("./config/db");
+const app = require("./app");
 
 // Connect Database
 connectDB();
-
-// Middleware
-app.use(cors());
-app.use(express.json());
-
-// Serve uploaded images
-app.use("/uploads", express.static("uploads"));
-
-// Routes
-const companyRoutes = require("./routes/companyRoutes");
-
-app.use("/api/company", companyRoutes);
-
-// Test Route
-app.get("/", (req, res) => {
-  res.json({
-    message: "Server is running successfully!",
-  });
-});
 
 // Start Server
 const PORT = process.env.PORT || 8000;

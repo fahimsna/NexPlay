@@ -2,16 +2,16 @@ const mongoose = require("mongoose");
 
 const companySchema = new mongoose.Schema(
   {
-    // Will be required after authentication is implemented
     ownerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: false,
+      required: true,
     },
 
     companyName: {
       type: String,
-      required: true,
+      required: [true, "Company name is required"],
+      trim: true,
     },
 
     logo: {
@@ -34,7 +34,11 @@ const companySchema = new mongoose.Schema(
       default: "Entertainment",
     },
 
-    // Admin Verification
+    location: {
+      type: String,
+      default: "",
+    },
+
     status: {
       type: String,
       enum: ["pending", "approved", "rejected"],

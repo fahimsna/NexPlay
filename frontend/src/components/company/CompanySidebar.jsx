@@ -1,137 +1,203 @@
-import { NavLink } from "react-router-dom";
-import { FiHome, FiUser, FiLogOut, FiX } from "react-icons/fi";
+import { NavLink, useNavigate } from "react-router-dom";
+
+import {
+  HiHome,
+  HiBuildingOffice2,
+  HiMegaphone,
+  HiRocketLaunch,
+  HiChartBar,
+  HiFilm,
+  HiCog6Tooth,
+  HiArrowRightOnRectangle,
+  HiXMark,
+} from "react-icons/hi2";
+
+import useAuth from "../../hooks/useAuth";
 
 function CompanySidebar({ open, setOpen }) {
-  const links = [
+  const navigate = useNavigate();
+
+  const { logout } = useAuth();
+
+  const menu = [
     {
       name: "Dashboard",
       path: "/company",
-      icon: <FiHome />,
+      icon: HiHome,
+      exact: true,
     },
-
     {
-      name: "Company Profile",
+      name: "Profile",
       path: "/company/profile",
-      icon: <FiUser />,
+      icon: HiBuildingOffice2,
+    },
+    {
+      name: "Advertisements",
+      path: "/company/advertisements",
+      icon: HiMegaphone,
+    },
+    {
+      name: "Campaigns",
+      path: "/company/campaigns",
+      icon: HiRocketLaunch,
+    },
+    {
+      name: "Upcoming Content",
+      path: "/company/content",
+      icon: HiFilm,
+    },
+    {
+      name: "Analytics",
+      path: "/company/analytics",
+      icon: HiChartBar,
+    },
+    {
+      name: "Settings",
+      path: "/company/settings",
+      icon: HiCog6Tooth,
     },
   ];
 
+  const handleLogout = () => {
+    logout();
+
+    navigate("/login");
+  };
+
   return (
-    <>
-      {/* Overlay Mobile */}
+    <aside
+      className={`
+      fixed
+      top-0
+      left-0
+      z-40
+      h-screen
+      w-64
 
-      {open && (
-        <div
-          onClick={() => setOpen(false)}
-          className="
-            fixed
-            inset-0
-            bg-black/40
-            z-40
-            md:hidden
-            "
-        />
-      )}
+      bg-[#222831]
+      border-r
+      border-white/10
 
-      <aside
-        className={`
-        
-        fixed
-        md:static
-        z-50
-        
-        top-0
-        left-0
-        
-        h-screen
-        w-64
-        
-        bg-white
-        border-r
-        
-        p-5
-        
-        transform
-        
-        transition-transform
-        
-        duration-300
-        
-        ${open ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+      transition-transform
+      duration-300
 
-        `}
+      ${open ? "translate-x-0" : "-translate-x-full"}
+
+      md:translate-x-0
+      `}
+    >
+      {/* Logo */}
+
+      <div
+        className="
+        h-20
+        flex
+        items-center
+        justify-between
+        px-6
+        border-b
+        border-white/10
+        "
       >
-        {/* Mobile Close */}
-
-        <button
-          onClick={() => setOpen(false)}
-          className="
-          md:hidden
-          absolute
-          right-4
-          top-4
-          "
-        >
-          <FiX size={22} />
-        </button>
-
         <h1
           className="
-          text-2xl
-          font-bold
-          text-purple-600
-          mb-10
-          "
+        text-2xl
+        font-black
+        text-[#D4A017]
+        "
         >
           NexPlay
         </h1>
 
-        <nav className="space-y-3">
-          {links.map((link) => (
+        <button onClick={() => setOpen(false)} className="md:hidden text-white">
+          <HiXMark size={26} />
+        </button>
+      </div>
+
+      {/* Navigation */}
+
+      <nav
+        className="
+      p-4
+      space-y-2
+      "
+      >
+        {menu.map((item) => {
+          const Icon = item.icon;
+
+          return (
             <NavLink
-              key={link.path}
-              to={link.path}
+              key={item.path}
+              to={item.path}
+              end={item.exact}
               onClick={() => setOpen(false)}
               className={({ isActive }) =>
                 `
-                  flex
-                  items-center
-                  gap-3
-                  px-4
-                  py-3
-                  rounded-lg
-                  transition
+              flex
+              items-center
+              gap-3
 
-                  ${
-                    isActive
-                      ? "bg-purple-600 text-white"
-                      : "hover:bg-gray-100 text-gray-700"
-                  }
+              px-4
+              py-3
 
-                  `
+              rounded-xl
+
+              transition-all
+
+              ${
+                isActive
+                  ? "bg-[#D4A017] text-black font-semibold"
+                  : "text-[#EEEEEE] hover:bg-[#393E46]"
+              }
+
+              `
               }
             >
-              {link.icon}
+              <Icon size={22} />
 
-              {link.name}
+              <span>{item.name}</span>
             </NavLink>
-          ))}
-        </nav>
+          );
+        })}
+      </nav>
 
+      {/* Logout */}
+
+      <div
+        className="
+        absolute
+        bottom-6
+        left-4
+        right-4
+        "
+      >
         <button
+          onClick={handleLogout}
           className="
+          w-full
+
           flex
           items-center
           gap-3
-          mt-10
-          text-red-500
+
+          px-4
+          py-3
+
+          rounded-xl
+
+          text-[#EEEEEE]
+
+          hover:bg-red-500/20
+
+          transition
+
           "
         >
-          <FiLogOut />
+          <HiArrowRightOnRectangle size={22} />
           Logout
         </button>
-      </aside>
-    </>
+      </div>
+    </aside>
   );
 }
 

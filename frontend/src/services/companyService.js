@@ -1,40 +1,24 @@
 import axios from "../api/axiosInstance";
 
-// Create Company
-export const createCompany = async (companyData) => {
-  const response = await axios.post("/company", companyData);
+const API = "/api/company";
 
-  return response.data;
+// GET COMPANY PROFILE
+export const getMyCompany = async () => {
+  const res = await axios.get(`${API}/profile`);
+
+  return res.data.company;
 };
 
-// Get All Companies
-export const getCompanies = async () => {
-  const response = await axios.get("/company");
+// CREATE COMPANY PROFILE
+export const createMyCompany = async (data) => {
+  const res = await axios.post(`${API}/profile`, data);
 
-  return response.data;
+  return res.data.company;
 };
 
-// Get Single Company
-export const getCompany = async (id) => {
-  const response = await axios.get(`/company/${id}`);
+// UPDATE COMPANY PROFILE
+export const updateMyCompany = async (data) => {
+  const res = await axios.put(`${API}/profile`, data);
 
-  return response.data;
-};
-
-// Update Company
-export const updateCompany = async (id, companyData) => {
-  const response = await axios.put(`/company/${id}`, companyData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-
-  return response.data;
-};
-
-// Delete Company
-export const deleteCompany = async (id) => {
-  const response = await axios.delete(`/company/${id}`);
-
-  return response.data;
+  return res.data.company;
 };
