@@ -24,6 +24,7 @@ import CompanyDashboardLayout from "../layouts/CompanyDashboardLayout";
 import PublicLayout from "../layouts/PublicLayout";
 
 import ProtectedRoute from "./ProtectedRoute";
+import CompanyUpcomingContent from "../pages/company/CompanyUpcomingContent";
 
 function AppRoutes() {
   return (
@@ -76,6 +77,7 @@ function AppRoutes() {
 
         <Route path="analytics" element={<CompanyAnalytics />} />
         <Route path="settings" element={<CompanySettings />} />
+        <Route path="content" element={<CompanyUpcomingContent />} />
       </Route>
     </Routes>
   );
