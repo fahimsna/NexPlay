@@ -2,48 +2,38 @@ const express = require("express");
 
 const router = express.Router();
 
-const {
-  getMyUpcomingContent,
-
-  addUpcomingContent,
-
-  updateUpcomingContent,
-
-  deleteUpcomingContent,
-} = require("../controllers/upcomingController");
-
 const authMiddleware = require("../middleware/authMiddleware");
 
 const roleMiddleware = require("../middleware/roleMiddleware");
 
-const { ROLES } = require("../config/roles");
+const ROLES = require("../config/roles");
 
-router.get(
-  "/",
-  authMiddleware,
-  roleMiddleware(ROLES.COMPANY),
-  getMyUpcomingContent,
-);
+const {
+  createUpcoming,
 
-router.post(
-  "/",
-  authMiddleware,
-  roleMiddleware(ROLES.COMPANY),
-  addUpcomingContent,
-);
+  getUpcoming,
+
+  updateUpcoming,
+
+  deleteUpcoming,
+} = require("../controllers/upcomingController");
+
+router.get("/", getUpcoming);
+
+router.post("/", authMiddleware, roleMiddleware(ROLES.COMPANY), createUpcoming);
 
 router.put(
   "/:id",
   authMiddleware,
   roleMiddleware(ROLES.COMPANY),
-  updateUpcomingContent,
+  updateUpcoming,
 );
 
 router.delete(
   "/:id",
   authMiddleware,
   roleMiddleware(ROLES.COMPANY),
-  deleteUpcomingContent,
+  deleteUpcoming,
 );
 
 module.exports = router;

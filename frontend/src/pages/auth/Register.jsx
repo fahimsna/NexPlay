@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+
 import axios from "../../api/axiosInstance";
 
 function Register() {
@@ -14,6 +15,8 @@ function Register() {
     companyName: "",
   });
 
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -25,11 +28,12 @@ function Register() {
     e.preventDefault();
 
     try {
-      const response = await axios.post("/api/auth/register", formData);
+      setLoading(true);
+
+      const response = await axios.post("/auth/register", formData);
 
       const data = response.data;
 
-      // Save authentication
       localStorage.setItem("token", data.token);
 
       localStorage.setItem("user", JSON.stringify(data.user));
@@ -38,6 +42,8 @@ function Register() {
 
       if (data.user.role === "company") {
         navigate("/company");
+      } else if (data.user.role === "admin") {
+        navigate("/admin");
       } else {
         navigate("/");
       }
@@ -45,13 +51,42 @@ function Register() {
       console.log(error.response?.data || error.message);
 
       alert(error.response?.data?.message || "Registration failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#222831]">
-      <div className="w-full max-w-md bg-[#393E46] p-8 rounded-2xl">
-        <h1 className="text-3xl font-bold text-white text-center mb-6">
+    <div
+      className="
+      min-h-screen
+      flex
+      items-center
+      justify-center
+      bg-[#222831]
+      px-4
+      "
+    >
+      <div
+        className="
+        w-full
+        max-w-md
+        bg-[#393E46]
+        rounded-3xl
+        p-8
+        border
+        border-white/10
+        "
+      >
+        <h1
+          className="
+          text-3xl
+          font-bold
+          text-white
+          text-center
+          mb-6
+          "
+        >
           Create Account
         </h1>
 
@@ -63,7 +98,16 @@ function Register() {
             value={formData.fullName}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 rounded-xl bg-white/10 text-white outline-none"
+            className="
+            w-full
+            px-4
+            py-3
+            rounded-xl
+            bg-white/10
+            text-white
+            placeholder-gray-400
+            outline-none
+            "
           />
 
           <input
@@ -73,7 +117,16 @@ function Register() {
             value={formData.username}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 rounded-xl bg-white/10 text-white outline-none"
+            className="
+            w-full
+            px-4
+            py-3
+            rounded-xl
+            bg-white/10
+            text-white
+            placeholder-gray-400
+            outline-none
+            "
           />
 
           <input
@@ -83,7 +136,16 @@ function Register() {
             value={formData.email}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 rounded-xl bg-white/10 text-white outline-none"
+            className="
+            w-full
+            px-4
+            py-3
+            rounded-xl
+            bg-white/10
+            text-white
+            placeholder-gray-400
+            outline-none
+            "
           />
 
           <input
@@ -93,14 +155,30 @@ function Register() {
             value={formData.password}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 rounded-xl bg-white/10 text-white outline-none"
+            className="
+            w-full
+            px-4
+            py-3
+            rounded-xl
+            bg-white/10
+            text-white
+            placeholder-gray-400
+            outline-none
+            "
           />
 
           <select
             name="role"
             value={formData.role}
             onChange={handleChange}
-            className="w-full px-4 py-3 rounded-xl bg-white text-black"
+            className="
+            w-full
+            px-4
+            py-3
+            rounded-xl
+            bg-white
+            text-black
+            "
           >
             <option value="user">Normal User</option>
 
@@ -115,21 +193,53 @@ function Register() {
               value={formData.companyName}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 rounded-xl bg-white/10 text-white outline-none"
+              className="
+                w-full
+                px-4
+                py-3
+                rounded-xl
+                bg-white/10
+                text-white
+                placeholder-gray-400
+                outline-none
+                "
             />
           )}
 
           <button
             type="submit"
-            className="w-full bg-[#D4A017] text-black font-bold py-3 rounded-xl hover:opacity-90"
+            disabled={loading}
+            className="
+            w-full
+            bg-[#D4A017]
+            text-black
+            font-bold
+            py-3
+            rounded-xl
+            hover:opacity-90
+            transition
+            "
           >
-            Register
+            {loading ? "Creating Account..." : "Register"}
           </button>
         </form>
 
-        <p className="text-center text-gray-300 mt-6">
+        <p
+          className="
+          text-center
+          text-gray-300
+          mt-6
+          "
+        >
           Already have an account?
-          <Link to="/login" className="text-[#D4A017] ml-2 font-semibold">
+          <Link
+            to="/login"
+            className="
+            text-[#D4A017]
+            ml-2
+            font-semibold
+            "
+          >
             Login
           </Link>
         </p>

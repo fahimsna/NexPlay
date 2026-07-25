@@ -2,9 +2,14 @@ import axios from "axios";
 
 const axiosInstance = axios.create({
   baseURL: "http://localhost:8000/api",
+
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
-// Attach JWT token automatically
+// ADD TOKEN AUTOMATICALLY
+
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -21,16 +26,18 @@ axiosInstance.interceptors.request.use(
   },
 );
 
-// Handle unauthorized
+// HANDLE ERRORS
+
 axiosInstance.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    return response;
+  },
 
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem("token");
-      localStorage.removeItem("user");
 
-      window.location.href = "/login";
+      localStorage.removeItem("user");
     }
 
     return Promise.reject(error);

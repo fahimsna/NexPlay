@@ -1,31 +1,33 @@
 import axios from "../api/axiosInstance";
 
-const AUTH_API = "/auth";
+// REGISTER
+
+export const registerService = async (data) => {
+  const response = await axios.post("/auth/register", data);
+
+  return response.data;
+};
 
 // LOGIN
-export const loginService = async (credentials) => {
-  const response = await axios.post(`${AUTH_API}/login`, credentials);
+
+export const loginService = async (data) => {
+  const response = await axios.post("/auth/login", data);
 
   return response.data;
 };
 
-// REGISTER
-export const registerService = async (userData) => {
-  const response = await axios.post(`${AUTH_API}/register`, userData);
+// GET CURRENT USER
 
-  return response.data;
-};
-
-// CURRENT USER
-export const getCurrentUserService = async () => {
-  const response = await axios.get(`${AUTH_API}/me`);
+export const getMeService = async () => {
+  const response = await axios.get("/auth/me");
 
   return response.data;
 };
 
 // LOGOUT
-export const logoutService = async () => {
-  const response = await axios.post(`${AUTH_API}/logout`);
 
-  return response.data;
+export const logoutService = () => {
+  localStorage.removeItem("token");
+
+  localStorage.removeItem("user");
 };

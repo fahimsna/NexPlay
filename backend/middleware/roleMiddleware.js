@@ -1,4 +1,4 @@
-const roleMiddleware = (allowedRole) => {
+const roleMiddleware = (...roles) => {
   return (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({
@@ -6,9 +6,9 @@ const roleMiddleware = (allowedRole) => {
       });
     }
 
-    if (req.user.role !== allowedRole) {
+    if (!roles.includes(req.user.role)) {
       return res.status(403).json({
-        message: "Forbidden",
+        message: "Access denied",
       });
     }
 
