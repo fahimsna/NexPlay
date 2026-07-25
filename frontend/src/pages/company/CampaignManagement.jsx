@@ -1,367 +1,547 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
-import CompanyDashboardLayout from "../../layouts/CompanyDashboardLayout";
-import "./CampaignManagement.css";
 
-const STORAGE_KEY = "nexplayCampaigns";
+import { HiPlus, HiPencilSquare, HiTrash } from "react-icons/hi2";
 
-function getSavedCampaigns() {
-  try {
-    const savedCampaigns = localStorage.getItem(STORAGE_KEY);
+import toast from "react-hot-toast";
 
-    if (savedCampaigns) {
-      const parsedCampaigns = JSON.parse(savedCampaigns);
-      return Array.isArray(parsedCampaigns) ? parsedCampaigns : [];
-    }
-  } catch (error) {
-    console.error("Could not read saved campaigns:", error);
-  }
-
-  return [];
-}
+import {
+  getMyCampaigns,
+  createCampaign,
+  updateCampaign,
+  deleteCampaign,
+} from "../../services/campaignService";
 
 function CampaignManagement() {
-  const location = useLocation();
+  const [campaigns, setCampaigns] = useState([]);
 
-  const isManagementPage = location.pathname === "/company/campaigns";
+  const [loading, setLoading] = useState(true);
 
-  const [campaigns, setCampaigns] = useState(getSavedCampaigns);
+  const [saving, setSaving] = useState(false);
+
   const [showForm, setShowForm] = useState(false);
+
   const [editingId, setEditingId] = useState(null);
 
   const [formData, setFormData] = useState({
     name: "",
+
     description: "",
+
     startDate: "",
+
     endDate: "",
+
     budget: "",
-    audience: "All Users",
+
+    targetAudience: "All Users",
+
     status: "Draft",
   });
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(campaigns));
+    fetchCampaigns();
+  }, []);
 
-    window.dispatchEvent(new Event("dashboardDataChanged"));
-  }, [campaigns]);
+  const fetchCampaigns = async () => {
+    try {
+      setLoading(true);
 
-  const handleInputChange = (event) => {
-    const { name, value } = event.target;
+      const data = await getMyCampaigns();
 
-    setFormData((previousData) => ({
-      ...previousData,
-      [name]: value,
-    }));
+      setCampaigns(data);
+    } catch (error) {
+      console.log(error);
+
+      toast.error("Failed to load campaigns");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+
+      [e.target.name]: e.target.value,
+    });
   };
 
   const resetForm = () => {
     setFormData({
       name: "",
+
       description: "",
+
       startDate: "",
+
       endDate: "",
+
       budget: "",
-      audience: "All Users",
+
+      targetAudience: "All Users",
+
       status: "Draft",
     });
 
     setEditingId(null);
+
     setShowForm(false);
   };
 
-  const openCreateForm = () => {
-    resetForm();
-    setShowForm(true);
-  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const saveCampaign = (event) => {
-    event.preventDefault();
+    try {
+      setSaving(true);
 
-    if (editingId !== null) {
-      setCampaigns((previousCampaigns) =>
-        previousCampaigns.map((campaign) =>
-          campaign.id === editingId
-            ? {
-                ...campaign,
-                ...formData,
-              }
-            : campaign,
-        ),
-      );
-    } else {
-      const newCampaign = {
-        id: Date.now(),
-        ...formData,
-      };
+      if (editingId) {
+        await updateCampaign(editingId, formData);
 
-      setCampaigns((previousCampaigns) => [...previousCampaigns, newCampaign]);
+        toast.success("Campaign updated");
+      } else {
+        await createCampaign(formData);
+
+        toast.success("Campaign created");
+      }
+
+      resetForm();
+
+      fetchCampaigns();
+    } catch (error) {
+      console.log(error);
+
+      toast.error(error.response?.data?.message || "Something went wrong");
+    } finally {
+      setSaving(false);
     }
-
-    resetForm();
   };
 
   const editCampaign = (campaign) => {
     setFormData({
       name: campaign.name,
+
       description: campaign.description,
-      startDate: campaign.startDate,
-      endDate: campaign.endDate,
+
+      startDate: campaign.startDate?.slice(0, 10),
+
+      endDate: campaign.endDate?.slice(0, 10),
+
       budget: campaign.budget,
-      audience: campaign.audience,
+
+      targetAudience: campaign.targetAudience,
+
       status: campaign.status,
     });
 
-    setEditingId(campaign.id);
+    setEditingId(campaign._id);
+
     setShowForm(true);
   };
 
-  const deleteCampaign = (id) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this campaign?",
-    );
+  const removeCampaign = async (id) => {
+    try {
+      await deleteCampaign(id);
 
-    if (!confirmed) {
-      return;
-    }
+      toast.success("Campaign deleted");
 
-    setCampaigns((previousCampaigns) =>
-      previousCampaigns.filter((campaign) => campaign.id !== id),
-    );
+      fetchCampaigns();
+    } catch (error) {
+      console.log(error);
 
-    if (editingId === id) {
-      resetForm();
+      toast.error("Delete failed");
     }
   };
 
-  const changeCampaignStatus = (id, newStatus) => {
-    setCampaigns((previousCampaigns) =>
-      previousCampaigns.map((campaign) =>
-        campaign.id === id
-          ? {
-              ...campaign,
-              status: newStatus,
-            }
-          : campaign,
-      ),
+  if (loading) {
+    return (
+      <div
+        className="
+text-center
+text-white
+py-20
+"
+      >
+        Loading campaigns...
+      </div>
     );
-  };
+  }
 
   return (
-    <CompanyDashboardLayout>
-      <div className="campaign-page">
-        <h1>Campaign Management</h1>
+    <div className="w-full">
+      {/* HEADER */}
 
-        {isManagementPage && (
-          <button
-            type="button"
-            className="create-campaign-button"
-            onClick={() => {
-              if (showForm) {
-                resetForm();
-              } else {
-                openCreateForm();
-              }
-            }}
+      <div
+        className="
+flex
+flex-col
+sm:flex-row
+sm:justify-between
+sm:items-center
+gap-5
+mb-8
+"
+      >
+        <div>
+          <h1
+            className="
+text-2xl
+sm:text-3xl
+font-bold
+text-white
+"
           >
-            {showForm ? "Close Form" : "Create New Campaign"}
-          </button>
-        )}
+            Campaign Management
+          </h1>
 
-        {showForm && (
-          <form className="campaign-form" onSubmit={saveCampaign}>
-            <h2>{editingId !== null ? "Edit Campaign" : "Create Campaign"}</h2>
+          <p
+            className="
+text-gray-400
+mt-2
+"
+          >
+            Create and manage marketing campaigns
+          </p>
+        </div>
 
-            <label htmlFor="name">Campaign Name</label>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="
+bg-[#D4A017]
+text-black
+px-5
+py-3
+rounded-xl
+font-bold
+flex
+items-center
+justify-center
+gap-2
+w-full
+sm:w-auto
+"
+        >
+          <HiPlus />
 
+          {showForm ? "Close" : "New Campaign"}
+        </button>
+      </div>
+
+      {/* FORM */}
+
+      {showForm && (
+        <form
+          onSubmit={handleSubmit}
+          className="
+bg-[#393E46]
+border
+border-white/10
+rounded-2xl
+p-5
+sm:p-6
+space-y-5
+mb-8
+"
+        >
+          <h2
+            className="
+text-xl
+font-bold
+text-white
+"
+          >
+            {editingId ? "Edit Campaign" : "Create Campaign"}
+          </h2>
+
+          <input
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="Campaign Name"
+            className="
+w-full
+p-3
+rounded-lg
+bg-white/10
+text-white
+outline-none
+"
+            required
+          />
+
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            placeholder="Description"
+            rows="4"
+            className="
+w-full
+p-3
+rounded-lg
+bg-white/10
+text-white
+outline-none
+"
+          />
+
+          <div
+            className="
+grid
+grid-cols-1
+sm:grid-cols-2
+gap-4
+"
+          >
             <input
-              id="name"
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              placeholder="Enter campaign name"
-              required
-            />
-
-            <label htmlFor="description">Description</label>
-
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              placeholder="Enter campaign description"
-              required
-            />
-
-            <label htmlFor="startDate">Start Date</label>
-
-            <input
-              id="startDate"
               type="date"
               name="startDate"
               value={formData.startDate}
-              onChange={handleInputChange}
-              required
+              onChange={handleChange}
+              className="
+p-3
+rounded-lg
+bg-white/10
+text-white
+"
             />
 
-            <label htmlFor="endDate">End Date</label>
-
             <input
-              id="endDate"
               type="date"
               name="endDate"
               value={formData.endDate}
-              onChange={handleInputChange}
-              required
+              onChange={handleChange}
+              className="
+p-3
+rounded-lg
+bg-white/10
+text-white
+"
             />
+          </div>
 
-            <label htmlFor="budget">Budget</label>
+          <input
+            type="number"
+            name="budget"
+            value={formData.budget}
+            onChange={handleChange}
+            placeholder="Budget"
+            className="
+w-full
+p-3
+rounded-lg
+bg-white/10
+text-white
+"
+          />
 
-            <input
-              id="budget"
-              type="number"
-              name="budget"
-              value={formData.budget}
-              onChange={handleInputChange}
-              placeholder="Enter budget"
-              min="0"
-              required
-            />
+          <select
+            name="targetAudience"
+            value={formData.targetAudience}
+            onChange={handleChange}
+            className="
+w-full
+p-3
+rounded-lg
+bg-white/10
+text-white
+"
+          >
+            <option>All Users</option>
 
-            <label htmlFor="audience">Target Audience</label>
+            <option>Movie Fans</option>
 
-            <select
-              id="audience"
-              name="audience"
-              value={formData.audience}
-              onChange={handleInputChange}
+            <option>Sports Fans</option>
+
+            <option>Anime Fans</option>
+          </select>
+
+          <select
+            name="status"
+            value={formData.status}
+            onChange={handleChange}
+            className="
+w-full
+p-3
+rounded-lg
+bg-white/10
+text-white
+"
+          >
+            <option>Draft</option>
+
+            <option>Active</option>
+
+            <option>Paused</option>
+
+            <option>Completed</option>
+          </select>
+
+          <div
+            className="
+flex
+flex-col
+sm:flex-row
+gap-3
+"
+          >
+            <button
+              disabled={saving}
+              className="
+bg-[#D4A017]
+text-black
+px-6
+py-3
+rounded-xl
+font-bold
+w-full
+sm:w-auto
+"
             >
-              <option value="All Users">All Users</option>
-
-              <option value="Movie Fans">Movie Fans</option>
-
-              <option value="Anime Fans">Anime Fans</option>
-
-              <option value="Sports Fans">Sports Fans</option>
-
-              <option value="Bangladesh Users">Bangladesh Users</option>
-            </select>
-
-            <label htmlFor="status">Status</label>
-
-            <select
-              id="status"
-              name="status"
-              value={formData.status}
-              onChange={handleInputChange}
-            >
-              <option value="Draft">Draft</option>
-
-              <option value="Scheduled">Scheduled</option>
-
-              <option value="Active">Active</option>
-
-              <option value="Paused">Paused</option>
-
-              <option value="Completed">Completed</option>
-
-              <option value="Ended">Ended</option>
-            </select>
-
-            <button type="submit" className="save-campaign-button">
-              {editingId !== null ? "Update Campaign" : "Save Campaign"}
+              {saving ? "Saving..." : "Save Campaign"}
             </button>
-          </form>
-        )}
 
-        <div className="campaign-list">
-          {campaigns.length === 0 ? (
-            <p>No campaigns created yet.</p>
-          ) : (
-            campaigns.map((campaign) => (
-              <div className="campaign-card" key={campaign.id}>
-                <h2>{campaign.name}</h2>
+            <button
+              type="button"
+              onClick={resetForm}
+              className="
+bg-gray-600
+text-white
+px-6
+py-3
+rounded-xl
+w-full
+sm:w-auto
+"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      )}
 
-                <p>{campaign.description}</p>
+      {/* LIST */}
 
-                <p>
-                  <strong>Start Date:</strong> {campaign.startDate}
-                </p>
-
-                <p>
-                  <strong>End Date:</strong> {campaign.endDate}
-                </p>
-
-                <p>
-                  <strong>Budget:</strong> ৳{campaign.budget}
-                </p>
-
-                <p>
-                  <strong>Target Audience:</strong> {campaign.audience}
-                </p>
-
-                <p>
-                  <strong>Status:</strong> {campaign.status}
-                </p>
-
-                <div className="campaign-action-buttons">
-                  {campaign.status !== "Active" && (
-                    <button
-                      type="button"
-                      className="campaign-edit-button"
-                      onClick={() =>
-                        changeCampaignStatus(campaign.id, "Active")
-                      }
-                    >
-                      Start
-                    </button>
-                  )}
-
-                  {campaign.status === "Active" && (
-                    <button
-                      type="button"
-                      className="campaign-edit-button"
-                      onClick={() =>
-                        changeCampaignStatus(campaign.id, "Paused")
-                      }
-                    >
-                      Pause
-                    </button>
-                  )}
-
-                  {campaign.status !== "Ended" && (
-                    <button
-                      type="button"
-                      className="campaign-delete-button"
-                      onClick={() => changeCampaignStatus(campaign.id, "Ended")}
-                    >
-                      End
-                    </button>
-                  )}
-
-                  <button
-                    type="button"
-                    className="campaign-edit-button"
-                    onClick={() => editCampaign(campaign)}
-                  >
-                    Edit
-                  </button>
-
-                  <button
-                    type="button"
-                    className="campaign-delete-button"
-                    onClick={() => deleteCampaign(campaign.id)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
+      {campaigns.length === 0 ? (
+        <div
+          className="
+text-center
+text-gray-400
+py-20
+"
+        >
+          No campaigns created yet.
         </div>
-      </div>
-    </CompanyDashboardLayout>
+      ) : (
+        <div
+          className="
+grid
+grid-cols-1
+sm:grid-cols-2
+xl:grid-cols-3
+gap-5
+"
+        >
+          {campaigns.map((campaign) => (
+            <div
+              key={campaign._id}
+              className="
+bg-[#393E46]
+border
+border-white/10
+rounded-2xl
+p-5
+"
+            >
+              <h2
+                className="
+text-xl
+font-bold
+text-white
+break-words
+"
+              >
+                {campaign.name}
+              </h2>
+
+              <p
+                className="
+text-gray-300
+mt-2
+text-sm
+"
+              >
+                {campaign.description}
+              </p>
+
+              <div
+                className="
+mt-4
+space-y-2
+text-sm
+text-gray-300
+"
+              >
+                <p>Start: {campaign.startDate?.slice(0, 10)}</p>
+
+                <p>End: {campaign.endDate?.slice(0, 10)}</p>
+
+                <p>Budget: ৳{campaign.budget}</p>
+
+                <p>Audience: {campaign.targetAudience}</p>
+
+                <p>Status: {campaign.status}</p>
+              </div>
+
+              <div
+                className="
+flex
+flex-col
+sm:flex-row
+gap-3
+mt-5
+"
+              >
+                <button
+                  onClick={() => editCampaign(campaign)}
+                  className="
+flex-1
+bg-blue-500
+text-white
+py-2
+rounded-xl
+flex
+justify-center
+items-center
+gap-2
+"
+                >
+                  <HiPencilSquare />
+                  Edit
+                </button>
+
+                <button
+                  onClick={() => removeCampaign(campaign._id)}
+                  className="
+flex-1
+bg-red-600
+text-white
+py-2
+rounded-xl
+flex
+justify-center
+items-center
+gap-2
+"
+                >
+                  <HiTrash />
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 

@@ -9,54 +9,46 @@ function CompanyDashboardLayout() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div
-      className="
-min-h-screen
-bg-[#111318]
-"
-    >
-      {/* Mobile button */}
-
+    <div className="min-h-screen bg-[#222831] text-white">
+      {/* Mobile Menu Button */}
       <button
         onClick={() => setOpen(true)}
         className="
-md:hidden
+          md:hidden
+          fixed
+          top-4
+          left-4
+          z-50
 
-fixed
-top-4
-left-4
+          bg-[#D4A017]
+          text-black
 
-z-50
+          p-3
+          rounded-xl
 
-bg-[#D4A017]
-text-black
-
-p-3
-
-rounded-xl
-
-"
+          shadow-lg
+        "
       >
-        <FiMenu size={22} />
+        <FiMenu size={24} />
       </button>
 
       {/* Sidebar */}
-
       <CompanySidebar open={open} setOpen={setOpen} />
 
-      {/* Main */}
-
+      {/* Main Content */}
       <main
         className="
-md:ml-64
+          md:ml-64
 
-min-h-screen
+          min-h-screen
 
-p-4
-sm:p-6
-lg:p-10
+          p-4
+          sm:p-6
+          lg:p-10
 
-"
+          pt-20
+          md:pt-10
+        "
       >
         <Outlet />
       </main>

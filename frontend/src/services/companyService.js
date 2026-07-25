@@ -1,24 +1,27 @@
 import axios from "../api/axiosInstance";
 
-const API = "/api/company";
 
-// GET COMPANY PROFILE
+const COMPANY_API = "/company";
+
+
+// GET MY COMPANY
 export const getMyCompany = async () => {
-  const res = await axios.get(`${API}/profile`);
 
-  return res.data.company;
+    const response = await axios.get(
+        `${COMPANY_API}/profile`
+    );
+
+    return response.data;
 };
 
-// CREATE COMPANY PROFILE
-export const createMyCompany = async (data) => {
-  const res = await axios.post(`${API}/profile`, data);
 
-  return res.data.company;
-};
-
-// UPDATE COMPANY PROFILE
+// UPDATE COMPANY
 export const updateMyCompany = async (data) => {
-  const res = await axios.put(`${API}/profile`, data);
 
-  return res.data.company;
+    const response = await axios.put(
+        `${COMPANY_API}/profile`,
+        data
+    );
+
+    return response.data;
 };
