@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const advertisementRoutes = require("./routes/advertisementRoutes");
 
 const app = express();
 
@@ -17,6 +18,7 @@ const testRoutes = require("./routes/testRoutes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/company", companyRoutes);
+app.use("/api/advertisements", advertisementRoutes);
 app.use("/api/test", testRoutes);
 
 // Root Test Route
