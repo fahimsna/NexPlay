@@ -3,6 +3,7 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const path = require("path");
+const analyticsRoutes = require("./routes/analyticsRoutes");
 
 // LOAD ENV
 dotenv.config();
@@ -92,3 +93,4 @@ const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+app.use("/api/analytics", analyticsRoutes);

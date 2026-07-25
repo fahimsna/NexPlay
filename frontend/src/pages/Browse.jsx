@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
+
 import EntertainmentCard from "../components/entertainment/EntertainmentCard";
+
+
 
 import {
   getTrendingMovies,
@@ -133,124 +136,79 @@ function Browse() {
   }
 
   return (
-    <section
-      className="
-      min-h-screen
-      bg-[#17191D]
-      text-white
-      pt-32
-      pb-20
-      "
-    >
-      <div
-        className="
-        max-w-7xl
-        mx-auto
-        px-4
-        sm:px-6
-        lg:px-8
-        "
-      >
-        {/* Header */}
+    <div className="min-h-screen bg-[#17191D] text-white">
+      {/* NAVBAR */}
 
-        <div
-          className="
-          text-center
-          max-w-3xl
-          mx-auto
-          "
-        >
+      
+
+      <section className="px-5 sm:px-8 lg:px-12 py-10">
+        {/* HEADER */}
+
+        <div className="text-center max-w-3xl mx-auto">
           <div
             className="
-            inline-flex
-            px-4
-            py-2
-            rounded-full
-            bg-white/5
-            border
-            border-white/10
-            text-[#D4A017]
-            text-xs
-            uppercase
-            tracking-[2px]
-            "
+inline-flex
+px-4
+py-2
+rounded-full
+bg-white/5
+border
+border-white/10
+text-[#D4A017]
+text-xs
+uppercase
+tracking-[2px]
+"
           >
             Discover
           </div>
 
           <h1
             className="
-            mt-6
-            text-4xl
-            sm:text-5xl
-            lg:text-6xl
-            font-black
-            leading-tight
-            tracking-tight
-            "
+mt-6
+text-4xl
+sm:text-5xl
+lg:text-6xl
+font-black
+leading-tight
+"
           >
             <span className="block">Explore</span>
 
-            <span
-              className="
-              block
-              text-[#D4A017]
-              mt-1
-              "
-            >
-              Entertainment
-            </span>
+            <span className="block text-[#D4A017] mt-1">Entertainment</span>
           </h1>
 
-          <p
-            className="
-            mt-4
-            max-w-xl
-            mx-auto
-            text-sm
-            sm:text-base
-            text-gray-400
-            leading-6
-            "
-          >
+          <p className="mt-4 text-gray-400">
             Browse movies and series from around the world.
           </p>
         </div>
 
-        {/* Tabs */}
+        {/* MOVIE / SERIES TAB */}
 
-        <div
-          className="
-          flex
-          justify-center
-          mt-10
-          "
-        >
+        <div className="flex justify-center mt-10">
           <div
             className="
-            flex
-            bg-[#24272D]
-            rounded-full
-            p-1
-            w-full
-            max-w-xs
-            "
+flex
+bg-[#24272D]
+rounded-full
+p-1
+w-full
+max-w-xs
+"
           >
             <button
               onClick={() => setContentType("movie")}
               className={`
-              flex-1
-              px-5
-              py-3
-              rounded-full
-              text-sm
-              transition
-              ${
-                contentType === "movie"
-                  ? "bg-[#D4A017] text-[#17191D]"
-                  : "text-gray-300"
-              }
-              `}
+flex-1
+px-5
+py-3
+rounded-full
+text-sm
+transition
+
+${contentType === "movie" ? "bg-[#D4A017] text-[#17191D]" : "text-gray-300"}
+
+`}
             >
               Movies
             </button>
@@ -258,79 +216,78 @@ function Browse() {
             <button
               onClick={() => setContentType("tv")}
               className={`
-              flex-1
-              px-5
-              py-3
-              rounded-full
-              text-sm
-              transition
-              ${
-                contentType === "tv"
-                  ? "bg-[#D4A017] text-[#17191D]"
-                  : "text-gray-300"
-              }
-              `}
+flex-1
+px-5
+py-3
+rounded-full
+text-sm
+transition
+
+${contentType === "tv" ? "bg-[#D4A017] text-[#17191D]" : "text-gray-300"}
+
+`}
             >
               Series
             </button>
           </div>
         </div>
 
-        {/* Search */}
+        {/* SEARCH */}
 
-        <div
-          className="
-          max-w-xl
-          mx-auto
-          mt-8
-          "
-        >
+        <div className="max-w-xl mx-auto mt-8">
           <input
             type="text"
             placeholder="Search movies..."
             value={search}
             onChange={handleSearch}
             className="
-            w-full
-            px-5
-            py-4
-            rounded-2xl
-            bg-[#24272D]
-            border
-            border-white/10
-            outline-none
-            focus:border-[#D4A017]
-            "
+w-full
+px-5
+py-4
+rounded-2xl
+bg-[#24272D]
+border
+border-white/10
+outline-none
+focus:border-[#D4A017]
+"
           />
         </div>
 
-        {/* Genres */}
+        {/* GENRES */}
 
         {contentType === "movie" && (
           <div
             className="
-              flex
-              flex-wrap
-              justify-center
-              gap-3
-              mt-8
-              "
+flex
+flex-wrap
+justify-center
+gap-3
+mt-8
+"
           >
             {genres.map((genre) => (
               <button
                 key={genre.id}
                 onClick={() => handleGenre(genre.id)}
                 className={`
-                    px-4
-                    py-2
-                    rounded-full
-                    text-sm
-                    ${
-                      selectedGenre === genre.id
-                        ? "bg-[#D4A017] text-[#17191D]"
-                        : "bg-[#24272D] text-gray-300"
-                    }
-                    `}
+
+px-4
+
+py-2
+
+rounded-full
+
+text-sm
+
+
+${
+  selectedGenre === genre.id
+    ? "bg-[#D4A017] text-[#17191D]"
+    : "bg-[#24272D] text-gray-300"
+}
+
+`}
               >
                 {genre.name}
               </button>
@@ -339,62 +296,48 @@ function Browse() {
         )}
 
         {loading ? (
-          <div
-            className="
-            text-center
-            mt-20
-            text-2xl
-            "
-          >
-            Loading...
-          </div>
+          <div className="text-center mt-20 text-2xl">Loading...</div>
         ) : (
           <>
             <div
               className="
-              grid
-              grid-cols-1
-              sm:grid-cols-2
-              lg:grid-cols-3
-              xl:grid-cols-4
-              gap-8
-              mt-14
-              "
+grid
+grid-cols--1
+sm:grid-cols-2
+lg:grid-cols-3
+xl:grid-cols-4
+gap-8
+mt-14
+"
             >
               {content.map((item) => (
                 <EntertainmentCard key={item.id} movie={item} />
               ))}
             </div>
 
-            <div
-              className="
-              flex
-              justify-center
-              mt-14
-              "
-            >
+            <div className="flex justify-center mt-14">
               <button
                 onClick={loadMore}
                 disabled={loadingMore}
                 className="
-                px-8
-                py-3
-                rounded-full
-                bg-[#D4A017]
-                text-[#17191D]
-                font-semibold
-                hover:scale-105
-                transition
-                disabled:opacity-50
-                "
+px-8
+py-3
+rounded-full
+bg-[#D4A017]
+text-[#17191D]
+font-semibold
+hover:scale-105
+transition
+disabled:opacity-50
+"
               >
                 {loadingMore ? "Loading..." : "Load More"}
               </button>
             </div>
           </>
         )}
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }
 

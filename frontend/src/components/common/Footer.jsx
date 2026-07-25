@@ -60,16 +60,15 @@ function Footer() {
       bg-[#17191D]
       border-t
       border-white/10
-      text-gray-300
+      mt-20
       "
     >
       <div
         className="
         max-w-7xl
         mx-auto
-        px-5
-        sm:px-8
-        py-14
+        px-6
+        py-12
         grid
         grid-cols-1
         sm:grid-cols-2
@@ -118,17 +117,13 @@ function Footer() {
             Explore
           </h3>
 
-          <ul
-            className="
-            space-y-3
-            text-sm
-            "
-          >
+          <ul className="space-y-3 text-sm">
             {exploreLinks.map((item) => (
               <li key={item.name}>
                 <Link
                   to={item.path}
                   className="
+                    text-gray-400
                     hover:text-[#D4A017]
                     transition
                     "
@@ -153,12 +148,7 @@ function Footer() {
             Platforms
           </h3>
 
-          <ul
-            className="
-            space-y-3
-            text-sm
-            "
-          >
+          <ul className="space-y-3 text-sm">
             {platforms.map((platform) => (
               <li key={platform.name}>
                 <a
@@ -166,6 +156,7 @@ function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="
+                    text-gray-400
                     hover:text-[#D4A017]
                     transition
                     "
@@ -190,17 +181,13 @@ function Footer() {
             More
           </h3>
 
-          <ul
-            className="
-            space-y-3
-            text-sm
-            "
-          >
+          <ul className="space-y-3 text-sm">
             {moreLinks.map((item) => (
               <li key={item.name}>
                 <Link
                   to={item.path}
                   className="
+                    text-gray-400
                     hover:text-[#D4A017]
                     transition
                     "
@@ -221,9 +208,7 @@ function Footer() {
         border-white/10
         py-5
         text-center
-        px-5
-        text-xs
-        sm:text-sm
+        text-sm
         text-gray-500
         "
       >

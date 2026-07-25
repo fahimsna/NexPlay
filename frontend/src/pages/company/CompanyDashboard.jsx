@@ -4,10 +4,8 @@ import {
   HiMegaphone,
   HiRectangleGroup,
   HiBuildingOffice2,
-  HiCheckBadge,
-  HiPlusCircle,
-  HiPencilSquare,
   HiChartBar,
+  HiCheckBadge,
 } from "react-icons/hi2";
 
 import { getDashboardStats } from "../../services/dashboardService";
@@ -34,11 +32,15 @@ function CompanyDashboard() {
   };
 
   if (!stats) {
-    return <div className="text-white text-xl">Loading Dashboard...</div>;
+    return <div className="text-white text-lg">Loading Dashboard...</div>;
   }
 
   return (
-    <div className="space-y-8">
+    <div
+      className="
+      space-y-8
+      "
+    >
       {/* HEADER */}
 
       <div>
@@ -50,161 +52,150 @@ function CompanyDashboard() {
           text-white
           "
         >
-          Welcome, {stats.company.companyName}
+          Welcome, {stats.company?.companyName}
         </h1>
 
-        <p className="text-gray-400 mt-2">
-          Manage your entertainment brand, advertisements and campaigns.
+        <p
+          className="
+          text-gray-400
+          mt-2
+          "
+        >
+          Manage your company activities and monitor performance
         </p>
       </div>
 
-      {/* COMPANY SUMMARY */}
+      {/* COMPANY STATUS */}
 
       <div
         className="
         bg-[#393E46]
-        rounded-3xl
-        p-6
         border
         border-white/10
+        rounded-3xl
+        p-6
         flex
         flex-col
-        md:flex-row
-        md:items-center
-        md:justify-between
+        sm:flex-row
+        sm:items-center
+        justify-between
         gap-5
         "
       >
-        <div className="flex items-center gap-5">
-          {stats.company.logo ? (
-            <img
-              src={`http://localhost:8000/uploads/${stats.company.logo}`}
-              className="
-              w-20
-              h-20
-              rounded-2xl
-              object-cover
-              "
-            />
-          ) : (
-            <div
-              className="
-              w-20
-              h-20
-              rounded-2xl
-              bg-[#222831]
-              flex
-              items-center
-              justify-center
-              "
-            >
-              <HiBuildingOffice2 className="text-[#D4A017]" size={40} />
-            </div>
-          )}
+        <div>
+          <h2
+            className="
+            text-xl
+            font-bold
+            text-white
+            "
+          >
+            Company Status
+          </h2>
 
-          <div>
-            <h2
-              className="
-              text-2xl
-              text-white
-              font-bold
-              flex
-              items-center
-              gap-2
-              "
-            >
-              {stats.company.companyName}
-
-              <HiCheckBadge className="text-[#D4A017]" />
-            </h2>
-
-            <p className="text-gray-400">Company Dashboard</p>
-          </div>
+          <p
+            className="
+            text-gray-400
+            mt-2
+            "
+          >
+            Your company verification status
+          </p>
         </div>
 
-        <div>
+        <div
+          className="
+          flex
+          items-center
+          gap-2
+          bg-[#222831]
+          px-5
+          py-3
+          rounded-xl
+          "
+        >
+          <HiCheckBadge className="text-[#D4A017]" size={25} />
+
           <span
-            className={`
-            px-4
-            py-2
-            rounded-full
+            className="
+            text-white
             font-semibold
-            text-sm
-            
-            ${
-              stats.company.status === "approved"
-                ? "bg-green-500/20 text-green-400"
-                : stats.company.status === "rejected"
-                  ? "bg-red-500/20 text-red-400"
-                  : "bg-yellow-500/20 text-yellow-400"
-            }
-            
-            `}
+            capitalize
+            "
           >
-            {stats.company.status}
+            {stats.company?.status}
           </span>
         </div>
       </div>
 
-      {/* STAT CARDS */}
+      {/* DASHBOARD CARDS */}
 
       <div
         className="
         grid
         grid-cols-1
         sm:grid-cols-2
-        xl:grid-cols-3
+        xl:grid-cols-4
         gap-6
         "
       >
         {/* PROFILE */}
 
         <DashboardCard
-          icon={<HiBuildingOffice2 />}
+          icon={<HiBuildingOffice2 size={32} />}
           title="Company Profile"
-          description="Update company information"
-          action={() => navigate("/company/profile")}
+          description="Manage company information"
+          onClick={() => navigate("/company/profile")}
         />
 
         {/* ADS */}
 
         <DashboardCard
-          icon={<HiMegaphone />}
+          icon={<HiMegaphone size={32} />}
           title="Advertisements"
-          description={`${stats.advertisements} advertisements created`}
-          action={() => navigate("/company/advertisements")}
+          description={`${stats.advertisements} Total Ads`}
+          onClick={() => navigate("/company/advertisements")}
         />
 
-        {/* CAMPAIGN */}
+        {/* CAMPAIGNS */}
 
         <DashboardCard
-          icon={<HiRectangleGroup />}
+          icon={<HiRectangleGroup size={32} />}
           title="Campaigns"
-          description={`${stats.campaigns} campaigns running`}
-          action={() => navigate("/company/campaigns")}
+          description={`${stats.campaigns} Total Campaigns`}
+          onClick={() => navigate("/company/campaigns")}
+        />
+
+        {/* ANALYTICS */}
+
+        <DashboardCard
+          icon={<HiChartBar size={32} />}
+          title="Analytics"
+          description="View company performance"
+          onClick={() => navigate("/company/analytics")}
         />
       </div>
 
-      {/* QUICK ACTIONS */}
+      {/* QUICK SUMMARY */}
 
       <div
         className="
         bg-[#393E46]
-        rounded-3xl
-        p-6
         border
         border-white/10
+        rounded-3xl
+        p-6
         "
       >
         <h2
           className="
           text-xl
-          text-white
           font-bold
+          text-white
           mb-5
           "
         >
-          Quick Actions
+          Quick Summary
         </h2>
 
         <div
@@ -212,120 +203,106 @@ function CompanyDashboard() {
           grid
           grid-cols-1
           sm:grid-cols-3
-          gap-4
+          gap-5
           "
         >
-          <ActionButton
-            icon={<HiPlusCircle />}
-            text="Create Advertisement"
-            click={() => navigate("/company/advertisements")}
-          />
+          <SummaryBox title="Advertisements" value={stats.advertisements} />
 
-          <ActionButton
-            icon={<HiPencilSquare />}
-            text="Edit Profile"
-            click={() => navigate("/company/profile")}
-          />
+          <SummaryBox title="Campaigns" value={stats.campaigns} />
 
-          <ActionButton
-            icon={<HiChartBar />}
-            text="View Campaigns"
-            click={() => navigate("/company/campaigns")}
-          />
+          <SummaryBox title="Account Status" value={stats.company?.status} />
         </div>
-      </div>
-
-      {/* RECENT ACTIVITY */}
-
-      <div
-        className="
-        bg-[#393E46]
-        rounded-3xl
-        p-6
-        border
-        border-white/10
-        "
-      >
-        <h2
-          className="
-          text-xl
-          text-white
-          font-bold
-          mb-3
-          "
-        >
-          Recent Activity
-        </h2>
-
-        <p className="text-gray-400">
-          Your latest advertisements and campaigns will appear here.
-        </p>
       </div>
     </div>
   );
 }
 
-function DashboardCard({ icon, title, description, action }) {
+function DashboardCard({ icon, title, description, onClick }) {
   return (
     <div
-      onClick={action}
+      onClick={onClick}
       className="
-      bg-[#393E46]
-      p-6
-      rounded-3xl
-      cursor-pointer
-      border
-      border-white/10
-      hover:-translate-y-2
-      transition
-      "
+bg-[#393E46]
+
+border
+border-white/10
+
+rounded-3xl
+
+p-6
+
+cursor-pointer
+
+hover:scale-105
+
+transition
+
+duration-300
+
+"
     >
       <div
         className="
-        text-[#D4A017]
-        text-4xl
-        "
+text-[#D4A017]
+"
       >
         {icon}
       </div>
 
       <h2
         className="
-        text-white
-        text-xl
-        font-bold
-        mt-5
-        "
+text-white
+text-xl
+font-bold
+mt-5
+"
       >
         {title}
       </h2>
 
-      <p className="text-gray-400 mt-2">{description}</p>
+      <p
+        className="
+text-gray-400
+mt-2
+text-sm
+"
+      >
+        {description}
+      </p>
     </div>
   );
 }
 
-function ActionButton({ icon, text, click }) {
+function SummaryBox({ title, value }) {
   return (
-    <button
-      onClick={click}
+    <div
       className="
-      bg-[#222831]
-      text-white
-      p-4
-      rounded-xl
-      flex
-      items-center
-      gap-3
-      hover:bg-[#D4A017]
-      hover:text-black
-      transition
-      "
+bg-[#222831]
+rounded-2xl
+p-5
+"
     >
-      <span className="text-2xl">{icon}</span>
+      <p
+        className="
+text-gray-400
+text-sm
+"
+      >
+        {title}
+      </p>
 
-      <span className="font-semibold">{text}</span>
-    </button>
+      <h3
+        className="
+text-white
+text-2xl
+font-bold
+mt-2
+capitalize
+"
+      >
+        {value}
+      </h3>
+    </div>
   );
 }
 
