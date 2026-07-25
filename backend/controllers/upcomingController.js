@@ -1,14 +1,28 @@
 const UpcomingContent = require("../models/UpcomingContent");
 
-// GET COMPANY CONTENT
+// COMPANY CREATE
 
-const getMyUpcomingContent = async (req, res) => {
+const createUpcoming = async (req, res) => {
   try {
-    const contents = await UpcomingContent.find({
+    const content = await UpcomingContent.create({
+      ...req.body,
+
       companyId: req.user.id,
-    }).sort({
-      createdAt: -1,
     });
+
+    res.status(201).json(content);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+// GET ALL
+
+const getUpcoming = async (req, res) => {
+  try {
+    const contents = await UpcomingContent.find();
 
     res.json(contents);
   } catch (error) {
@@ -18,48 +32,15 @@ const getMyUpcomingContent = async (req, res) => {
   }
 };
 
-// CREATE
-
-const addUpcomingContent = async (req, res) => {
-  try {
-    const content = await UpcomingContent.create({
-      companyId: req.user.id,
-
-      title: req.body.title,
-
-      description: req.body.description,
-
-      category: req.body.category,
-
-      genre: req.body.genre,
-
-      imageUrl: req.body.imageUrl,
-
-      trailerUrl: req.body.trailerUrl,
-
-      releaseDate: req.body.releaseDate,
-
-      status: req.body.status,
-    });
-
-    res.status(201).json(content);
-  } catch (error) {
-    res.status(400).json({
-      message: error.message,
-    });
-  }
-};
-
 // UPDATE
 
-const updateUpcomingContent = async (req, res) => {
+const updateUpcoming = async (req, res) => {
   try {
-    const updated = await UpcomingContent.findOneAndUpdate(
-      {
-        _id: req.params.id,
-        companyId: req.user.id,
-      },
+    const updated = await UpcomingContent.findByIdAndUpdate(
+      req.params.id,
+
       req.body,
+
       {
         new: true,
       },
@@ -67,7 +48,7 @@ const updateUpcomingContent = async (req, res) => {
 
     res.json(updated);
   } catch (error) {
-    res.status(400).json({
+    res.status(500).json({
       message: error.message,
     });
   }
@@ -75,16 +56,12 @@ const updateUpcomingContent = async (req, res) => {
 
 // DELETE
 
-const deleteUpcomingContent = async (req, res) => {
+const deleteUpcoming = async (req, res) => {
   try {
-    await UpcomingContent.findOneAndDelete({
-      _id: req.params.id,
-
-      companyId: req.user.id,
-    });
+    await UpcomingContent.findByIdAndDelete(req.params.id);
 
     res.json({
-      message: "Deleted successfully",
+      message: "Deleted",
     });
   } catch (error) {
     res.status(500).json({
@@ -94,8 +71,11 @@ const deleteUpcomingContent = async (req, res) => {
 };
 
 module.exports = {
-  getMyUpcomingContent,
-  addUpcomingContent,
-  updateUpcomingContent,
-  deleteUpcomingContent,
+  createUpcoming,
+
+  getUpcoming,
+
+  updateUpcoming,
+
+  deleteUpcoming,
 };

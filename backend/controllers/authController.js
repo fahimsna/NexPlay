@@ -3,7 +3,7 @@ const Company = require("../models/Company");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-// GENERATE JWT TOKEN
+// GENERATE TOKEN
 const generateToken = (id, role) => {
   return jwt.sign(
     {
@@ -17,12 +17,12 @@ const generateToken = (id, role) => {
   );
 };
 
-// REGISTER USER
+// REGISTER
+
 const register = async (req, res) => {
   try {
     const { fullName, username, email, password, role, companyName } = req.body;
 
-    // CHECK EXISTING USER
     const existingUser = await User.findOne({
       $or: [{ email }, { username }],
     });
@@ -33,36 +33,29 @@ const register = async (req, res) => {
       });
     }
 
-    // HASH PASSWORD
-    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    // CREATE USER
     const user = await User.create({
       fullName,
-
       username,
-
       email,
-
       password: hashedPassword,
-
       role: role || "user",
     });
 
-    // CREATE COMPANY PROFILE AUTOMATICALLY
+    // CREATE COMPANY PROFILE
+
     if (user.role === "company") {
       if (!companyName) {
         return res.status(400).json({
-          message: "Company name is required",
+          message: "Company name required",
         });
       }
 
       await Company.create({
         ownerId: user._id,
 
-        companyName: companyName,
+        companyName,
 
         description: "",
 
@@ -100,12 +93,12 @@ const register = async (req, res) => {
   }
 };
 
-// LOGIN USER
+// LOGIN
+
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // FIND USER
     const user = await User.findOne({
       email,
     });
@@ -116,7 +109,6 @@ const login = async (req, res) => {
       });
     }
 
-    // CHECK PASSWORD
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -125,7 +117,7 @@ const login = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    res.json({
       message: "Login successful",
 
       user: {
@@ -150,6 +142,7 @@ const login = async (req, res) => {
 };
 
 // GET CURRENT USER
+
 const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
@@ -160,7 +153,7 @@ const getMe = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    res.json({
       user,
     });
   } catch (error) {

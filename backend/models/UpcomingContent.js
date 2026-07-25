@@ -2,49 +2,42 @@ const mongoose = require("mongoose");
 
 const upcomingContentSchema = new mongoose.Schema(
   {
-    companyId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Company",
-      required: true,
-    },
-
     title: {
       type: String,
+
       required: true,
-      trim: true,
     },
 
     description: {
       type: String,
-      required: true,
-    },
 
-    category: {
-      type: String,
-      required: true,
-    },
-
-    genre: {
-      type: String,
-      required: true,
-    },
-
-    imageUrl: {
-      type: String,
-    },
-
-    trailerUrl: {
-      type: String,
+      default: "",
     },
 
     releaseDate: {
       type: Date,
     },
 
+    genre: {
+      type: String,
+    },
+
+    image: {
+      type: String,
+    },
+
+    companyId: {
+      type: mongoose.Schema.Types.ObjectId,
+
+      ref: "Company",
+    },
+
     status: {
       type: String,
-      enum: ["Coming Soon", "Released"],
-      default: "Coming Soon",
+
+      enum: ["pending", "approved", "rejected"],
+
+      default: "pending",
     },
   },
   {
