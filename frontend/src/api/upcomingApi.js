@@ -2,24 +2,74 @@ import axios from "axios";
 
 const API = "http://localhost:8000/api/upcoming";
 
-const config = () => ({
-  headers: {
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
-  },
-});
-
-export const getUpcomingContent = () => {
-  return axios.get(API, config());
+const getToken = () => {
+  return localStorage.getItem("token");
 };
 
-export const addUpcomingContent = (data) => {
-  return axios.post(API, data, config());
+// CREATE UPCOMING CONTENT
+
+export const createUpcoming = async (data) => {
+  const res = await axios.post(
+    API,
+
+    data,
+
+    {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    },
+  );
+
+  return res.data;
 };
 
-export const updateUpcomingContent = (id, data) => {
-  return axios.put(`${API}/${id}`, data, config());
+// GET COMPANY UPCOMING CONTENT
+
+export const getUpcoming = async () => {
+  const res = await axios.get(
+    API,
+
+    {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    },
+  );
+
+  return res.data;
 };
 
-export const deleteUpcomingContent = (id) => {
-  return axios.delete(`${API}/${id}`, config());
+// UPDATE UPCOMING CONTENT
+
+export const updateUpcoming = async (id, data) => {
+  const res = await axios.put(
+    `${API}/${id}`,
+
+    data,
+
+    {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    },
+  );
+
+  return res.data;
+};
+
+// DELETE UPCOMING CONTENT
+
+export const deleteUpcoming = async (id) => {
+  const res = await axios.delete(
+    `${API}/${id}`,
+
+    {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    },
+  );
+
+  return res.data;
 };

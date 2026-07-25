@@ -3,28 +3,23 @@ import { useEffect, useState } from "react";
 import {
   HiPlus,
   HiTrash,
+  HiPencilSquare,
   HiFilm,
   HiCalendarDays,
   HiPlay,
   HiPhoto,
-  HiPencil,
+  HiXMark,
 } from "react-icons/hi2";
 
 import {
   createUpcoming,
   getUpcoming,
-  updateUpcoming,
   deleteUpcoming,
+  updateUpcoming,
 } from "../../api/upcomingApi";
 
 function CompanyUpcomingContent() {
-  const [contents, setContents] = useState([]);
-
-  const [loading, setLoading] = useState(true);
-
-  const [editId, setEditId] = useState(null);
-
-  const [formData, setFormData] = useState({
+  const emptyForm = {
     title: "",
     description: "",
     category: "Movie",
@@ -33,7 +28,17 @@ function CompanyUpcomingContent() {
     trailerUrl: "",
     releaseDate: "",
     status: "Coming Soon",
-  });
+  };
+
+  const [contents, setContents] = useState([]);
+
+  const [loading, setLoading] = useState(true);
+
+  const [formData, setFormData] = useState(emptyForm);
+
+  const [editId, setEditId] = useState(null);
+
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     loadContents();
@@ -67,34 +72,25 @@ function CompanyUpcomingContent() {
         await updateUpcoming(editId, formData);
 
         alert("Content updated successfully");
-
-        setEditId(null);
       } else {
         await createUpcoming(formData);
 
         alert("Content added successfully");
       }
 
-      setFormData({
-        title: "",
-        description: "",
-        category: "Movie",
-        genre: "",
-        imageUrl: "",
-        trailerUrl: "",
-        releaseDate: "",
-        status: "Coming Soon",
-      });
+      setFormData(emptyForm);
+
+      setEditId(null);
+
+      setShowForm(false);
 
       loadContents();
     } catch (error) {
-      alert(error.response?.data?.message || "Failed");
+      alert(error.response?.data?.message || "Operation failed");
     }
   };
 
   const handleEdit = (item) => {
-    setEditId(item._id);
-
     setFormData({
       title: item.title,
 
@@ -108,16 +104,14 @@ function CompanyUpcomingContent() {
 
       trailerUrl: item.trailerUrl,
 
-      releaseDate: item.releaseDate.substring(0, 10),
+      releaseDate: item.releaseDate?.slice(0, 10),
 
       status: item.status,
     });
 
-    window.scrollTo({
-      top: 0,
+    setEditId(item._id);
 
-      behavior: "smooth",
-    });
+    setShowForm(true);
   };
 
   const handleDelete = async (id) => {
@@ -138,130 +132,109 @@ function CompanyUpcomingContent() {
     <div className="space-y-8">
       {/* HEADER */}
 
-      <div>
-        <h1
-          className="
+      <div className="flex justify-between items-center">
+        <div>
+          <h1
+            className="
 text-3xl
 font-bold
 text-white
 "
-        >
-          Upcoming Content Management
-        </h1>
+          >
+            Upcoming Content Management
+          </h1>
 
-        <p
-          className="
+          <p
+            className="
 text-gray-400
 mt-2
 "
+          >
+            Manage movies, shows, games and sports releases
+          </p>
+        </div>
+
+        <button
+          onClick={() => {
+            setShowForm(true);
+
+            setEditId(null);
+
+            setFormData(emptyForm);
+          }}
+          className="
+bg-[#D4A017]
+text-black
+px-5
+py-3
+rounded-xl
+font-bold
+flex
+items-center
+gap-2
+"
         >
-          Manage movies, shows, games and sports releases
-        </p>
+          <HiPlus />
+          Add Content
+        </button>
       </div>
 
       {/* FORM */}
 
-      <div
-        className="
+      {showForm && (
+        <div
+          className="
 bg-[#393E46]
-p-6
 rounded-3xl
+p-6
 border
 border-white/10
 "
-      >
-        <div
-          className="
+        >
+          <div
+            className="
 flex
+justify-between
 items-center
-gap-3
 mb-6
 "
-        >
-          <HiPlus className="text-[#D4A017]" size={30} />
-
-          <h2
-            className="
+          >
+            <h2
+              className="
 text-xl
 font-bold
 text-white
 "
-          >
-            {editId ? "Edit Upcoming Content" : "Add Upcoming Content"}
-          </h2>
-        </div>
+            >
+              {editId ? "Edit Upcoming Content" : "Add Upcoming Content"}
+            </h2>
 
-        <form
-          onSubmit={handleSubmit}
-          className="
+            <button
+              onClick={() => setShowForm(false)}
+              className="
+text-white
+"
+            >
+              <HiXMark size={25} />
+            </button>
+          </div>
+
+          <form
+            onSubmit={handleSubmit}
+            className="
 grid
 grid-cols-1
 md:grid-cols-2
 gap-5
 "
-        >
-          <input
-            name="title"
-            placeholder="Title"
-            value={formData.title}
-            onChange={handleChange}
-            required
-            className="
-p-3
-rounded-xl
-bg-[#222831]
-text-white
-border
-border-white/10
-"
-          />
-
-          <input
-            name="genre"
-            placeholder="Genre"
-            value={formData.genre}
-            onChange={handleChange}
-            className="
-p-3
-rounded-xl
-bg-[#222831]
-text-white
-border
-border-white/10
-"
-          />
-
-          <select
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            className="
-p-3
-rounded-xl
-bg-[#222831]
-text-white
-border
-border-white/10
-"
           >
-            <option>Movie</option>
-
-            <option>TV Show</option>
-
-            <option>Series</option>
-
-            <option>Sports</option>
-
-            <option>Game</option>
-          </select>
-
-          <input
-            type="date"
-            name="releaseDate"
-            value={formData.releaseDate}
-            onChange={handleChange}
-            required
-            className="
+            <input
+              name="title"
+              placeholder="Title"
+              value={formData.title}
+              onChange={handleChange}
+              required
+              className="
 p-3
 rounded-xl
 bg-[#222831]
@@ -269,14 +242,14 @@ text-white
 border
 border-white/10
 "
-          />
+            />
 
-          <input
-            name="imageUrl"
-            placeholder="Poster Image URL"
-            value={formData.imageUrl}
-            onChange={handleChange}
-            className="
+            <input
+              name="genre"
+              placeholder="Genre"
+              value={formData.genre}
+              onChange={handleChange}
+              className="
 p-3
 rounded-xl
 bg-[#222831]
@@ -284,14 +257,13 @@ text-white
 border
 border-white/10
 "
-          />
+            />
 
-          <input
-            name="trailerUrl"
-            placeholder="Trailer URL"
-            value={formData.trailerUrl}
-            onChange={handleChange}
-            className="
+            <select
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              className="
 p-3
 rounded-xl
 bg-[#222831]
@@ -299,15 +271,71 @@ text-white
 border
 border-white/10
 "
-          />
+            >
+              <option>Movie</option>
 
-          <textarea
-            name="description"
-            placeholder="Description"
-            value={formData.description}
-            onChange={handleChange}
-            required
-            className="
+              <option>TV Show</option>
+
+              <option>Series</option>
+
+              <option>Sports</option>
+
+              <option>Game</option>
+            </select>
+
+            <input
+              type="date"
+              name="releaseDate"
+              value={formData.releaseDate}
+              onChange={handleChange}
+              required
+              className="
+p-3
+rounded-xl
+bg-[#222831]
+text-white
+border
+border-white/10
+"
+            />
+
+            <input
+              name="imageUrl"
+              placeholder="Poster URL"
+              value={formData.imageUrl}
+              onChange={handleChange}
+              className="
+p-3
+rounded-xl
+bg-[#222831]
+text-white
+border
+border-white/10
+"
+            />
+
+            <input
+              name="trailerUrl"
+              placeholder="Trailer URL"
+              value={formData.trailerUrl}
+              onChange={handleChange}
+              className="
+p-3
+rounded-xl
+bg-[#222831]
+text-white
+border
+border-white/10
+"
+            />
+
+            <textarea
+              name="description"
+              placeholder="Description"
+              value={formData.description}
+              onChange={handleChange}
+              required
+              className="
 md:col-span-2
 h-32
 p-3
@@ -317,23 +345,23 @@ text-white
 border
 border-white/10
 "
-          />
+            />
 
-          <button
-            className="
+            <button
+              className="
 md:col-span-2
 bg-[#D4A017]
 text-black
 font-bold
 py-3
 rounded-xl
-hover:bg-yellow-400
 "
-          >
-            {editId ? "Update Content" : "Add Content"}
-          </button>
-        </form>
-      </div>
+            >
+              {editId ? "Update Content" : "Add Content"}
+            </button>
+          </form>
+        </div>
+      )}
 
       {/* LIST */}
 
@@ -413,45 +441,33 @@ text-white
                   <p
                     className="
 text-gray-400
+text-sm
 mt-2
 "
                   >
                     {item.description}
                   </p>
 
-                  <p
+                  <div
                     className="
-text-gray-300
 mt-4
-"
-                  >
-                    <HiFilm
-                      className="
-inline
-text-[#D4A017]
-mr-2
-"
-                    />
-
-                    {item.category}
-                  </p>
-
-                  <p
-                    className="
 text-gray-300
-mt-2
+space-y-2
+text-sm
 "
                   >
-                    <HiCalendarDays
-                      className="
-inline
-text-[#D4A017]
-mr-2
-"
-                    />
+                    <p>
+                      <HiFilm className="inline text-[#D4A017] mr-2" />
 
-                    {item.releaseDate.substring(0, 10)}
-                  </p>
+                      {item.category}
+                    </p>
+
+                    <p>
+                      <HiCalendarDays className="inline text-[#D4A017] mr-2" />
+
+                      {new Date(item.releaseDate).toDateString()}
+                    </p>
+                  </div>
 
                   <div
                     className="
@@ -463,7 +479,7 @@ mt-5
                     <button
                       onClick={() => handleEdit(item)}
                       className="
-bg-blue-500
+bg-blue-600
 px-4
 py-2
 rounded-xl
@@ -472,7 +488,7 @@ items-center
 gap-2
 "
                     >
-                      <HiPencil />
+                      <HiPencilSquare />
                       Edit
                     </button>
 
