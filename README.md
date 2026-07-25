@@ -17,3 +17,12 @@ Entertainment Discovery & Branding Platform
 After cloning please bash npm install 
 Then npm run dev in both backend and frontend.
 Thank you......
+# Demo Account
+
+For testing the application, the following account can be used:
+
+### User Account
+
+Email:fahim202678@gmail.com
+
+Password:12345678
