@@ -4,11 +4,6 @@ const Company = require("../models/Company");
 // CREATE ADVERTISEMENT
 const createAdvertisement = async (req, res) => {
   try {
-    console.log("CREATE ADVERTISEMENT");
-    console.log("USER:", req.user);
-    console.log("BODY:", req.body);
-    console.log("FILE:", req.file);
-
     const company = await Company.findOne({
       ownerId: req.user.id,
     });
@@ -37,16 +32,12 @@ const createAdvertisement = async (req, res) => {
       image: req.file ? req.file.filename : "",
     });
 
-    console.log("CREATED:", advertisement);
-
     res.status(201).json({
       message: "Advertisement created successfully",
 
       advertisement,
     });
   } catch (error) {
-    console.log(error);
-
     res.status(500).json({
       message: error.message,
     });
@@ -72,7 +63,7 @@ const getMyAdvertisements = async (req, res) => {
       createdAt: -1,
     });
 
-    res.status(200).json(advertisements);
+    res.json(advertisements);
   } catch (error) {
     res.status(500).json({
       message: error.message,
@@ -80,7 +71,34 @@ const getMyAdvertisements = async (req, res) => {
   }
 };
 
-// GET SINGLE AD
+// GET ADVERTISEMENT COUNT
+const getAdvertisementCount = async (req, res) => {
+  try {
+    const company = await Company.findOne({
+      ownerId: req.user.id,
+    });
+
+    if (!company) {
+      return res.status(404).json({
+        message: "Company profile not found",
+      });
+    }
+
+    const count = await Advertisement.countDocuments({
+      companyId: company._id,
+    });
+
+    res.json({
+      count,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+// GET SINGLE ADVERTISEMENT
 const getAdvertisement = async (req, res) => {
   try {
     const advertisement = await Advertisement.findById(req.params.id);
@@ -99,7 +117,7 @@ const getAdvertisement = async (req, res) => {
   }
 };
 
-// UPDATE
+// UPDATE ADVERTISEMENT
 const updateAdvertisement = async (req, res) => {
   try {
     const updateData = {
@@ -142,7 +160,7 @@ const updateAdvertisement = async (req, res) => {
   }
 };
 
-// DELETE
+// DELETE ADVERTISEMENT
 const deleteAdvertisement = async (req, res) => {
   try {
     await Advertisement.findByIdAndDelete(req.params.id);
@@ -167,4 +185,6 @@ module.exports = {
   updateAdvertisement,
 
   deleteAdvertisement,
+
+  getAdvertisementCount,
 };

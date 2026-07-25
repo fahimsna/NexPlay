@@ -16,6 +16,7 @@ app.use("/uploads", express.static("uploads"));
 const authRoutes = require("./routes/authRoutes");
 const companyRoutes = require("./routes/companyRoutes");
 const testRoutes = require("./routes/testRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/company", companyRoutes);
@@ -29,5 +30,6 @@ app.get("/", (req, res) => {
     message: "Server is running successfully!",
   });
 });
+app.use("/api/dashboard", dashboardRoutes);
 
 module.exports = app;

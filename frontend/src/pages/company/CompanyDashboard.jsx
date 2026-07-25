@@ -1,39 +1,40 @@
 import { useEffect, useState } from "react";
 
 import {
-  HiBuildingOffice2,
   HiMegaphone,
-  HiRocketLaunch,
-  HiFilm,
+  HiRectangleGroup,
+  HiBuildingOffice2,
+  HiCheckBadge,
+  HiPlusCircle,
+  HiPencilSquare,
+  HiChartBar,
 } from "react-icons/hi2";
 
-import CompanyDashboardLayout from "../../layouts/CompanyDashboardLayout";
+import { getDashboardStats } from "../../services/dashboardService";
 
-import { getMyCompany } from "../../services/companyService";
+import { useNavigate } from "react-router-dom";
 
 function CompanyDashboard() {
-  const [company, setCompany] = useState(null);
+  const [stats, setStats] = useState(null);
 
-  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    loadCompany();
+    loadDashboard();
   }, []);
 
-  const loadCompany = async () => {
+  const loadDashboard = async () => {
     try {
-      const data = await getMyCompany();
+      const data = await getDashboardStats();
 
-      setCompany(data);
+      setStats(data);
     } catch (error) {
-      console.log(error.response?.data || error.message);
-    } finally {
-      setLoading(false);
+      console.log(error);
     }
   };
 
-  if (loading) {
-    return <div className="text-white">Loading Dashboard...</div>;
+  if (!stats) {
+    return <div className="text-white text-xl">Loading Dashboard...</div>;
   }
 
   return (
@@ -43,337 +44,288 @@ function CompanyDashboard() {
       <div>
         <h1
           className="
-text-3xl
-md:text-4xl
-font-black
-text-white
-"
+          text-3xl
+          md:text-4xl
+          font-bold
+          text-white
+          "
         >
-          Welcome back, {company?.companyName || "Company"}
+          Welcome, {stats.company.companyName}
         </h1>
 
-        <p
-          className="
-text-gray-400
-mt-2
-"
-        >
-          Manage your entertainment business from here.
+        <p className="text-gray-400 mt-2">
+          Manage your entertainment brand, advertisements and campaigns.
         </p>
       </div>
 
-      {/* COMPANY HERO CARD */}
+      {/* COMPANY SUMMARY */}
 
       <div
         className="
-bg-[#393E46]
-rounded-3xl
-border
-border-white/10
-p-6
-md:p-8
-flex
-flex-col
-md:flex-row
-items-center
-justify-between
-gap-6
-"
+        bg-[#393E46]
+        rounded-3xl
+        p-6
+        border
+        border-white/10
+        flex
+        flex-col
+        md:flex-row
+        md:items-center
+        md:justify-between
+        gap-5
+        "
       >
-        <div
-          className="
-flex
-items-center
-gap-5
-"
-        >
-          {/* LOGO */}
-
-          <div
-            className="
-w-24
-h-24
-rounded-3xl
-overflow-hidden
-bg-[#D4A017]
-flex
-items-center
-justify-center
-"
-          >
-            {company?.logo ? (
-              <img
-                src={`http://localhost:8000/uploads/${company.logo}`}
-                alt="Company Logo"
-                className="
-w-full
-h-full
-object-cover
-"
-              />
-            ) : (
-              <HiBuildingOffice2 size={45} className="text-black" />
-            )}
-          </div>
+        <div className="flex items-center gap-5">
+          {stats.company.logo ? (
+            <img
+              src={`http://localhost:8000/uploads/${stats.company.logo}`}
+              className="
+              w-20
+              h-20
+              rounded-2xl
+              object-cover
+              "
+            />
+          ) : (
+            <div
+              className="
+              w-20
+              h-20
+              rounded-2xl
+              bg-[#222831]
+              flex
+              items-center
+              justify-center
+              "
+            >
+              <HiBuildingOffice2 className="text-[#D4A017]" size={40} />
+            </div>
+          )}
 
           <div>
             <h2
               className="
-text-2xl
-font-bold
-text-white
-"
+              text-2xl
+              text-white
+              font-bold
+              flex
+              items-center
+              gap-2
+              "
             >
-              {company?.companyName}
+              {stats.company.companyName}
+
+              <HiCheckBadge className="text-[#D4A017]" />
             </h2>
 
-            <p
-              className="
-text-gray-300
-mt-1
-"
-            >
-              {company?.industry}
-            </p>
-
-            <p
-              className="
-text-sm
-text-gray-400
-mt-1
-"
-            >
-              {company?.location}
-            </p>
+            <p className="text-gray-400">Company Dashboard</p>
           </div>
         </div>
 
-        <div
-          className="
-bg-[#222831]
-px-5
-py-3
-rounded-xl
-"
-        >
-          <p
-            className="
-text-gray-400
-text-sm
-"
+        <div>
+          <span
+            className={`
+            px-4
+            py-2
+            rounded-full
+            font-semibold
+            text-sm
+            
+            ${
+              stats.company.status === "approved"
+                ? "bg-green-500/20 text-green-400"
+                : stats.company.status === "rejected"
+                  ? "bg-red-500/20 text-red-400"
+                  : "bg-yellow-500/20 text-yellow-400"
+            }
+            
+            `}
           >
-            Account Status
-          </p>
-
-          <p
-            className="
-text-[#D4A017]
-font-bold
-"
-          >
-            {company?.status || "Pending"}
-          </p>
+            {stats.company.status}
+          </span>
         </div>
       </div>
 
-      {/* STATS */}
+      {/* STAT CARDS */}
 
       <div
         className="
-grid
-grid-cols-1
-sm:grid-cols-2
-lg:grid-cols-4
-gap-5
-"
+        grid
+        grid-cols-1
+        sm:grid-cols-2
+        xl:grid-cols-3
+        gap-6
+        "
       >
-        <StatsCard
+        {/* PROFILE */}
+
+        <DashboardCard
+          icon={<HiBuildingOffice2 />}
+          title="Company Profile"
+          description="Update company information"
+          action={() => navigate("/company/profile")}
+        />
+
+        {/* ADS */}
+
+        <DashboardCard
+          icon={<HiMegaphone />}
           title="Advertisements"
-          value="0"
-          icon={<HiMegaphone size={28} />}
+          description={`${stats.advertisements} advertisements created`}
+          action={() => navigate("/company/advertisements")}
         />
 
-        <StatsCard
+        {/* CAMPAIGN */}
+
+        <DashboardCard
+          icon={<HiRectangleGroup />}
           title="Campaigns"
-          value="0"
-          icon={<HiRocketLaunch size={28} />}
-        />
-
-        <StatsCard
-          title="Upcoming Content"
-          value="0"
-          icon={<HiFilm size={28} />}
-        />
-
-        <StatsCard
-          title="Analytics"
-          value="--"
-          icon={<HiBuildingOffice2 size={28} />}
+          description={`${stats.campaigns} campaigns running`}
+          action={() => navigate("/company/campaigns")}
         />
       </div>
 
-      {/* LOWER SECTION */}
+      {/* QUICK ACTIONS */}
 
       <div
         className="
-grid
-lg:grid-cols-2
-gap-6
-"
+        bg-[#393E46]
+        rounded-3xl
+        p-6
+        border
+        border-white/10
+        "
       >
-        {/* PROFILE SUMMARY */}
+        <h2
+          className="
+          text-xl
+          text-white
+          font-bold
+          mb-5
+          "
+        >
+          Quick Actions
+        </h2>
 
         <div
           className="
-bg-[#393E46]
-rounded-3xl
-p-6
-border
-border-white/10
-"
+          grid
+          grid-cols-1
+          sm:grid-cols-3
+          gap-4
+          "
         >
-          <h3
-            className="
-text-xl
-font-bold
-text-white
-mb-5
-"
-          >
-            Company Overview
-          </h3>
+          <ActionButton
+            icon={<HiPlusCircle />}
+            text="Create Advertisement"
+            click={() => navigate("/company/advertisements")}
+          />
 
-          <div className="space-y-4">
-            <Info label="Website" value={company?.website} />
+          <ActionButton
+            icon={<HiPencilSquare />}
+            text="Edit Profile"
+            click={() => navigate("/company/profile")}
+          />
 
-            <Info label="Industry" value={company?.industry} />
-
-            <Info label="Location" value={company?.location} />
-          </div>
+          <ActionButton
+            icon={<HiChartBar />}
+            text="View Campaigns"
+            click={() => navigate("/company/campaigns")}
+          />
         </div>
+      </div>
 
-        {/* RECENT ACTIVITY */}
+      {/* RECENT ACTIVITY */}
 
-        <div
+      <div
+        className="
+        bg-[#393E46]
+        rounded-3xl
+        p-6
+        border
+        border-white/10
+        "
+      >
+        <h2
           className="
-bg-[#393E46]
-rounded-3xl
-p-6
-border
-border-white/10
-"
+          text-xl
+          text-white
+          font-bold
+          mb-3
+          "
         >
-          <h3
-            className="
-text-xl
-font-bold
-text-white
-mb-5
-"
-          >
-            Recent Activity
-          </h3>
+          Recent Activity
+        </h2>
 
-          <div
-            className="
-space-y-4
-"
-          >
-            <Activity text="Company profile created" />
-
-            <Activity text="Dashboard activated" />
-
-            <Activity text="No campaigns yet" />
-          </div>
-        </div>
+        <p className="text-gray-400">
+          Your latest advertisements and campaigns will appear here.
+        </p>
       </div>
     </div>
   );
 }
 
-function StatsCard({ title, value, icon }) {
+function DashboardCard({ icon, title, description, action }) {
   return (
     <div
+      onClick={action}
       className="
-bg-[#393E46]
-rounded-3xl
-p-6
-border
-border-white/10
-flex
-items-center
-justify-between
-"
+      bg-[#393E46]
+      p-6
+      rounded-3xl
+      cursor-pointer
+      border
+      border-white/10
+      hover:-translate-y-2
+      transition
+      "
     >
-      <div>
-        <p
-          className="
-text-gray-400
-text-sm
-"
-        >
-          {title}
-        </p>
-
-        <h2
-          className="
-text-3xl
-font-black
-text-white
-mt-2
-"
-        >
-          {value}
-        </h2>
-      </div>
-
       <div
         className="
-text-[#D4A017]
-"
+        text-[#D4A017]
+        text-4xl
+        "
       >
         {icon}
       </div>
+
+      <h2
+        className="
+        text-white
+        text-xl
+        font-bold
+        mt-5
+        "
+      >
+        {title}
+      </h2>
+
+      <p className="text-gray-400 mt-2">{description}</p>
     </div>
   );
 }
 
-function Info({ label, value }) {
+function ActionButton({ icon, text, click }) {
   return (
-    <div>
-      <p
-        className="
-text-gray-400
-text-sm
-"
-      >
-        {label}
-      </p>
-
-      <p
-        className="
-text-white
-font-semibold
-"
-      >
-        {value || "Not added"}
-      </p>
-    </div>
-  );
-}
-
-function Activity({ text }) {
-  return (
-    <div
+    <button
+      onClick={click}
       className="
-bg-[#222831]
-rounded-xl
-p-4
-text-gray-300
-"
+      bg-[#222831]
+      text-white
+      p-4
+      rounded-xl
+      flex
+      items-center
+      gap-3
+      hover:bg-[#D4A017]
+      hover:text-black
+      transition
+      "
     >
-      {text}
-    </div>
+      <span className="text-2xl">{icon}</span>
+
+      <span className="font-semibold">{text}</span>
+    </button>
   );
 }
 

@@ -15,7 +15,6 @@ const campaignSchema = new mongoose.Schema(
 
     description: {
       type: String,
-      required: true,
     },
 
     startDate: {
@@ -30,7 +29,7 @@ const campaignSchema = new mongoose.Schema(
 
     budget: {
       type: Number,
-      required: true,
+      default: 0,
     },
 
     targetAudience: {
@@ -42,6 +41,17 @@ const campaignSchema = new mongoose.Schema(
       type: String,
       enum: ["Draft", "Active", "Paused", "Completed", "Ended"],
       default: "Draft",
+    },
+
+    advertisements: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Advertisement",
+      },
+    ],
+
+    rejectionReason: {
+      type: String,
     },
   },
   {
