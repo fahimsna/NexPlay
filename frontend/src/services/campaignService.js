@@ -1,33 +1,38 @@
-import axiosInstance from "../api/axiosInstance";
+import axios from "../api/axiosInstance";
+
+const CAMPAIGN_API = "/campaign";
+
+// CREATE CAMPAIGN
+export const createCampaign = async (data) => {
+  const response = await axios.post(CAMPAIGN_API, data);
+
+  return response.data;
+};
 
 // GET MY CAMPAIGNS
-
 export const getMyCampaigns = async () => {
-  const res = await axiosInstance.get("/campaigns/my");
+  const response = await axios.get(`${CAMPAIGN_API}/my`);
 
-  return res.data;
+  return response.data;
 };
 
-// CREATE
+// GET SINGLE CAMPAIGN
+export const getCampaign = async (id) => {
+  const response = await axios.get(`${CAMPAIGN_API}/${id}`);
 
-export const createCampaign = async (data) => {
-  const res = await axiosInstance.post("/campaigns", data);
-
-  return res.data;
+  return response.data;
 };
 
-// UPDATE
-
+// UPDATE CAMPAIGN
 export const updateCampaign = async (id, data) => {
-  const res = await axiosInstance.put(`/campaigns/${id}`, data);
+  const response = await axios.put(`${CAMPAIGN_API}/${id}`, data);
 
-  return res.data;
+  return response.data;
 };
 
-// DELETE
-
+// DELETE CAMPAIGN
 export const deleteCampaign = async (id) => {
-  const res = await axiosInstance.delete(`/campaigns/${id}`);
+  const response = await axios.delete(`${CAMPAIGN_API}/${id}`);
 
-  return res.data;
+  return response.data;
 };

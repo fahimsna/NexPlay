@@ -4,26 +4,16 @@ const router = express.Router();
 
 const authMiddleware = require("../middleware/authMiddleware");
 const roleMiddleware = require("../middleware/roleMiddleware");
-const upload = require("../middleware/upload");
 
 const {
-  createAdvertisement,
   getMyAdvertisements,
-  getAdvertisement,
+  createAdvertisement,
   updateAdvertisement,
   deleteAdvertisement,
 } = require("../controllers/advertisementController");
 
-// CREATE
-router.post(
-  "/",
-  authMiddleware,
-  roleMiddleware("company"),
-  upload.single("image"),
-  createAdvertisement,
-);
+// GET COMPANY ADS
 
-// GET ALL MY ADS
 router.get(
   "/my",
   authMiddleware,
@@ -31,19 +21,26 @@ router.get(
   getMyAdvertisements,
 );
 
-// GET SINGLE AD
-router.get("/:id", authMiddleware, roleMiddleware("company"), getAdvertisement);
+// CREATE
+
+router.post(
+  "/",
+  authMiddleware,
+  roleMiddleware("company"),
+  createAdvertisement,
+);
 
 // UPDATE
+
 router.put(
   "/:id",
   authMiddleware,
   roleMiddleware("company"),
-  upload.single("image"),
   updateAdvertisement,
 );
 
 // DELETE
+
 router.delete(
   "/:id",
   authMiddleware,

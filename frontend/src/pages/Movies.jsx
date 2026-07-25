@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
+
 import EntertainmentCard from "../components/entertainment/EntertainmentCard";
 import { getTrendingMovies } from "../services/tmdbService";
+
+
 
 function Movies() {
   const [movies, setMovies] = useState([]);
@@ -47,40 +50,20 @@ function Movies() {
 
   if (loading) {
     return (
-      <section
-        className="
-        min-h-screen
-        bg-[#17191D]
-        text-white
-        flex
-        items-center
-        justify-center
-        "
-      >
-        <h1 className="text-3xl font-bold">Loading Movies...</h1>
-      </section>
+      <div className="min-h-screen bg-[#17191D] text-white flex items-center justify-center">
+        Loading Movies...
+      </div>
     );
   }
 
   return (
-    <section
-      className="
-      min-h-screen
-      bg-[#17191D]
-      text-white
-      pt-32
-      pb-20
-      "
-    >
-      <div
-        className="
-        max-w-7xl
-        mx-auto
-        px-5
-        sm:px-8
-        "
-      >
-        {/* Header */}
+    <div className="min-h-screen bg-[#17191D] text-white">
+      {/* NAVBAR */}
+
+      
+
+      <section className="px-5 sm:px-8 lg:px-12 py-10">
+        {/* HEADER */}
 
         <div className="text-center">
           <div
@@ -114,17 +97,12 @@ function Movies() {
             <span className="text-[#D4A017]">Movies</span>
           </h1>
 
-          <p
-            className="
-            mt-4
-            text-gray-400
-            "
-          >
+          <p className="mt-4 text-gray-400">
             Discover trending movies and popular entertainment.
           </p>
         </div>
 
-        {/* Movies Grid */}
+        {/* MOVIES GRID */}
 
         <div
           className="
@@ -141,15 +119,9 @@ function Movies() {
           ))}
         </div>
 
-        {/* Load More */}
+        {/* LOAD MORE */}
 
-        <div
-          className="
-        flex
-        justify-center
-        mt-14
-        "
-        >
+        <div className="flex justify-center mt-14">
           <button
             onClick={loadMoreMovies}
             disabled={loadingMore}
@@ -168,8 +140,8 @@ function Movies() {
             {loadingMore ? "Loading..." : "Load More Movies"}
           </button>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }
 
