@@ -4,6 +4,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const path = require("path");
 const analyticsRoutes = require("./routes/analyticsRoutes");
+const upcomingRoutes = require("./routes/upcomingRoutes");
 
 // LOAD ENV
 dotenv.config();
@@ -94,3 +95,4 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/upcoming", upcomingRoutes);
