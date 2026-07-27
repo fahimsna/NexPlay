@@ -3,6 +3,7 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const path = require("path");
+const settingsRoutes = require("./routes/settingsRoutes");
 
 dotenv.config();
 
@@ -11,20 +12,14 @@ const app = express();
 // =======================
 // DATABASE CONNECTION
 // =======================
-
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log("MongoDB Connected");
-  })
-  .catch((error) => {
-    console.log("MongoDB Error:", error.message);
-  });
+  .then(() => console.log("MongoDB Connected"))
+  .catch((error) => console.log("MongoDB Error:", error.message));
 
 // =======================
 // MIDDLEWARE
 // =======================
-
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -33,23 +28,16 @@ app.use(
 );
 
 app.use(express.json());
-
-app.use(
-  express.urlencoded({
-    extended: true,
-  }),
-);
+app.use(express.urlencoded({ extended: true }));
 
 // =======================
 // STATIC FILES
 // =======================
-
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // =======================
-// ROUTES IMPORT
+// ROUTES
 // =======================
-
 const authRoutes = require("./routes/authRoutes");
 const companyRoutes = require("./routes/companyRoutes");
 const advertisementRoutes = require("./routes/advertisementRoutes");
@@ -58,28 +46,25 @@ const dashboardRoutes = require("./routes/dashboardRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const upcomingRoutes = require("./routes/upcomingRoutes");
 
+// (We'll add settingsRoutes here later)
+// const settingsRoutes = require("./routes/settingsRoutes");
+
 // =======================
 // API ROUTES
 // =======================
-
 app.use("/api/auth", authRoutes);
-
 app.use("/api/company", companyRoutes);
-
 app.use("/api/advertisements", advertisementRoutes);
-
 app.use("/api/campaigns", campaignRoutes);
-
 app.use("/api/dashboard", dashboardRoutes);
-
 app.use("/api/analytics", analyticsRoutes);
-
 app.use("/api/upcoming", upcomingRoutes);
+// app.use("/api/settings", settingsRoutes);
+app.use("/api/settings", settingsRoutes);
 
 // =======================
-// TEST ROUTE
+// ROOT ROUTE
 // =======================
-
 app.get("/", (req, res) => {
   res.send("NexPlay Backend Running");
 });
@@ -87,7 +72,6 @@ app.get("/", (req, res) => {
 // =======================
 // SERVER
 // =======================
-
 const PORT = process.env.PORT || 8000;
 
 app.listen(PORT, () => {
