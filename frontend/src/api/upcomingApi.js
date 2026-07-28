@@ -1,75 +1,56 @@
 import axios from "axios";
 
-const API = "http://localhost:8000/api/upcoming";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-const getToken = () => {
-  return localStorage.getItem("token");
-};
+const api = axios.create({
+  baseURL: `${API_URL}/api/upcoming`,
+});
 
-// CREATE UPCOMING CONTENT
+// JWT TOKEN
 
-export const createUpcoming = async (data) => {
-  const res = await axios.post(
-    API,
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
 
-    data,
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
 
-    {
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-      },
-    },
-  );
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  },
+);
 
-  return res.data;
-};
-
-// GET COMPANY UPCOMING CONTENT
+// GET COMPANY UPCOMING
 
 export const getUpcoming = async () => {
-  const res = await axios.get(
-    API,
+  const response = await api.get("/my");
 
-    {
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-      },
-    },
-  );
-
-  return res.data;
+  return response.data;
 };
 
-// UPDATE UPCOMING CONTENT
+// CREATE
+
+export const createUpcoming = async (data) => {
+  const response = await api.post("/", data);
+
+  return response.data;
+};
+
+// UPDATE
 
 export const updateUpcoming = async (id, data) => {
-  const res = await axios.put(
-    `${API}/${id}`,
+  const response = await api.put(`/${id}`, data);
 
-    data,
-
-    {
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-      },
-    },
-  );
-
-  return res.data;
+  return response.data;
 };
 
-// DELETE UPCOMING CONTENT
+// DELETE
 
 export const deleteUpcoming = async (id) => {
-  const res = await axios.delete(
-    `${API}/${id}`,
+  const response = await api.delete(`/${id}`);
 
-    {
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-      },
-    },
-  );
-
-  return res.data;
+  return response.data;
 };

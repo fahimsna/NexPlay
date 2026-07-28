@@ -1,55 +1,56 @@
 import { useEffect, useState } from "react";
 
 import {
-  HiPlus,
-  HiTrash,
-  HiFilm,
-  HiCalendarDays,
-  HiPlay,
-  HiPhoto,
-  HiPencil,
-} from "react-icons/hi2";
-
-import {
-  createUpcoming,
   getUpcoming,
+  createUpcoming,
   updateUpcoming,
   deleteUpcoming,
 } from "../../api/upcomingApi";
 
-function CompanyUpcomingContent() {
+const CompanyUpcomingContent = () => {
   const [contents, setContents] = useState([]);
 
   const [loading, setLoading] = useState(true);
 
-  const [editId, setEditId] = useState(null);
+  const [editingId, setEditingId] = useState(null);
 
-  const [formData, setFormData] = useState({
+  const emptyForm = {
     title: "",
     description: "",
-    category: "Movie",
-    genre: "",
-    imageUrl: "",
-    trailerUrl: "",
+    poster: "",
+    logo: "",
+    trailer: "",
     releaseDate: "",
     status: "Coming Soon",
-  });
+  };
+
+  const [formData, setFormData] = useState(emptyForm);
+
+  // ==========================
+  // LOAD COMPANY CONTENT
+  // ==========================
+
+  const loadContents = async () => {
+    try {
+      setLoading(true);
+
+      const data = await getUpcoming();
+
+      setContents(data);
+    } catch (error) {
+      console.log("LOAD ERROR:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     loadContents();
   }, []);
 
-  const loadContents = async () => {
-    try {
-      const data = await getUpcoming();
-
-      setContents(data);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // ==========================
+  // INPUT CHANGE
+  // ==========================
 
   const handleChange = (e) => {
     setFormData({
@@ -59,56 +60,53 @@ function CompanyUpcomingContent() {
     });
   };
 
+  // ==========================
+  // CREATE / UPDATE
+  // ==========================
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      if (editId) {
-        await updateUpcoming(editId, formData);
+      if (editingId) {
+        await updateUpcoming(
+          editingId,
 
-        alert("Content updated successfully");
-
-        setEditId(null);
+          formData,
+        );
       } else {
         await createUpcoming(formData);
-
-        alert("Content added successfully");
       }
 
-      setFormData({
-        title: "",
-        description: "",
-        category: "Movie",
-        genre: "",
-        imageUrl: "",
-        trailerUrl: "",
-        releaseDate: "",
-        status: "Coming Soon",
-      });
+      setFormData(emptyForm);
+
+      setEditingId(null);
 
       loadContents();
     } catch (error) {
-      alert(error.response?.data?.message || "Failed");
+      console.log("SAVE ERROR:", error);
     }
   };
 
+  // ==========================
+  // EDIT
+  // ==========================
+
   const handleEdit = (item) => {
-    setEditId(item._id);
+    setEditingId(item._id);
 
     setFormData({
       title: item.title,
 
-      description: item.description,
+      description: item.description || "",
 
-      category: item.category,
+      poster: item.poster || "",
 
-      genre: item.genre,
+      logo: item.logo || "",
 
-      imageUrl: item.imageUrl,
+      trailer: item.trailer || "",
 
-      trailerUrl: item.trailerUrl,
-
-      releaseDate: item.releaseDate.substring(0, 10),
+      releaseDate: item.releaseDate.split("T")[0],
 
       status: item.status,
     });
@@ -120,405 +118,427 @@ function CompanyUpcomingContent() {
     });
   };
 
+  // ==========================
+  // DELETE
+  // ==========================
+
   const handleDelete = async (id) => {
-    const confirmDelete = window.confirm("Delete this content?");
-
-    if (!confirmDelete) return;
-
     try {
       await deleteUpcoming(id);
 
       loadContents();
     } catch (error) {
-      console.log(error);
+      console.log("DELETE ERROR", error);
     }
   };
 
-  return (
-    <div className="space-y-8">
-      {/* HEADER */}
+  if (loading) {
+    return (
+      <div
+        className="
+      min-h-screen
+      bg-[#17191D]
+      flex
+      items-center
+      justify-center
+      text-white
+      "
+      >
+        Loading...
+      </div>
+    );
+  }
 
-      <div>
-        <h1
-          className="
+  return (
+    <div
+      className="
+min-h-screen
+bg-[#17191D]
+text-white
+p-4
+md:p-8
+"
+    >
+      <div
+        className="
+max-w-7xl
+mx-auto
+space-y-8
+"
+      >
+        {/* HEADER */}
+
+        <div>
+          <h1
+            className="
 text-3xl
 font-bold
-text-white
 "
-        >
-          Upcoming Content Management
-        </h1>
+          >
+            Upcoming Content Management
+          </h1>
 
-        <p
-          className="
+          <p
+            className="
 text-gray-400
 mt-2
 "
-        >
-          Manage movies, shows, games and sports releases
-        </p>
-      </div>
+          >
+            Promote your upcoming movies, shows and events
+          </p>
+        </div>
 
-      {/* FORM */}
+        {/* FORM */}
 
-      <div
-        className="
-bg-[#393E46]
-p-6
-rounded-3xl
-border
-border-white/10
-"
-      >
         <div
           className="
-flex
-items-center
-gap-3
-mb-6
+bg-[#22252B]
+border
+border-[#34373D]
+rounded-xl
+p-6
 "
         >
-          <HiPlus className="text-[#D4A017]" size={30} />
-
           <h2
             className="
 text-xl
-font-bold
-text-white
-"
-          >
-            {editId ? "Edit Upcoming Content" : "Add Upcoming Content"}
-          </h2>
-        </div>
-
-        <form
-          onSubmit={handleSubmit}
-          className="
-grid
-grid-cols-1
-md:grid-cols-2
-gap-5
-"
-        >
-          <input
-            name="title"
-            placeholder="Title"
-            value={formData.title}
-            onChange={handleChange}
-            required
-            className="
-p-3
-rounded-xl
-bg-[#222831]
-text-white
-border
-border-white/10
-"
-          />
-
-          <input
-            name="genre"
-            placeholder="Genre"
-            value={formData.genre}
-            onChange={handleChange}
-            className="
-p-3
-rounded-xl
-bg-[#222831]
-text-white
-border
-border-white/10
-"
-          />
-
-          <select
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            className="
-p-3
-rounded-xl
-bg-[#222831]
-text-white
-border
-border-white/10
-"
-          >
-            <option>Movie</option>
-
-            <option>TV Show</option>
-
-            <option>Series</option>
-
-            <option>Sports</option>
-
-            <option>Game</option>
-          </select>
-
-          <input
-            type="date"
-            name="releaseDate"
-            value={formData.releaseDate}
-            onChange={handleChange}
-            required
-            className="
-p-3
-rounded-xl
-bg-[#222831]
-text-white
-border
-border-white/10
-"
-          />
-
-          <input
-            name="imageUrl"
-            placeholder="Poster Image URL"
-            value={formData.imageUrl}
-            onChange={handleChange}
-            className="
-p-3
-rounded-xl
-bg-[#222831]
-text-white
-border
-border-white/10
-"
-          />
-
-          <input
-            name="trailerUrl"
-            placeholder="Trailer URL"
-            value={formData.trailerUrl}
-            onChange={handleChange}
-            className="
-p-3
-rounded-xl
-bg-[#222831]
-text-white
-border
-border-white/10
-"
-          />
-
-          <textarea
-            name="description"
-            placeholder="Description"
-            value={formData.description}
-            onChange={handleChange}
-            required
-            className="
-md:col-span-2
-h-32
-p-3
-rounded-xl
-bg-[#222831]
-text-white
-border
-border-white/10
-"
-          />
-
-          <button
-            className="
-md:col-span-2
-bg-[#D4A017]
-text-black
-font-bold
-py-3
-rounded-xl
-hover:bg-yellow-400
-"
-          >
-            {editId ? "Update Content" : "Add Content"}
-          </button>
-        </form>
-      </div>
-
-      {/* LIST */}
-
-      <div>
-        <h2
-          className="
-text-2xl
-font-bold
-text-white
+font-semibold
 mb-5
 "
-        >
-          Your Releases
-        </h2>
+          >
+            {editingId ? "Edit Content" : "Add New Content"}
+          </h2>
 
-        {loading ? (
-          <p className="text-gray-400">Loading...</p>
-        ) : contents.length === 0 ? (
-          <p className="text-gray-400">No content found</p>
-        ) : (
-          <div
+          <form
+            onSubmit={handleSubmit}
             className="
+space-y-4
+"
+          >
+            <input
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              placeholder="Content Title"
+              required
+              className="
+input-style
+w-full
+bg-[#17191D]
+border
+border-[#34373D]
+rounded-lg
+px-4
+py-3
+text-white
+"
+            />
+
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              placeholder="Description"
+              rows="4"
+              className="
+w-full
+bg-[#17191D]
+border
+border-[#34373D]
+rounded-lg
+px-4
+py-3
+text-white
+"
+            />
+
+            <input
+              name="poster"
+              value={formData.poster}
+              onChange={handleChange}
+              placeholder="Poster Image URL"
+              className="
+w-full
+bg-[#17191D]
+border
+border-[#34373D]
+rounded-lg
+px-4
+py-3
+text-white
+"
+            />
+
+            <input
+              name="logo"
+              value={formData.logo}
+              onChange={handleChange}
+              placeholder="Company Logo URL"
+              className="
+w-full
+bg-[#17191D]
+border
+border-[#34373D]
+rounded-lg
+px-4
+py-3
+text-white
+"
+            />
+
+            <input
+              name="trailer"
+              value={formData.trailer}
+              onChange={handleChange}
+              placeholder="Trailer YouTube URL"
+              className="
+w-full
+bg-[#17191D]
+border
+border-[#34373D]
+rounded-lg
+px-4
+py-3
+text-white
+"
+            />
+
+            <div
+              className="
 grid
-grid-cols-1
+md:grid-cols-2
+gap-4
+"
+            >
+              <input
+                type="date"
+                name="releaseDate"
+                value={formData.releaseDate}
+                onChange={handleChange}
+                required
+                className="
+bg-[#17191D]
+border
+border-[#34373D]
+rounded-lg
+px-4
+py-3
+text-white
+"
+              />
+
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+                className="
+bg-[#17191D]
+border
+border-[#34373D]
+rounded-lg
+px-4
+py-3
+text-white
+"
+              >
+                <option>Coming Soon</option>
+
+                <option>Released</option>
+              </select>
+            </div>
+
+            <button
+              className="
+bg-[#D4A017]
+hover:bg-[#B8860B]
+text-black
+font-bold
+px-6
+py-3
+rounded-lg
+transition
+"
+            >
+              {editingId ? "Update Content" : "Add Content"}
+            </button>
+          </form>
+        </div>
+
+        {/* CONTENT CARDS */}
+
+        <div
+          className="
+grid
 md:grid-cols-2
 xl:grid-cols-3
 gap-6
 "
-          >
-            {contents.map((item) => (
-              <div
-                key={item._id}
-                className="
-bg-[#393E46]
-rounded-3xl
-overflow-hidden
+        >
+          {contents.map((item) => (
+            <div
+              key={item._id}
+              className="
+bg-[#22252B]
 border
-border-white/10
+border-[#34373D]
+rounded-xl
+overflow-hidden
+shadow-lg
+hover:border-[#D4A017]
+transition
 "
-              >
-                {item.imageUrl ? (
-                  <img
-                    src={item.imageUrl}
-                    alt={item.title}
-                    className="
+            >
+              {/* POSTER */}
+
+              {item.poster && (
+                <img
+                  src={item.poster}
+                  alt={item.title}
+                  className="
 w-full
-h-56
+h-72
 object-cover
 "
-                  />
-                ) : (
-                  <div
-                    className="
-h-56
+                />
+              )}
+
+              <div
+                className="
+p-5
+"
+              >
+                <div
+                  className="
 flex
 items-center
-justify-center
-bg-[#222831]
-text-gray-400
+gap-3
+mb-3
 "
-                  >
-                    <HiPhoto size={40} />
-                  </div>
-                )}
+                >
+                  {item.logo && (
+                    <img
+                      src={item.logo}
+                      alt="logo"
+                      className="
+w-12
+h-12
+rounded-full
+object-cover
+border
+border-[#D4A017]
+"
+                    />
+                  )}
 
-                <div className="p-5">
-                  <h3
+                  <h2
                     className="
 text-xl
 font-bold
-text-white
 "
                   >
                     {item.title}
-                  </h3>
+                  </h2>
+                </div>
 
-                  <p
-                    className="
+                <p
+                  className="
 text-gray-400
-mt-2
+text-sm
 "
-                  >
-                    {item.description}
-                  </p>
+                >
+                  {item.description}
+                </p>
 
-                  <p
-                    className="
-text-gray-300
+                <div
+                  className="
 mt-4
-"
-                  >
-                    <HiFilm
-                      className="
-inline
-text-[#D4A017]
-mr-2
-"
-                    />
-
-                    {item.category}
-                  </p>
-
-                  <p
-                    className="
+space-y-2
+text-sm
 text-gray-300
-mt-2
 "
-                  >
-                    <HiCalendarDays
-                      className="
-inline
-text-[#D4A017]
-mr-2
-"
-                    />
-
-                    {item.releaseDate.substring(0, 10)}
+                >
+                  <p>
+                    Release: {new Date(item.releaseDate).toLocaleDateString()}
                   </p>
 
-                  <div
+                  <span
                     className="
+inline-block
+bg-[#D4A017]
+text-black
+px-3
+py-1
+rounded-full
+text-xs
+font-semibold
+"
+                  >
+                    {item.status}
+                  </span>
+                </div>
+
+                {item.trailer && (
+                  <a
+                    href={item.trailer}
+                    target="_blank"
+                    className="
+block
+mt-5
+text-center
+bg-[#D4A017]
+hover:bg-[#B8860B]
+text-black
+font-semibold
+py-2
+rounded-lg
+"
+                  >
+                    ▶ Watch Trailer
+                  </a>
+                )}
+
+                <div
+                  className="
 flex
 gap-3
 mt-5
 "
+                >
+                  <button
+                    onClick={() => handleEdit(item)}
+                    className="
+flex-1
+bg-yellow-500
+text-black
+py-2
+rounded-lg
+font-semibold
+"
                   >
-                    <button
-                      onClick={() => handleEdit(item)}
-                      className="
-bg-blue-500
-px-4
-py-2
-rounded-xl
-flex
-items-center
-gap-2
-"
-                    >
-                      <HiPencil />
-                      Edit
-                    </button>
+                    Edit
+                  </button>
 
-                    <button
-                      onClick={() => handleDelete(item._id)}
-                      className="
-bg-red-500
-px-4
+                  <button
+                    onClick={() => handleDelete(item._id)}
+                    className="
+flex-1
+bg-red-600
+hover:bg-red-700
 py-2
-rounded-xl
-flex
-items-center
-gap-2
+rounded-lg
+font-semibold
 "
-                    >
-                      <HiTrash />
-                      Delete
-                    </button>
-
-                    {item.trailerUrl && (
-                      <a
-                        href={item.trailerUrl}
-                        target="_blank"
-                        className="
-bg-green-600
-px-4
-py-2
-rounded-xl
-flex
-items-center
-gap-2
-"
-                      >
-                        <HiPlay />
-                        Trailer
-                      </a>
-                    )}
-                  </div>
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
-}
+};
 
 export default CompanyUpcomingContent;

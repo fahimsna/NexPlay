@@ -4,40 +4,43 @@ const upcomingContentSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-
       required: true,
     },
 
     description: {
       type: String,
+    },
 
+    poster: {
+      type: String,
+      default: "",
+    },
+
+    trailer: {
+      type: String,
+      default: "",
+    },
+
+    logo: {
+      type: String,
       default: "",
     },
 
     releaseDate: {
       type: Date,
-    },
-
-    genre: {
-      type: String,
-    },
-
-    image: {
-      type: String,
-    },
-
-    companyId: {
-      type: mongoose.Schema.Types.ObjectId,
-
-      ref: "Company",
+      required: true,
     },
 
     status: {
       type: String,
+      enum: ["Coming Soon", "Released"],
+      default: "Coming Soon",
+    },
 
-      enum: ["pending", "approved", "rejected"],
-
-      default: "pending",
+    companyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Company",
+      required: true,
     },
   },
   {

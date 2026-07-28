@@ -6,34 +6,31 @@ const authMiddleware = require("../middleware/authMiddleware");
 
 const roleMiddleware = require("../middleware/roleMiddleware");
 
-const ROLES = require("../config/roles");
-
 const {
   createUpcoming,
-
   getUpcoming,
-
+  getMyUpcoming,
   updateUpcoming,
-
   deleteUpcoming,
 } = require("../controllers/upcomingController");
 
-router.get("/", getUpcoming);
+// COMPANY
 
-router.post("/", authMiddleware, roleMiddleware(ROLES.COMPANY), createUpcoming);
+router.get("/my", authMiddleware, roleMiddleware("company"), getMyUpcoming);
 
-router.put(
-  "/:id",
-  authMiddleware,
-  roleMiddleware(ROLES.COMPANY),
-  updateUpcoming,
-);
+router.post("/", authMiddleware, roleMiddleware("company"), createUpcoming);
+
+router.put("/:id", authMiddleware, roleMiddleware("company"), updateUpcoming);
 
 router.delete(
   "/:id",
   authMiddleware,
-  roleMiddleware(ROLES.COMPANY),
+  roleMiddleware("company"),
   deleteUpcoming,
 );
+
+// PUBLIC
+
+router.get("/", getUpcoming);
 
 module.exports = router;
