@@ -33,7 +33,7 @@ function CompanySidebar({ open, setOpen }) {
       {open && (
         <div
           onClick={() => setOpen(false)}
-          className="fixed inset-0 z-40 bg-black/40 md:hidden"
+          className="fixed inset-0 z-40 bg-black/60 md:hidden"
         />
       )}
 
@@ -41,7 +41,10 @@ function CompanySidebar({ open, setOpen }) {
         className={`
           fixed left-0 top-0 z-50
           h-screen w-64
-          border-r bg-white p-5
+          border-r border-white/10
+          bg-[#111318] p-5
+          text-white
+          shadow-xl
           transition-transform duration-300
           md:static md:translate-x-0
           ${
@@ -55,13 +58,21 @@ function CompanySidebar({ open, setOpen }) {
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="absolute right-4 top-4 md:hidden"
+          className="
+            absolute right-4 top-4
+            rounded-lg p-2
+            text-gray-300
+            transition
+            hover:bg-white/10
+            hover:text-white
+            md:hidden
+          "
           aria-label="Close sidebar"
         >
           <FiX size={22} />
         </button>
 
-        <h1 className="mb-10 text-2xl font-bold text-purple-600">
+        <h1 className="mb-10 text-2xl font-bold text-purple-500">
           NexPlay
         </h1>
 
@@ -76,11 +87,12 @@ function CompanySidebar({ open, setOpen }) {
                 `
                   flex items-center gap-3
                   rounded-lg px-4 py-3
+                  font-medium
                   transition
                   ${
                     isActive
-                      ? "bg-purple-600 text-white"
-                      : "text-gray-700 hover:bg-gray-100"
+                      ? "bg-purple-600 text-white shadow-md"
+                      : "text-gray-300 hover:bg-white/10 hover:text-white"
                   }
                 `
               }
@@ -94,10 +106,12 @@ function CompanySidebar({ open, setOpen }) {
         <button
           type="button"
           className="
-            mt-10 flex items-center gap-3
+            mt-10 flex w-full items-center gap-3
             rounded-lg px-4 py-3
-            text-red-500 transition
-            hover:bg-red-50
+            text-red-400
+            transition
+            hover:bg-red-500/10
+            hover:text-red-300
           "
         >
           <FiLogOut />
