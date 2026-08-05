@@ -1,8 +1,9 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
-const mongoose = require("mongoose");
 const path = require("path");
+
+const connectDB = require("./config/db");
 const settingsRoutes = require("./routes/settingsRoutes");
 
 dotenv.config();
@@ -12,10 +13,7 @@ const app = express();
 // =======================
 // DATABASE CONNECTION
 // =======================
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected"))
-  .catch((error) => console.log("MongoDB Error:", error.message));
+connectDB();
 
 // =======================
 // MIDDLEWARE
@@ -46,9 +44,6 @@ const dashboardRoutes = require("./routes/dashboardRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const upcomingRoutes = require("./routes/upcomingRoutes");
 
-// (We'll add settingsRoutes here later)
-// const settingsRoutes = require("./routes/settingsRoutes");
-
 // =======================
 // API ROUTES
 // =======================
@@ -59,7 +54,6 @@ app.use("/api/campaigns", campaignRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/upcoming", upcomingRoutes);
-// app.use("/api/settings", settingsRoutes);
 app.use("/api/settings", settingsRoutes);
 
 // =======================
