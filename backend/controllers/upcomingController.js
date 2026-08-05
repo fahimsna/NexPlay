@@ -1,70 +1,104 @@
 const UpcomingContent = require("../models/UpcomingContent");
 
 // COMPANY CREATE
-
 const createUpcoming = async (req, res) => {
   try {
     const content = await UpcomingContent.create({
-      ...req.body,
-
+      title: req.body.title,
+      description: req.body.description,
+      genre: req.body.genre,
+      releaseDate: req.body.releaseDate,
+      image: req.body.image || req.body.imageUrl || "",
       companyId: req.user.id,
+
+      // Backend model accepts only:
+      // pending, approved, rejected
+      status: "pending",
     });
 
-    res.status(201).json(content);
+    return res.status(201).json(content);
   } catch (error) {
-    res.status(500).json({
+    console.error("CREATE UPCOMING ERROR:", error);
+
+    return res.status(500).json({
       message: error.message,
     });
   }
 };
 
 // GET ALL
-
 const getUpcoming = async (req, res) => {
   try {
-    const contents = await UpcomingContent.find();
+    const contents = await UpcomingContent.find().sort({
+      releaseDate: 1,
+    });
 
-    res.json(contents);
+    return res.json(contents);
   } catch (error) {
-    res.status(500).json({
+    console.error("GET UPCOMING ERROR:", error);
+
+    return res.status(500).json({
       message: error.message,
     });
   }
 };
 
 // UPDATE
-
 const updateUpcoming = async (req, res) => {
   try {
+    const updateData = {
+      title: req.body.title,
+      description: req.body.description,
+      genre: req.body.genre,
+      releaseDate: req.body.releaseDate,
+      image: req.body.image || req.body.imageUrl || "",
+    };
+
     const updated = await UpcomingContent.findByIdAndUpdate(
       req.params.id,
-
-      req.body,
-
+      updateData,
       {
         new: true,
+        runValidators: true,
       },
     );
 
-    res.json(updated);
+    if (!updated) {
+      return res.status(404).json({
+        message: "Upcoming content not found",
+      });
+    }
+
+    return res.json(updated);
   } catch (error) {
-    res.status(500).json({
+    console.error("UPDATE UPCOMING ERROR:", error);
+
+    return res.status(500).json({
       message: error.message,
     });
   }
 };
 
 // DELETE
-
 const deleteUpcoming = async (req, res) => {
   try {
-    await UpcomingContent.findByIdAndDelete(req.params.id);
+    const deleted = await UpcomingContent.findByIdAndDelete(
+      req.params.id,
+    );
 
-    res.json({
+    if (!deleted) {
+      return res.status(404).json({
+        message: "Upcoming content not found",
+      });
+    }
+
+      return res.json({
       message: "Deleted",
     });
   } catch (error) {
-    res.status(500).json({
+    console.error("DELETE UPCOMING ERROR:", error);
+
+    return res.status(500).json({
       message: error.message,
     });
   }
@@ -72,10 +106,7 @@ const deleteUpcoming = async (req, res) => {
 
 module.exports = {
   createUpcoming,
-
   getUpcoming,
-
   updateUpcoming,
-
   deleteUpcoming,
 };
