@@ -19,10 +19,12 @@ const buildUrl = (endpoint, params = {}) => {
 };
 
 /**
- * Generic API request
+ * Generic request function
  */
 const requestSportsApi = async (endpoint, params = {}) => {
   const url = buildUrl(endpoint, params);
+
+  console.log("Sports API:", url);
 
   const response = await fetch(url);
 
@@ -34,11 +36,23 @@ const requestSportsApi = async (endpoint, params = {}) => {
 };
 
 /**
- * Get all sports categories
+ * ==========================================
+ * SPORTS
+ * ==========================================
+ */
+
+/**
+ * Get all sports
  */
 const getAllSports = async () => {
   return requestSportsApi("all_sports.php");
 };
+
+/**
+ * ==========================================
+ * LEAGUES
+ * ==========================================
+ */
 
 /**
  * Get leagues
@@ -55,13 +69,37 @@ const getLeagues = async ({ sport, country } = {}) => {
 };
 
 /**
- * Get league by ID
+ * Get league details
  */
 const getLeagueById = async (leagueId) => {
   return requestSportsApi("lookupleague.php", {
     id: leagueId,
   });
 };
+
+/**
+ * Get upcoming league events
+ */
+const getLeagueUpcomingEvents = async (leagueId) => {
+  return requestSportsApi("eventsnextleague.php", {
+    id: leagueId,
+  });
+};
+
+/**
+ * Get previous league events
+ */
+const getLeaguePastEvents = async (leagueId) => {
+  return requestSportsApi("eventspastleague.php", {
+    id: leagueId,
+  });
+};
+
+/**
+ * ==========================================
+ * TEAMS
+ * ==========================================
+ */
 
 /**
  * Get teams
@@ -80,7 +118,7 @@ const getTeams = async ({ league, sport, country } = {}) => {
 };
 
 /**
- * Get team by ID
+ * Get team details
  */
 const getTeamById = async (teamId) => {
   return requestSportsApi("lookupteam.php", {
@@ -89,7 +127,13 @@ const getTeamById = async (teamId) => {
 };
 
 /**
- * Get match/event by ID
+ * ==========================================
+ * EVENTS
+ * ==========================================
+ */
+
+/**
+ * Get event details
  */
 const getEventById = async (eventId) => {
   return requestSportsApi("lookupevent.php", {
@@ -99,9 +143,14 @@ const getEventById = async (eventId) => {
 
 module.exports = {
   getAllSports,
+
   getLeagues,
   getLeagueById,
+  getLeagueUpcomingEvents,
+  getLeaguePastEvents,
+
   getTeams,
   getTeamById,
+
   getEventById,
 };

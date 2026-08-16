@@ -27,6 +27,10 @@ import CompanyDashboardLayout from "../layouts/CompanyDashboardLayout";
 import PublicLayout from "../layouts/PublicLayout";
 
 import ProtectedRoute from "./ProtectedRoute";
+import Sports from "../pages/Sports";
+import SportsLeagueDetails from "../pages/SportsLeagueDetails";
+import SportsTeamDetails from "../pages/SportsTeamDetails";
+import SportsMatchDetails from "../pages/SportsMatchDetails";
 
 function AppRoutes() {
   return (
@@ -42,17 +46,18 @@ function AppRoutes() {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/partner" element={<Partner />} />
+        <Route path="/sports" element={<Sports />} />
+
+        <Route path="/sports/league/:id" element={<SportsLeagueDetails />} />
+
+        <Route path="/sports/team/:id" element={<SportsTeamDetails />} />
+
+        <Route path="/sports/match/:id" element={<SportsMatchDetails />} />
 
         {/* Sprint 2: Upcoming Release Calendar */}
-        <Route
-          path="/calendar"
-          element={<UpcomingReleaseCalendar />}
-        />
+        <Route path="/calendar" element={<UpcomingReleaseCalendar />} />
 
-        <Route
-          path="/upcoming"
-          element={<UpcomingReleaseCalendar />}
-        />
+        <Route path="/upcoming" element={<UpcomingReleaseCalendar />} />
       </Route>
 
       {/* AUTH */}
@@ -70,10 +75,7 @@ function AppRoutes() {
       >
         <Route index element={<CompanyDashboard />} />
         <Route path="profile" element={<CompanyProfile />} />
-        <Route
-          path="advertisements"
-          element={<AdvertisementManagement />}
-        />
+        <Route path="advertisements" element={<AdvertisementManagement />} />
         <Route path="campaigns" element={<CampaignManagement />} />
         <Route path="analytics" element={<CompanyAnalytics />} />
         <Route path="settings" element={<CompanySettings />} />

@@ -2,48 +2,57 @@ const express = require("express");
 
 const {
   getSportsCategories,
+
   getLeagues,
   getLeagueById,
+  getLeagueUpcomingEvents,
+  getLeaguePastEvents,
+
   getTeams,
   getTeamById,
+
   getEventById,
 } = require("../controllers/sportsController");
 
 const router = express.Router();
 
-/*
+/**
  * Sports Categories
- * GET /api/sports/categories
  */
 router.get("/categories", getSportsCategories);
 
-/*
- * Tournament / League Explorer
- * GET /api/sports/leagues
+/**
+ * League Explorer
  */
 router.get("/leagues", getLeagues);
 
-/*
+/**
  * League Details
- * GET /api/sports/leagues/:id
  */
 router.get("/leagues/:id", getLeagueById);
 
-/*
+/**
+ * Upcoming League Matches
+ */
+router.get("/leagues/:id/events/upcoming", getLeagueUpcomingEvents);
+
+/**
+ * Previous League Matches
+ */
+router.get("/leagues/:id/events/past", getLeaguePastEvents);
+
+/**
  * Team Explorer
- * GET /api/sports/teams
  */
 router.get("/teams", getTeams);
 
-/*
+/**
  * Team Details
- * GET /api/sports/teams/:id
  */
 router.get("/teams/:id", getTeamById);
 
-/*
+/**
  * Match Details
- * GET /api/sports/events/:id
  */
 router.get("/events/:id", getEventById);
 

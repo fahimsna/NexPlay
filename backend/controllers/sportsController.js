@@ -1,7 +1,10 @@
 const sportsService = require("../services/sportsService");
 
 /**
+ * ==========================================
+ * SPORTS CATEGORIES
  * GET /api/sports/categories
+ * ==========================================
  */
 const getSportsCategories = async (req, res) => {
   try {
@@ -22,11 +25,10 @@ const getSportsCategories = async (req, res) => {
 };
 
 /**
+ * ==========================================
+ * LEAGUES
  * GET /api/sports/leagues
- *
- * Example:
- * /api/sports/leagues?sport=Soccer
- * /api/sports/leagues?sport=Soccer&country=England
+ * ==========================================
  */
 const getLeagues = async (req, res) => {
   try {
@@ -52,7 +54,10 @@ const getLeagues = async (req, res) => {
 };
 
 /**
+ * ==========================================
+ * LEAGUE DETAILS
  * GET /api/sports/leagues/:id
+ * ==========================================
  */
 const getLeagueById = async (req, res) => {
   try {
@@ -91,10 +96,76 @@ const getLeagueById = async (req, res) => {
 };
 
 /**
+ * ==========================================
+ * LEAGUE UPCOMING EVENTS
+ * GET /api/sports/leagues/:id/events/upcoming
+ * ==========================================
+ */
+const getLeagueUpcomingEvents = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "League ID is required",
+      });
+    }
+
+    const data = await sportsService.getLeagueUpcomingEvents(id);
+
+    res.status(200).json({
+      success: true,
+      data: data.events || [],
+    });
+  } catch (error) {
+    console.error("Get upcoming league events error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch upcoming league events",
+    });
+  }
+};
+
+/**
+ * ==========================================
+ * LEAGUE PAST EVENTS
+ * GET /api/sports/leagues/:id/events/past
+ * ==========================================
+ */
+const getLeaguePastEvents = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "League ID is required",
+      });
+    }
+
+    const data = await sportsService.getLeaguePastEvents(id);
+
+    res.status(200).json({
+      success: true,
+      data: data.events || [],
+    });
+  } catch (error) {
+    console.error("Get past league events error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch past league events",
+    });
+  }
+};
+
+/**
+ * ==========================================
+ * TEAMS
  * GET /api/sports/teams
- *
- * Example:
- * /api/sports/teams?league=English%20Premier%20League
+ * ==========================================
  */
 const getTeams = async (req, res) => {
   try {
@@ -103,8 +174,7 @@ const getTeams = async (req, res) => {
     if (!league && !sport && !country) {
       return res.status(400).json({
         success: false,
-        message:
-          "Please provide at least one filter: league, sport, or country",
+        message: "Please provide at least one filter",
       });
     }
 
@@ -129,7 +199,10 @@ const getTeams = async (req, res) => {
 };
 
 /**
+ * ==========================================
+ * TEAM DETAILS
  * GET /api/sports/teams/:id
+ * ==========================================
  */
 const getTeamById = async (req, res) => {
   try {
@@ -168,7 +241,10 @@ const getTeamById = async (req, res) => {
 };
 
 /**
+ * ==========================================
+ * EVENT DETAILS
  * GET /api/sports/events/:id
+ * ==========================================
  */
 const getEventById = async (req, res) => {
   try {
@@ -208,9 +284,14 @@ const getEventById = async (req, res) => {
 
 module.exports = {
   getSportsCategories,
+
   getLeagues,
   getLeagueById,
+  getLeagueUpcomingEvents,
+  getLeaguePastEvents,
+
   getTeams,
   getTeamById,
+
   getEventById,
 };
