@@ -5,6 +5,7 @@ const path = require("path");
 
 const connectDB = require("./config/db");
 const settingsRoutes = require("./routes/settingsRoutes");
+const sportsRoutes = require("./routes/sportsRoutes");
 
 dotenv.config();
 
@@ -55,6 +56,7 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/upcoming", upcomingRoutes);
 app.use("/api/settings", settingsRoutes);
+app.use("/api/sports", sportsRoutes);
 
 // =======================
 // ROOT ROUTE
