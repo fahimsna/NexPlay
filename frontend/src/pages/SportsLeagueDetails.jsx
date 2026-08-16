@@ -1,539 +1,525 @@
-import axios from "axios";
+import { useEffect, useState } from "react";
+
+import { Link, useParams } from "react-router-dom";
+
+import {
+  getLeagueById,
+  getLeagueUpcomingEvents,
+  getLeaguePastEvents,
+} from "../services/sportsService";
+
+function SportsLeagueDetails() {
+  const { id } = useParams();
+
+  const [league, setLeague] = useState(null);
+
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
+
+  const [pastEvents, setPastEvents] = useState([]);
+
+  const [loading, setLoading] = useState(true);
+
+  const [error, setError] = useState("");
+
+  /*
+  |--------------------------------------------------------------------------
+  | LOAD LEAGUE
+  |--------------------------------------------------------------------------
+  */
+
+  useEffect(() => {
+    loadLeague();
+  }, [id]);
+
+  const loadLeague = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      console.log("Loading league:", id);
+
+      /*
+      --------------------------------------------------------------
+      Get league information
+      --------------------------------------------------------------
+      */
+
+      const leagueData = await getLeagueById(id);
+
+      console.log("League data:", leagueData);
+
+      if (!leagueData) {
+        setError("League information could not be found.");
+
+        return;
+      }
+
+      setLeague(leagueData);
+
+      /*
+      --------------------------------------------------------------
+      Load upcoming and past matches
+      --------------------------------------------------------------
+      */
+
+      const [upcoming, past] = await Promise.allSettled([
+        getLeagueUpcomingEvents(id),
+
+        getLeaguePastEvents(id),
+      ]);
+
+      /*
+      --------------------------------------------------------------
+      Upcoming
+      --------------------------------------------------------------
+      */
+
+      if (upcoming.status === "fulfilled") {
+        console.log("Upcoming events:", upcoming.value);
+
+        setUpcomingEvents(Array.isArray(upcoming.value) ? upcoming.value : []);
+      } else {
+        console.error("Upcoming events error:", upcoming.reason);
+
+        setUpcomingEvents([]);
+      }
+
+      /*
+      --------------------------------------------------------------
+      Past
+      --------------------------------------------------------------
+      */
+
+      if (past.status === "fulfilled") {
+        console.log("Past events:", past.value);
+
+        setPastEvents(Array.isArray(past.value) ? past.value : []);
+      } else {
+        console.error("Past events error:", past.reason);
+
+        setPastEvents([]);
+      }
+    } catch (error) {
+      console.error("League details error:", error);
+
+      setError("Failed to load league details.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /*
+  |--------------------------------------------------------------------------
+  | LOADING
+  |--------------------------------------------------------------------------
+  */
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#17191D] text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 mx-auto rounded-full border-2 border-[#D4A017] border-t-transparent animate-spin" />
+
+          <p className="mt-5 text-gray-400">Loading league...</p>
+        </div>
+      </div>
+    );
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | ERROR
+  |--------------------------------------------------------------------------
+  */
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#17191D] text-white flex items-center justify-center px-5">
+        <div className="text-center">
+          <p className="text-red-400">{error}</p>
+
+          <Link
+            to="/sports"
+            className="inline-block mt-6 text-[#D4A017] hover:underline"
+          >
+            ← Back to Sports
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | NO LEAGUE
+  |--------------------------------------------------------------------------
+  */
+
+  if (!league) {
+    return (
+      <div className="min-h-screen bg-[#17191D] text-white flex items-center justify-center">
+        League not found.
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#17191D] text-white">
+      {/* ================================================================
+          HEADER
+      ================================================================= */}
+
+      <section className="px-5 sm:px-8 lg:px-12 pt-10 pb-8">
+        <div className="max-w-6xl mx-auto">
+          <Link
+            to="/sports"
+            className="text-gray-400 hover:text-[#D4A017] transition"
+          >
+            ← Back to Sports
+          </Link>
+
+          {/* LEAGUE HERO */}
+
+          <div className="mt-8 bg-[#24272D] border border-white/10 rounded-3xl p-7 sm:p-10">
+            <div className="flex flex-col md:flex-row md:items-center gap-7">
+              {/* LOGO */}
+
+              <div className="w-28 h-28 shrink-0 rounded-2xl bg-white flex items-center justify-center overflow-hidden">
+                {league.strBadge ? (
+                  <img
+                    src={league.strBadge}
+                    alt={league.strLeague}
+                    className="w-20 h-20 object-contain"
+                  />
+                ) : league.strLogo ? (
+                  <img
+                    src={league.strLogo}
+                    alt={league.strLeague}
+                    className="w-20 h-20 object-contain"
+                  />
+                ) : (
+                  <span className="text-4xl">🏆</span>
+                )}
+              </div>
+
+              {/* INFORMATION */}
+
+              <div className="flex-1">
+                <p className="text-[#D4A017] text-sm uppercase tracking-[2px]">
+                  {league.strSport || "Sport"}
+                </p>
+
+                <h1 className="mt-2 text-3xl sm:text-4xl font-black">
+                  {league.strLeague}
+                </h1>
+
+                <div className="flex flex-wrap gap-3 mt-4">
+                  {league.strCountry && (
+                    <span className="px-4 py-2 bg-[#1B1E22] rounded-full text-sm text-gray-300">
+                      🌍 {league.strCountry}
+                    </span>
+                  )}
+
+                  {league.strCurrentSeason && (
+                    <span className="px-4 py-2 bg-[#1B1E22] rounded-full text-sm text-gray-300">
+                      Season: {league.strCurrentSeason}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ================================================================
+          MATCHES
+      ================================================================= */}
+
+      <section className="px-5 sm:px-8 lg:px-12 pb-16">
+        <div className="max-w-6xl mx-auto">
+          {/* ============================================================
+              UPCOMING
+          ============================================================= */}
+
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <p className="text-[#D4A017] text-sm uppercase tracking-[2px]">
+                  Fixtures
+                </p>
+
+                <h2 className="mt-1 text-2xl sm:text-3xl font-black">
+                  Upcoming Matches
+                </h2>
+              </div>
+
+              <span className="text-sm text-gray-500">
+                {upcomingEvents.length} match
+                {upcomingEvents.length !== 1 ? "es" : ""}
+              </span>
+            </div>
+
+            {upcomingEvents.length > 0 ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                {upcomingEvents.map((event) => (
+                  <MatchCard
+                    key={event.idEvent}
+                    event={event}
+                    upcoming={true}
+                  />
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                title="No upcoming matches"
+                text="There are currently no upcoming fixtures available for this league."
+              />
+            )}
+          </div>
+
+          {/* ============================================================
+              PAST
+          ============================================================= */}
+
+          <div className="mt-14">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <p className="text-gray-500 text-sm uppercase tracking-[2px]">
+                  Results
+                </p>
+
+                <h2 className="mt-1 text-2xl sm:text-3xl font-black">
+                  Previous Matches
+                </h2>
+              </div>
+
+              <span className="text-sm text-gray-500">
+                {pastEvents.length} match
+                {pastEvents.length !== 1 ? "es" : ""}
+              </span>
+            </div>
+
+            {pastEvents.length > 0 ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                {pastEvents.map((event) => (
+                  <MatchCard
+                    key={event.idEvent}
+                    event={event}
+                    upcoming={false}
+                  />
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                title="No previous matches"
+                text="There are currently no previous match results available for this league."
+              />
+            )}
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
 
 /*
 |--------------------------------------------------------------------------
-| TheSportsDB Configuration
+| MATCH CARD
 |--------------------------------------------------------------------------
 */
 
-const API_KEY = "123";
+function MatchCard({ event, upcoming }) {
+  const homeScore =
+    (event.intHomeScore ?? event.intHomeScore === 0) ? event.intHomeScore : "-";
 
-const BASE_URL = `https://www.thesportsdb.com/api/v1/json/${API_KEY}`;
+  const awayScore =
+    (event.intAwayScore ?? event.intAwayScore === 0) ? event.intAwayScore : "-";
+
+  const date = formatDate(event.dateEvent);
+
+  const time = event.strTime ? formatTime(event.strTime) : "";
+
+  return (
+    <Link
+      to={`/sports/match/${event.idEvent}`}
+      className="group bg-[#24272D] border border-white/10 rounded-2xl p-6 hover:border-[#D4A017]/50 hover:bg-[#292C32] transition"
+    >
+      {/* DATE */}
+
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-[#D4A017] text-sm font-semibold">{date}</p>
+
+          {time && <p className="text-gray-500 text-xs mt-1">{time}</p>}
+        </div>
+
+        <span className="text-xs text-gray-500 group-hover:text-[#D4A017] transition">
+          View match →
+        </span>
+      </div>
+
+      {/* TEAMS */}
+
+      <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-center mt-6">
+        {/* HOME */}
+
+        <TeamMini
+          name={event.strHomeTeam}
+          badge={event.strHomeTeamBadge}
+          align="right"
+        />
+
+        {/* SCORE */}
+
+        <div className="text-center min-w-[80px]">
+          {upcoming ? (
+            <div className="text-xs uppercase tracking-wider text-gray-500">
+              vs
+            </div>
+          ) : (
+            <div className="text-2xl font-black text-[#D4A017]">
+              {homeScore}
+
+              <span className="text-gray-600 mx-2">-</span>
+
+              {awayScore}
+            </div>
+          )}
+
+          <p className="mt-2 text-[11px] text-gray-600 uppercase">
+            {event.strStatus || (upcoming ? "Scheduled" : "Finished")}
+          </p>
+        </div>
+
+        {/* AWAY */}
+
+        <TeamMini
+          name={event.strAwayTeam}
+          badge={event.strAwayTeamBadge}
+          align="left"
+        />
+      </div>
+
+      {/* VENUE */}
+
+      {event.strVenue && (
+        <div className="mt-5 pt-4 border-t border-white/5">
+          <p className="text-xs text-gray-500">📍 {event.strVenue}</p>
+        </div>
+      )}
+    </Link>
+  );
+}
 
 /*
 |--------------------------------------------------------------------------
-| Axios Instance
+| MINI TEAM
 |--------------------------------------------------------------------------
 */
 
-const sportsApi = axios.create({
-  baseURL: BASE_URL,
-  timeout: 15000,
-});
+function TeamMini({ name, badge, align }) {
+  return (
+    <div
+      className={`flex items-center gap-3 ${
+        align === "right" ? "justify-end" : "justify-start"
+      }`}
+    >
+      {align === "right" && (
+        <p className="font-semibold text-sm sm:text-base text-right">
+          {name || "Home Team"}
+        </p>
+      )}
+
+      <div className="w-12 h-12 shrink-0 rounded-xl bg-white flex items-center justify-center">
+        {badge ? (
+          <img src={badge} alt={name} className="w-9 h-9 object-contain" />
+        ) : (
+          <span className="text-xl">⚽</span>
+        )}
+      </div>
+
+      {align === "left" && (
+        <p className="font-semibold text-sm sm:text-base">
+          {name || "Away Team"}
+        </p>
+      )}
+    </div>
+  );
+}
 
 /*
 |--------------------------------------------------------------------------
-| SPORT MAPPING
+| EMPTY STATE
 |--------------------------------------------------------------------------
 */
 
-const SPORT_MAPPING = {
-  football: "soccer",
-  soccer: "soccer",
+function EmptyState({ title, text }) {
+  return (
+    <div className="bg-[#24272D] border border-white/10 rounded-2xl p-10 text-center">
+      <div className="text-4xl mb-4">🏟️</div>
 
-  cricket: "cricket",
+      <h3 className="text-lg font-bold">{title}</h3>
 
-  basketball: "basketball",
-
-  tennis: "tennis",
-
-  baseball: "baseball",
-
-  rugby: "rugby",
-
-  golf: "golf",
-
-  hockey: "hockey",
-
-  volleyball: "volleyball",
-
-  handball: "handball",
-
-  boxing: "boxing",
-
-  wrestling: "wrestling",
-
-  motorsport: "motorsport",
-
-  formula1: "motorsport",
-};
+      <p className="mt-2 text-gray-500 text-sm max-w-md mx-auto">{text}</p>
+    </div>
+  );
+}
 
 /*
 |--------------------------------------------------------------------------
-| NORMALIZE SPORT
+| FORMAT DATE
 |--------------------------------------------------------------------------
 */
 
-const normalizeSport = (sport) => {
-  if (!sport) {
+function formatDate(dateString) {
+  if (!dateString) {
+    return "Date unavailable";
+  }
+
+  try {
+    const date = new Date(dateString);
+
+    if (Number.isNaN(date.getTime())) {
+      return dateString;
+    }
+
+    return date.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  } catch {
+    return dateString;
+  }
+}
+
+/*
+|--------------------------------------------------------------------------
+| FORMAT TIME
+|--------------------------------------------------------------------------
+*/
+
+function formatTime(timeString) {
+  if (!timeString) {
     return "";
   }
 
-  const value = sport.toString().trim().toLowerCase();
-
-  return SPORT_MAPPING[value] || value;
-};
-
-/*
-|--------------------------------------------------------------------------
-| GET SPORTS
-|--------------------------------------------------------------------------
-*/
-
-export const getSports = async () => {
   try {
-    const response = await sportsApi.get("/all_sports.php");
+    const [hours, minutes] = timeString.split(":");
 
-    console.log("Sports API Response:", response.data);
+    const date = new Date();
 
-    return response.data?.sports || [];
-  } catch (error) {
-    console.error("getSports error:", error.response?.data || error.message);
+    date.setHours(Number(hours), Number(minutes), 0, 0);
 
-    throw error;
-  }
-};
-
-/*
-|--------------------------------------------------------------------------
-| GET SPORTS CATEGORIES
-|--------------------------------------------------------------------------
-*/
-
-export const getSportsCategories = async () => {
-  try {
-    const response = await sportsApi.get("/all_sports.php");
-
-    console.log("Sports Categories Response:", response.data);
-
-    return response.data?.sports || [];
-  } catch (error) {
-    console.error(
-      "getSportsCategories error:",
-      error.response?.data || error.message,
-    );
-
-    throw error;
-  }
-};
-
-/*
-|--------------------------------------------------------------------------
-| GET ALL LEAGUES
-|--------------------------------------------------------------------------
-*/
-
-export const getAllLeagues = async () => {
-  try {
-    const response = await sportsApi.get("/all_leagues.php");
-
-    console.log("All Leagues Response:", response.data);
-
-    const leagues = response.data?.leagues || [];
-
-    console.log("Total leagues:", leagues.length);
-
-    return leagues;
-  } catch (error) {
-    console.error(
-      "getAllLeagues error:",
-      error.response?.data || error.message,
-    );
-
-    throw error;
-  }
-};
-
-/*
-|--------------------------------------------------------------------------
-| GET LEAGUES
-|--------------------------------------------------------------------------
-*/
-
-export const getLeagues = async (sport) => {
-  try {
-    if (!sport) {
-      return [];
-    }
-
-    const apiSport = normalizeSport(sport);
-
-    console.log("=================================");
-
-    console.log("Selected sport:", sport);
-
-    console.log("Normalized sport:", apiSport);
-
-    const allLeagues = await getAllLeagues();
-
-    const filteredLeagues = allLeagues.filter((league) => {
-      const leagueSport = league.strSport?.toString().trim().toLowerCase();
-
-      return leagueSport === apiSport;
+    return date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
     });
-
-    console.log("Leagues found:", filteredLeagues);
-
-    console.log("League count:", filteredLeagues.length);
-
-    console.log("=================================");
-
-    return filteredLeagues;
-  } catch (error) {
-    console.error("getLeagues error:", error.response?.data || error.message);
-
-    throw error;
+  } catch {
+    return timeString;
   }
-};
+}
 
-/*
-|--------------------------------------------------------------------------
-| GET LEAGUES BY SPORT
-|--------------------------------------------------------------------------
-*/
-
-export const getLeaguesBySport = async (sport) => {
-  return getLeagues(sport);
-};
-
-/*
-|--------------------------------------------------------------------------
-| GET LEAGUE BY ID
-|--------------------------------------------------------------------------
-*/
-
-export const getLeagueById = async (id) => {
-  try {
-    if (!id) {
-      throw new Error("League ID is required");
-    }
-
-    const response = await sportsApi.get(`/lookupleague.php?id=${id}`);
-
-    console.log("League Details Response:", response.data);
-
-    return response.data?.leagues?.[0] || null;
-  } catch (error) {
-    console.error(
-      "getLeagueById error:",
-      error.response?.data || error.message,
-    );
-
-    throw error;
-  }
-};
-
-/*
-|--------------------------------------------------------------------------
-| GET TEAMS BY LEAGUE
-|--------------------------------------------------------------------------
-*/
-
-export const getTeamsByLeague = async (leagueName) => {
-  try {
-    if (!leagueName) {
-      return [];
-    }
-
-    const response = await sportsApi.get("/search_all_teams.php", {
-      params: {
-        l: leagueName,
-      },
-    });
-
-    console.log("Teams Response:", response.data);
-
-    return response.data?.teams || [];
-  } catch (error) {
-    console.error(
-      "getTeamsByLeague error:",
-      error.response?.data || error.message,
-    );
-
-    throw error;
-  }
-};
-
-/*
-|--------------------------------------------------------------------------
-| GET TEAM BY ID
-|--------------------------------------------------------------------------
-*/
-
-export const getTeamById = async (id) => {
-  try {
-    if (!id) {
-      throw new Error("Team ID is required");
-    }
-
-    const response = await sportsApi.get(`/lookupteam.php?id=${id}`);
-
-    console.log("Team Details Response:", response.data);
-
-    return response.data?.teams?.[0] || null;
-  } catch (error) {
-    console.error("getTeamById error:", error.response?.data || error.message);
-
-    throw error;
-  }
-};
-
-/*
-|--------------------------------------------------------------------------
-| GET EVENT BY ID
-|--------------------------------------------------------------------------
-*/
-
-export const getEventById = async (id) => {
-  try {
-    if (!id) {
-      throw new Error("Event ID is required");
-    }
-
-    const response = await sportsApi.get(`/lookupevent.php?id=${id}`);
-
-    console.log("Event Details Response:", response.data);
-
-    return response.data?.events?.[0] || null;
-  } catch (error) {
-    console.error("getEventById error:", error.response?.data || error.message);
-
-    throw error;
-  }
-};
-
-/*
-|--------------------------------------------------------------------------
-| GET NEXT LEAGUE EVENTS
-|--------------------------------------------------------------------------
-*/
-
-export const getNextLeagueEvents = async (leagueId) => {
-  try {
-    if (!leagueId) {
-      return [];
-    }
-
-    const response = await sportsApi.get(
-      `/eventsnextleague.php?id=${leagueId}`,
-    );
-
-    console.log("Next League Events Response:", response.data);
-
-    return response.data?.events || [];
-  } catch (error) {
-    console.error(
-      "getNextLeagueEvents error:",
-      error.response?.data || error.message,
-    );
-
-    throw error;
-  }
-};
-
-/*
-|--------------------------------------------------------------------------
-| GET LEAGUE UPCOMING EVENTS
-|--------------------------------------------------------------------------
-|
-| Required by SportsLeagueDetails.jsx
-|
-*/
-
-export const getLeagueUpcomingEvents = async (leagueId) => {
-  return getNextLeagueEvents(leagueId);
-};
-
-/*
-|--------------------------------------------------------------------------
-| GET LEAGUE NEXT EVENTS
-|--------------------------------------------------------------------------
-*/
-
-export const getLeagueNextEvents = async (leagueId) => {
-  return getNextLeagueEvents(leagueId);
-};
-
-/*
-|--------------------------------------------------------------------------
-| GET PAST LEAGUE EVENTS
-|--------------------------------------------------------------------------
-*/
-
-export const getPastLeagueEvents = async (leagueId) => {
-  try {
-    if (!leagueId) {
-      return [];
-    }
-
-    const response = await sportsApi.get(
-      `/eventspastleague.php?id=${leagueId}`,
-    );
-
-    console.log("Past League Events Response:", response.data);
-
-    return response.data?.events || [];
-  } catch (error) {
-    console.error(
-      "getPastLeagueEvents error:",
-      error.response?.data || error.message,
-    );
-
-    throw error;
-  }
-};
-
-/*
-|--------------------------------------------------------------------------
-| GET LEAGUE PAST EVENTS
-|--------------------------------------------------------------------------
-*/
-
-export const getLeaguePastEvents = async (leagueId) => {
-  return getPastLeagueEvents(leagueId);
-};
-
-/*
-|--------------------------------------------------------------------------
-| GET NEXT TEAM EVENTS
-|--------------------------------------------------------------------------
-*/
-
-export const getNextTeamEvents = async (teamId) => {
-  try {
-    if (!teamId) {
-      return [];
-    }
-
-    const response = await sportsApi.get(`/eventsnext.php?id=${teamId}`);
-
-    console.log("Next Team Events Response:", response.data);
-
-    return response.data?.events || [];
-  } catch (error) {
-    console.error(
-      "getNextTeamEvents error:",
-      error.response?.data || error.message,
-    );
-
-    throw error;
-  }
-};
-
-/*
-|--------------------------------------------------------------------------
-| GET PAST TEAM EVENTS
-|--------------------------------------------------------------------------
-*/
-
-export const getPastTeamEvents = async (teamId) => {
-  try {
-    if (!teamId) {
-      return [];
-    }
-
-    const response = await sportsApi.get(`/eventslast.php?id=${teamId}`);
-
-    console.log("Past Team Events Response:", response.data);
-
-    return response.data?.results || response.data?.events || [];
-  } catch (error) {
-    console.error(
-      "getPastTeamEvents error:",
-      error.response?.data || error.message,
-    );
-
-    throw error;
-  }
-};
-
-/*
-|--------------------------------------------------------------------------
-| SEARCH TEAM
-|--------------------------------------------------------------------------
-*/
-
-export const searchTeam = async (teamName) => {
-  try {
-    if (!teamName) {
-      return [];
-    }
-
-    const response = await sportsApi.get("/searchteams.php", {
-      params: {
-        t: teamName,
-      },
-    });
-
-    console.log("Search Team Response:", response.data);
-
-    return response.data?.teams || [];
-  } catch (error) {
-    console.error("searchTeam error:", error.response?.data || error.message);
-
-    throw error;
-  }
-};
-
-/*
-|--------------------------------------------------------------------------
-| SEARCH LEAGUE
-|--------------------------------------------------------------------------
-*/
-
-export const searchLeague = async (leagueName) => {
-  try {
-    if (!leagueName) {
-      return [];
-    }
-
-    const response = await sportsApi.get("/search_all_leagues.php", {
-      params: {
-        l: leagueName,
-      },
-    });
-
-    console.log("Search League Response:", response.data);
-
-    return response.data?.countries || response.data?.leagues || [];
-  } catch (error) {
-    console.error("searchLeague error:", error.response?.data || error.message);
-
-    throw error;
-  }
-};
-
-/*
-|--------------------------------------------------------------------------
-| DEFAULT EXPORT
-|--------------------------------------------------------------------------
-*/
-
-export default {
-  getSports,
-  getSportsCategories,
-
-  getAllLeagues,
-  getLeagues,
-  getLeaguesBySport,
-
-  getLeagueById,
-
-  getTeamsByLeague,
-  getTeamById,
-
-  getEventById,
-
-  getNextLeagueEvents,
-  getLeagueUpcomingEvents,
-  getLeagueNextEvents,
-
-  getPastLeagueEvents,
-  getLeaguePastEvents,
-
-  getNextTeamEvents,
-  getPastTeamEvents,
-
-  searchTeam,
-  searchLeague,
-};
+export default SportsLeagueDetails;

@@ -1,84 +1,66 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 
-import {
-  FaFutbol,
-  FaBasketballBall,
-  FaBaseballBall,
-  FaVolleyballBall,
-  FaTableTennis,
-  FaTrophy,
-} from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 import { getSportsCategories, getLeagues } from "../services/sportsService";
 
 /*
 |--------------------------------------------------------------------------
-| Sports
-|--------------------------------------------------------------------------
-|
-| label   = name shown to user
-| apiName = name expected by TheSportsDB
-|
+| SPORTS REQUIRED BY SPRINT 3
 |--------------------------------------------------------------------------
 */
 
-const popularSports = [
+const SPORTS = [
   {
-    label: "Football",
+    name: "Football",
+    icon: "⚽",
     apiName: "Soccer",
-    icon: FaFutbol,
   },
-
   {
-    label: "Cricket",
+    name: "Cricket",
+    icon: "🏏",
     apiName: "Cricket",
-    icon: FaTrophy,
   },
-
   {
-    label: "Basketball",
+    name: "Basketball",
+    icon: "🏀",
     apiName: "Basketball",
-    icon: FaBasketballBall,
   },
-
   {
-    label: "Tennis",
+    name: "Tennis",
+    icon: "🎾",
     apiName: "Tennis",
-    icon: FaTableTennis,
   },
-
   {
-    label: "Baseball",
+    name: "Baseball",
+    icon: "⚾",
     apiName: "Baseball",
-    icon: FaBaseballBall,
   },
-
   {
-    label: "Volleyball",
+    name: "Volleyball",
+    icon: "🏐",
     apiName: "Volleyball",
-    icon: FaVolleyballBall,
   },
 ];
 
 function Sports() {
-  const [sports, setSports] = useState([]);
+  const [apiSports, setApiSports] = useState([]);
+
+  const [selectedSport, setSelectedSport] = useState("Football");
 
   const [leagues, setLeagues] = useState([]);
 
-  const [selectedSport, setSelectedSport] = useState(popularSports[0]);
-
   const [loadingSports, setLoadingSports] = useState(true);
 
-  const [loadingLeagues, setLoadingLeagues] = useState(true);
+  const [loadingLeagues, setLoadingLeagues] = useState(false);
 
   const [error, setError] = useState("");
 
-  const [search, setSearch] = useState("");
+  const [leagueError, setLeagueError] = useState("");
 
   /*
   |--------------------------------------------------------------------------
-  | Load sports
+  | LOAD SPORTS
   |--------------------------------------------------------------------------
   */
 
@@ -86,31 +68,21 @@ function Sports() {
     loadSports();
   }, []);
 
-  /*
-  |--------------------------------------------------------------------------
-  | Load leagues
-  |--------------------------------------------------------------------------
-  */
-
-  useEffect(() => {
-    loadLeagues(selectedSport.apiName);
-  }, [selectedSport]);
-
-  /*
-  |--------------------------------------------------------------------------
-  | Get sports
-  |--------------------------------------------------------------------------
-  */
-
   const loadSports = async () => {
     try {
       setLoadingSports(true);
 
+      setError("");
+
       const data = await getSportsCategories();
 
-      setSports(data);
+      console.log("API SPORTS:", data);
+
+      setApiSports(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Sports error:", error);
+
+      setError("Could not load sports from API.");
     } finally {
       setLoadingSports(false);
     }
@@ -118,155 +90,168 @@ function Sports() {
 
   /*
   |--------------------------------------------------------------------------
-  | Get leagues
+  | LOAD LEAGUES WHEN SPORT CHANGES
   |--------------------------------------------------------------------------
   */
 
-  const loadLeagues = async (sport) => {
+  useEffect(() => {
+    loadLeagues(selectedSport);
+  }, [selectedSport]);
+
+  const loadLeagues = async (sportName) => {
     try {
       setLoadingLeagues(true);
 
-      setError("");
+      setLeagueError("");
 
       setLeagues([]);
 
-      console.log("Loading leagues for:", sport);
+      const sport = SPORTS.find((item) => item.name === sportName);
 
-      const data = await getLeagues({
-        sport,
-      });
+      const apiSport = sport?.apiName || sportName;
 
-      console.log("Leagues received:", data);
+      console.log("Loading leagues for:", apiSport);
 
-      setLeagues(data);
+      const data = await getLeagues(apiSport);
+
+      console.log("LEAGUES:", data);
+
+      setLeagues(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("League error:", error);
 
-      setError("Unable to load leagues.");
-
-      setLeagues([]);
+      setLeagueError("Could not load leagues for this sport.");
     } finally {
       setLoadingLeagues(false);
     }
   };
 
-  /*
-  |--------------------------------------------------------------------------
-  | Search
-  |--------------------------------------------------------------------------
-  */
-
-  const filteredLeagues = leagues.filter((league) =>
-    league.strLeague?.toLowerCase().includes(search.toLowerCase()),
-  );
-
-  /*
-  |--------------------------------------------------------------------------
-  | UI
-  |--------------------------------------------------------------------------
-  */
-
   return (
     <div className="min-h-screen bg-[#17191D] text-white">
-      {/* =========================================================
+      {/* ================================================================
           HERO
-      ========================================================= */}
+      ================================================================= */}
 
-      <section className="px-5 sm:px-8 lg:px-12 pt-12 pb-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="max-w-3xl">
-            <span className="inline-flex px-4 py-2 rounded-full bg-white/5 border border-white/10 text-[#D4A017] text-xs uppercase tracking-[2px]">
-              Sports Explorer
-            </span>
+      <section className="px-5 sm:px-8 lg:px-12 pt-16 pb-12">
+        <div className="max-w-6xl mx-auto">
+          <p className="text-[#D4A017] uppercase tracking-[3px] text-sm font-semibold">
+            Sports Explorer
+          </p>
 
-            <h1 className="mt-6 text-4xl sm:text-5xl lg:text-6xl font-black leading-tight">
-              Explore
-              <span className="text-[#D4A017]"> Sports</span>
-            </h1>
+          <h1 className="mt-3 text-4xl sm:text-5xl font-black">
+            Explore Sports
+          </h1>
 
-            <p className="mt-5 text-gray-400 text-lg">
-              Discover sports, tournaments, leagues, teams and matches from
-              around the world.
-            </p>
-          </div>
+          <p className="mt-5 max-w-2xl text-gray-400 text-lg leading-8">
+            Discover sports, tournaments, leagues, teams and matches from around
+            the world.
+          </p>
         </div>
       </section>
 
-      {/* =========================================================
+      {/* ================================================================
           SPORTS CATEGORIES
-      ========================================================= */}
+      ================================================================= */}
 
-      <section className="px-5 sm:px-8 lg:px-12">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold">Sports Categories</h2>
+      <section className="px-5 sm:px-8 lg:px-12 pb-12">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-end justify-between mb-6">
+            <div>
+              <p className="text-[#D4A017] text-sm uppercase tracking-[2px]">
+                Categories
+              </p>
 
-            <p className="text-gray-500 mt-1">
-              Choose a sport to explore its leagues
-            </p>
+              <h2 className="mt-1 text-2xl sm:text-3xl font-black">
+                Sports Categories
+              </h2>
+
+              <p className="mt-2 text-gray-500">
+                Choose a sport to explore its leagues
+              </p>
+            </div>
+
+            {!loadingSports && (
+              <p className="text-sm text-gray-500">
+                {apiSports.length > 0
+                  ? `${apiSports.length} sports available from the API`
+                  : "Sports explorer"}
+              </p>
+            )}
           </div>
 
-          {loadingSports ? (
-            <p className="text-gray-500">Loading sports...</p>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-              {popularSports.map((sport) => {
-                const Icon = sport.icon;
+          {/* API ERROR */}
 
-                const active = selectedSport.apiName === sport.apiName;
-
-                return (
-                  <button
-                    key={sport.apiName}
-                    onClick={() => setSelectedSport(sport)}
-                    className={`
-                        p-5
-                        rounded-2xl
-                        border
-                        transition
-                        text-left
-                        ${
-                          active
-                            ? "bg-[#D4A017] text-[#17191D] border-[#D4A017]"
-                            : "bg-[#24272D] border-white/10 hover:border-[#D4A017]"
-                        }
-                      `}
-                  >
-                    <Icon size={28} />
-
-                    <p className="mt-4 font-semibold">{sport.label}</p>
-                  </button>
-                );
-              })}
+          {error && (
+            <div className="mb-5 bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-300">
+              {error}
             </div>
           )}
 
-          {!loadingSports && (
-            <p className="mt-5 text-sm text-gray-500">
-              {sports.length > 0
-                ? `${sports.length} sports available from the API`
-                : "Sports API unavailable"}
-            </p>
-          )}
+          {/* SPORTS */}
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            {SPORTS.map((sport) => {
+              const active = selectedSport === sport.name;
+
+              return (
+                <button
+                  key={sport.name}
+                  onClick={() => setSelectedSport(sport.name)}
+                  className={`
+                      group
+                      rounded-2xl
+                      p-5
+                      border
+                      transition
+                      text-left
+                      ${
+                        active
+                          ? "bg-[#D4A017] border-[#D4A017] text-[#17191D]"
+                          : "bg-[#24272D] border-white/10 hover:border-[#D4A017]/50"
+                      }
+                    `}
+                >
+                  <div
+                    className={`
+                        text-3xl
+                        ${active ? "" : "group-hover:scale-110"}
+                        transition
+                      `}
+                  >
+                    {sport.icon}
+                  </div>
+
+                  <p className="mt-4 font-bold">{sport.name}</p>
+
+                  <p
+                    className={`
+                        mt-1 text-xs
+                        ${active ? "text-[#17191D]/60" : "text-gray-500"}
+                      `}
+                  >
+                    Explore leagues
+                  </p>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </section>
 
-      {/* =========================================================
-          LEAGUE EXPLORER
-      ========================================================= */}
+      {/* ================================================================
+          LEAGUES
+      ================================================================= */}
 
-      <section className="px-5 sm:px-8 lg:px-12 py-12">
-        <div className="max-w-7xl mx-auto">
-          {/* HEADER */}
-
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+      <section className="px-5 sm:px-8 lg:px-12 pb-20">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-end justify-between mb-7">
             <div>
-              <span className="text-[#D4A017] text-sm uppercase tracking-[2px]">
+              <p className="text-[#D4A017] text-sm uppercase tracking-[2px]">
                 Tournament & League Explorer
-              </span>
+              </p>
 
-              <h2 className="mt-2 text-3xl font-black">
-                {selectedSport.label} Leagues
+              <h2 className="mt-1 text-2xl sm:text-3xl font-black">
+                {selectedSport} Leagues
               </h2>
 
               <p className="mt-2 text-gray-500">
@@ -274,134 +259,121 @@ function Sports() {
               </p>
             </div>
 
-            {/* SEARCH */}
-
-            <div className="w-full lg:w-80">
-              <input
-                type="text"
-                placeholder="Search leagues..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="
-                  w-full
-                  px-5
-                  py-3
-                  rounded-xl
-                  bg-[#24272D]
-                  border
-                  border-white/10
-                  outline-none
-                  focus:border-[#D4A017]
-                "
-              />
-            </div>
+            {!loadingLeagues && leagues.length > 0 && (
+              <p className="text-sm text-gray-500">{leagues.length} found</p>
+            )}
           </div>
 
           {/* LOADING */}
 
           {loadingLeagues && (
-            <div className="text-center py-20">
-              <div className="animate-spin w-8 h-8 border-2 border-[#D4A017] border-t-transparent rounded-full mx-auto" />
+            <div className="bg-[#24272D] border border-white/10 rounded-2xl p-12 text-center">
+              <div className="w-9 h-9 mx-auto border-2 border-[#D4A017] border-t-transparent rounded-full animate-spin" />
 
               <p className="mt-5 text-gray-400">
-                Loading {selectedSport.label} leagues...
+                Loading {selectedSport} leagues...
               </p>
             </div>
           )}
 
           {/* ERROR */}
 
-          {!loadingLeagues && error && (
-            <div className="mt-8 p-6 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-300">
-              <p>{error}</p>
+          {!loadingLeagues && leagueError && (
+            <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-8 text-center">
+              <p className="text-red-300">{leagueError}</p>
 
               <button
-                onClick={() => loadLeagues(selectedSport.apiName)}
-                className="mt-3 underline"
+                onClick={() => loadLeagues(selectedSport)}
+                className="mt-5 px-5 py-2 rounded-lg bg-[#D4A017] text-[#17191D] font-bold"
               >
-                Retry
+                Try Again
               </button>
             </div>
           )}
 
           {/* EMPTY */}
 
-          {!loadingLeagues && !error && filteredLeagues.length === 0 && (
-            <div className="text-center py-20">
-              <FaTrophy className="mx-auto text-gray-600" size={40} />
+          {!loadingLeagues && !leagueError && leagues.length === 0 && (
+            <div className="bg-[#24272D] border border-white/10 rounded-2xl p-12 text-center">
+              <div className="text-5xl">🏆</div>
 
-              <p className="mt-4 text-gray-400">
-                No leagues found for {selectedSport.label}.
+              <h3 className="mt-5 text-xl font-bold">No leagues found</h3>
+
+              <p className="mt-2 text-gray-500 max-w-md mx-auto">
+                No league data is currently available for {selectedSport}.
               </p>
-
-              <p className="mt-2 text-sm text-gray-600">Try another sport.</p>
             </div>
           )}
 
-          {/* LEAGUES */}
+          {/* LEAGUE GRID */}
 
-          {!loadingLeagues && filteredLeagues.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
-              {filteredLeagues.map((league) => (
-                <Link
-                  key={league.idLeague}
-                  to={`/sports/league/${league.idLeague}`}
-                  className="
-                        group
-                        bg-[#24272D]
-                        border
-                        border-white/10
-                        rounded-2xl
-                        p-6
-                        hover:border-[#D4A017]
-                        hover:-translate-y-1
-                        transition
-                      "
-                >
-                  {/* BADGE */}
-
-                  <div className="w-14 h-14 rounded-xl bg-white flex items-center justify-center overflow-hidden">
-                    {league.strBadge ? (
-                      <img
-                        src={league.strBadge}
-                        alt={league.strLeague}
-                        className="w-10 h-10 object-contain"
-                      />
-                    ) : (
-                      <FaTrophy className="text-[#D4A017]" />
-                    )}
-                  </div>
-
-                  {/* NAME */}
-
-                  <h3 className="mt-5 font-bold text-lg group-hover:text-[#D4A017] transition">
-                    {league.strLeague}
-                  </h3>
-
-                  {/* COUNTRY */}
-
-                  <p className="mt-2 text-sm text-gray-500">
-                    {league.strCountry || "International"}
-                  </p>
-
-                  {/* SPORT */}
-
-                  <p className="mt-1 text-xs text-gray-600">
-                    {league.strSport}
-                  </p>
-
-                  {/* LINK */}
-
-                  <div className="mt-5 text-sm text-[#D4A017]">
-                    Explore league →
-                  </div>
-                </Link>
+          {!loadingLeagues && !leagueError && leagues.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {leagues.map((league) => (
+                <LeagueCard key={league.idLeague} league={league} />
               ))}
             </div>
           )}
         </div>
       </section>
     </div>
+  );
+}
+
+/*
+|--------------------------------------------------------------------------
+| LEAGUE CARD
+|--------------------------------------------------------------------------
+*/
+
+function LeagueCard({ league }) {
+  return (
+    <Link
+      to={`/sports/league/${league.idLeague}`}
+      className="group bg-[#24272D] border border-white/10 rounded-2xl p-6 hover:border-[#D4A017]/50 hover:-translate-y-1 transition"
+    >
+      {/* LOGO */}
+
+      <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center overflow-hidden">
+        {league.strBadge ? (
+          <img
+            src={league.strBadge}
+            alt={league.strLeague}
+            className="w-12 h-12 object-contain"
+          />
+        ) : league.strLogo ? (
+          <img
+            src={league.strLogo}
+            alt={league.strLeague}
+            className="w-12 h-12 object-contain"
+          />
+        ) : (
+          <span className="text-2xl">🏆</span>
+        )}
+      </div>
+
+      {/* NAME */}
+
+      <h3 className="mt-5 text-lg font-bold group-hover:text-[#D4A017] transition">
+        {league.strLeague}
+      </h3>
+
+      {/* COUNTRY */}
+
+      {league.strCountry && (
+        <p className="mt-2 text-sm text-gray-500">🌍 {league.strCountry}</p>
+      )}
+
+      {/* SPORT */}
+
+      {league.strSport && (
+        <p className="mt-1 text-sm text-gray-500">{league.strSport}</p>
+      )}
+
+      {/* LINK */}
+
+      <p className="mt-5 text-sm text-[#D4A017]">Explore league →</p>
+    </Link>
   );
 }
 
