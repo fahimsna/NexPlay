@@ -1,10 +1,13 @@
 const sportsService = require("../services/sportsService");
 
+/*
+|--------------------------------------------------------------------------
+| SPORTS CATEGORIES
+|--------------------------------------------------------------------------
+*/
+
 /**
- * ==========================================
- * SPORTS CATEGORIES
  * GET /api/sports/categories
- * ==========================================
  */
 const getSportsCategories = async (req, res) => {
   try {
@@ -24,24 +27,36 @@ const getSportsCategories = async (req, res) => {
   }
 };
 
+/*
+|--------------------------------------------------------------------------
+| LEAGUES
+|--------------------------------------------------------------------------
+*/
+
 /**
- * ==========================================
- * LEAGUES
  * GET /api/sports/leagues
- * ==========================================
+ *
+ * Example:
+ * /api/sports/leagues?sport=Football
  */
 const getLeagues = async (req, res) => {
   try {
     const { sport, country } = req.query;
+
+    console.log("Frontend requested sport:", sport);
 
     const data = await sportsService.getLeagues({
       sport,
       country,
     });
 
+    const leagues = data.leagues || [];
+
+    console.log("Leagues returned:", leagues.length);
+
     res.status(200).json({
       success: true,
-      data: data.leagues || [],
+      data: leagues,
     });
   } catch (error) {
     console.error("Get leagues error:", error);
@@ -54,10 +69,7 @@ const getLeagues = async (req, res) => {
 };
 
 /**
- * ==========================================
- * LEAGUE DETAILS
  * GET /api/sports/leagues/:id
- * ==========================================
  */
 const getLeagueById = async (req, res) => {
   try {
@@ -72,7 +84,7 @@ const getLeagueById = async (req, res) => {
 
     const data = await sportsService.getLeagueById(id);
 
-    const league = data.leagues?.[0] || null;
+    const league = data.leagues?.[0];
 
     if (!league) {
       return res.status(404).json({
@@ -95,11 +107,14 @@ const getLeagueById = async (req, res) => {
   }
 };
 
+/*
+|--------------------------------------------------------------------------
+| LEAGUE EVENTS
+|--------------------------------------------------------------------------
+*/
+
 /**
- * ==========================================
- * LEAGUE UPCOMING EVENTS
  * GET /api/sports/leagues/:id/events/upcoming
- * ==========================================
  */
 const getLeagueUpcomingEvents = async (req, res) => {
   try {
@@ -119,20 +134,17 @@ const getLeagueUpcomingEvents = async (req, res) => {
       data: data.events || [],
     });
   } catch (error) {
-    console.error("Get upcoming league events error:", error);
+    console.error("Upcoming events error:", error);
 
     res.status(500).json({
       success: false,
-      message: "Failed to fetch upcoming league events",
+      message: "Failed to fetch upcoming events",
     });
   }
 };
 
 /**
- * ==========================================
- * LEAGUE PAST EVENTS
  * GET /api/sports/leagues/:id/events/past
- * ==========================================
  */
 const getLeaguePastEvents = async (req, res) => {
   try {
@@ -152,20 +164,26 @@ const getLeaguePastEvents = async (req, res) => {
       data: data.events || [],
     });
   } catch (error) {
-    console.error("Get past league events error:", error);
+    console.error("Past events error:", error);
 
     res.status(500).json({
       success: false,
-      message: "Failed to fetch past league events",
+      message: "Failed to fetch past events",
     });
   }
 };
 
+/*
+|--------------------------------------------------------------------------
+| TEAMS
+|--------------------------------------------------------------------------
+*/
+
 /**
- * ==========================================
- * TEAMS
  * GET /api/sports/teams
- * ==========================================
+ *
+ * Example:
+ * /api/sports/teams?league=English_Premier_League
  */
 const getTeams = async (req, res) => {
   try {
@@ -174,7 +192,7 @@ const getTeams = async (req, res) => {
     if (!league && !sport && !country) {
       return res.status(400).json({
         success: false,
-        message: "Please provide at least one filter",
+        message: "Please provide a league, sport or country",
       });
     }
 
@@ -199,10 +217,7 @@ const getTeams = async (req, res) => {
 };
 
 /**
- * ==========================================
- * TEAM DETAILS
  * GET /api/sports/teams/:id
- * ==========================================
  */
 const getTeamById = async (req, res) => {
   try {
@@ -217,7 +232,7 @@ const getTeamById = async (req, res) => {
 
     const data = await sportsService.getTeamById(id);
 
-    const team = data.teams?.[0] || null;
+    const team = data.teams?.[0];
 
     if (!team) {
       return res.status(404).json({
@@ -240,11 +255,14 @@ const getTeamById = async (req, res) => {
   }
 };
 
+/*
+|--------------------------------------------------------------------------
+| MATCH / EVENT
+|--------------------------------------------------------------------------
+*/
+
 /**
- * ==========================================
- * EVENT DETAILS
  * GET /api/sports/events/:id
- * ==========================================
  */
 const getEventById = async (req, res) => {
   try {
@@ -259,12 +277,12 @@ const getEventById = async (req, res) => {
 
     const data = await sportsService.getEventById(id);
 
-    const event = data.events?.[0] || null;
+    const event = data.events?.[0];
 
     if (!event) {
       return res.status(404).json({
         success: false,
-        message: "Match/event not found",
+        message: "Match not found",
       });
     }
 
@@ -273,7 +291,7 @@ const getEventById = async (req, res) => {
       data: event,
     });
   } catch (error) {
-    console.error("Get event details error:", error);
+    console.error("Get match details error:", error);
 
     res.status(500).json({
       success: false,
@@ -282,11 +300,18 @@ const getEventById = async (req, res) => {
   }
 };
 
+/*
+|--------------------------------------------------------------------------
+| EXPORT
+|--------------------------------------------------------------------------
+*/
+
 module.exports = {
   getSportsCategories,
 
   getLeagues,
   getLeagueById,
+
   getLeagueUpcomingEvents,
   getLeaguePastEvents,
 

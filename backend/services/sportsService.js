@@ -3,9 +3,12 @@ const SPORTS_API_BASE_URL =
 
 const SPORTS_API_KEY = process.env.SPORTS_API_KEY || "123";
 
-/**
- * Build TheSportsDB API URL
- */
+/*
+|--------------------------------------------------------------------------
+| Build API URL
+|--------------------------------------------------------------------------
+*/
+
 const buildUrl = (endpoint, params = {}) => {
   const url = new URL(`${SPORTS_API_BASE_URL}/${SPORTS_API_KEY}/${endpoint}`);
 
@@ -18,13 +21,16 @@ const buildUrl = (endpoint, params = {}) => {
   return url.toString();
 };
 
-/**
- * Generic request function
- */
+/*
+|--------------------------------------------------------------------------
+| Generic API Request
+|--------------------------------------------------------------------------
+*/
+
 const requestSportsApi = async (endpoint, params = {}) => {
   const url = buildUrl(endpoint, params);
 
-  console.log("Sports API:", url);
+  console.log("Sports API Request:", url);
 
   const response = await fetch(url);
 
@@ -35,11 +41,49 @@ const requestSportsApi = async (endpoint, params = {}) => {
   return response.json();
 };
 
-/**
- * ==========================================
- * SPORTS
- * ==========================================
- */
+/*
+|--------------------------------------------------------------------------
+| Normalize sport names
+|--------------------------------------------------------------------------
+|
+| Frontend:
+| Football
+|
+| TheSportsDB:
+| Soccer
+|
+|--------------------------------------------------------------------------
+*/
+
+const normalizeSport = (sport) => {
+  if (!sport) {
+    return sport;
+  }
+
+  const normalized = sport.trim().toLowerCase();
+
+  const sportMap = {
+    football: "Soccer",
+    soccer: "Soccer",
+    cricket: "Cricket",
+    basketball: "Basketball",
+    tennis: "Tennis",
+    baseball: "Baseball",
+    volleyball: "Volleyball",
+    hockey: "Ice Hockey",
+    "ice hockey": "Ice Hockey",
+    rugby: "Rugby",
+    motorsport: "Motorsport",
+  };
+
+  return sportMap[normalized] || sport;
+};
+
+/*
+|--------------------------------------------------------------------------
+| SPORTS CATEGORIES
+|--------------------------------------------------------------------------
+*/
 
 /**
  * Get all sports
@@ -48,11 +92,11 @@ const getAllSports = async () => {
   return requestSportsApi("all_sports.php");
 };
 
-/**
- * ==========================================
- * LEAGUES
- * ==========================================
- */
+/*
+|--------------------------------------------------------------------------
+| LEAGUES
+|--------------------------------------------------------------------------
+*/
 
 /**
  * Get leagues
@@ -62,8 +106,14 @@ const getAllSports = async () => {
  * country
  */
 const getLeagues = async ({ sport, country } = {}) => {
+  const apiSport = normalizeSport(sport);
+
+  console.log("Requested sport:", sport);
+
+  console.log("Normalized API sport:", apiSport);
+
   return requestSportsApi("search_all_leagues.php", {
-    s: sport,
+    s: apiSport,
     c: country,
   });
 };
@@ -95,24 +145,21 @@ const getLeaguePastEvents = async (leagueId) => {
   });
 };
 
-/**
- * ==========================================
- * TEAMS
- * ==========================================
- */
+/*
+|--------------------------------------------------------------------------
+| TEAMS
+|--------------------------------------------------------------------------
+*/
 
 /**
- * Get teams
- *
- * Optional:
- * league
- * sport
- * country
+ * Get teams by league
  */
 const getTeams = async ({ league, sport, country } = {}) => {
+  const apiSport = normalizeSport(sport);
+
   return requestSportsApi("search_all_teams.php", {
     l: league,
-    s: sport,
+    s: apiSport,
     c: country,
   });
 };
@@ -126,20 +173,26 @@ const getTeamById = async (teamId) => {
   });
 };
 
-/**
- * ==========================================
- * EVENTS
- * ==========================================
- */
+/*
+|--------------------------------------------------------------------------
+| EVENTS / MATCHES
+|--------------------------------------------------------------------------
+*/
 
 /**
- * Get event details
+ * Get event / match details
  */
 const getEventById = async (eventId) => {
   return requestSportsApi("lookupevent.php", {
     id: eventId,
   });
 };
+
+/*
+|--------------------------------------------------------------------------
+| EXPORT
+|--------------------------------------------------------------------------
+*/
 
 module.exports = {
   getAllSports,

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import { Link, useParams } from "react-router-dom";
 
 import { getTeamById } from "../services/sportsService";
@@ -7,30 +8,54 @@ function SportsTeamDetails() {
   const { id } = useParams();
 
   const [team, setTeam] = useState(null);
+
   const [loading, setLoading] = useState(true);
+
+  const [error, setError] = useState("");
 
   useEffect(() => {
     loadTeam();
   }, [id]);
 
-  async function loadTeam() {
+  const loadTeam = async () => {
     try {
       setLoading(true);
+      setError("");
 
       const data = await getTeamById(id);
 
       setTeam(data);
     } catch (error) {
-      console.error(error);
+      console.error("Team details error:", error);
+
+      setError("Failed to load team details.");
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-[#17191D] text-white flex items-center justify-center">
-        Loading team...
+        <div className="text-center">
+          <div className="animate-spin w-10 h-10 border-2 border-[#D4A017] border-t-transparent rounded-full mx-auto" />
+
+          <p className="mt-5 text-gray-400">Loading team...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#17191D] text-white flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-400">{error}</p>
+
+          <Link to="/sports" className="inline-block mt-5 text-[#D4A017]">
+            ← Back to Sports
+          </Link>
+        </div>
       </div>
     );
   }
@@ -52,6 +77,8 @@ function SportsTeamDetails() {
           </Link>
 
           <div className="mt-8 bg-[#24272D] border border-white/10 rounded-3xl overflow-hidden">
+            {/* FANART */}
+
             {team.strTeamFanart1 && (
               <div
                 className="h-56 sm:h-72 bg-cover bg-center"
@@ -62,6 +89,8 @@ function SportsTeamDetails() {
             )}
 
             <div className="p-7 sm:p-10">
+              {/* TEAM HEADER */}
+
               <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6">
                 <div className="w-32 h-32 bg-white rounded-2xl flex items-center justify-center">
                   {team.strTeamBadge ? (
@@ -86,6 +115,8 @@ function SportsTeamDetails() {
                 </div>
               </div>
 
+              {/* INFORMATION */}
+
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-10">
                 <Info label="Country" value={team.strCountry} />
 
@@ -95,6 +126,8 @@ function SportsTeamDetails() {
 
                 <Info label="Manager" value={team.strManager} />
               </div>
+
+              {/* DESCRIPTION */}
 
               {team.strDescriptionEN && (
                 <div className="mt-10">

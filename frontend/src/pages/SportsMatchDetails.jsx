@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import { Link, useParams } from "react-router-dom";
 
 import { getEventById } from "../services/sportsService";
@@ -7,30 +8,54 @@ function SportsMatchDetails() {
   const { id } = useParams();
 
   const [event, setEvent] = useState(null);
+
   const [loading, setLoading] = useState(true);
+
+  const [error, setError] = useState("");
 
   useEffect(() => {
     loadEvent();
   }, [id]);
 
-  async function loadEvent() {
+  const loadEvent = async () => {
     try {
       setLoading(true);
+      setError("");
 
       const data = await getEventById(id);
 
       setEvent(data);
     } catch (error) {
-      console.error(error);
+      console.error("Match details error:", error);
+
+      setError("Failed to load match details.");
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-[#17191D] text-white flex items-center justify-center">
-        Loading match...
+        <div className="text-center">
+          <div className="animate-spin w-10 h-10 border-2 border-[#D4A017] border-t-transparent rounded-full mx-auto" />
+
+          <p className="mt-5 text-gray-400">Loading match...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#17191D] text-white flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-400">{error}</p>
+
+          <Link to="/sports" className="inline-block mt-5 text-[#D4A017]">
+            ← Back to Sports
+          </Link>
+        </div>
       </div>
     );
   }
@@ -52,7 +77,7 @@ function SportsMatchDetails() {
           </Link>
 
           <div className="mt-8 bg-[#24272D] border border-white/10 rounded-3xl p-7 sm:p-12">
-            {/* EVENT META */}
+            {/* MATCH INFORMATION */}
 
             <div className="text-center">
               <p className="text-[#D4A017] uppercase tracking-[2px] text-sm">
@@ -114,9 +139,9 @@ function SportsMatchDetails() {
               <Info label="Round" value={event.intRound} />
             </div>
 
-            {/* DESCRIPTION */}
+            {/* POSTPONED */}
 
-            {event.strPostponed && (
+            {event.strPostponed === "yes" && (
               <div className="mt-8 bg-red-500/10 border border-red-500/20 rounded-xl p-5 text-red-300">
                 This match has been postponed.
               </div>

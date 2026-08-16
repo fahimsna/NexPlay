@@ -5,6 +5,7 @@ const {
 
   getLeagues,
   getLeagueById,
+
   getLeagueUpcomingEvents,
   getLeaguePastEvents,
 
@@ -16,44 +17,50 @@ const {
 
 const router = express.Router();
 
-/**
- * Sports Categories
- */
+/*
+|--------------------------------------------------------------------------
+| SPORTS
+|--------------------------------------------------------------------------
+*/
+
 router.get("/categories", getSportsCategories);
 
-/**
- * League Explorer
- */
+/*
+|--------------------------------------------------------------------------
+| LEAGUES
+|--------------------------------------------------------------------------
+*/
+
 router.get("/leagues", getLeagues);
 
-/**
- * League Details
- */
 router.get("/leagues/:id", getLeagueById);
 
-/**
- * Upcoming League Matches
- */
+/*
+|--------------------------------------------------------------------------
+| LEAGUE EVENTS
+|--------------------------------------------------------------------------
+*/
+
 router.get("/leagues/:id/events/upcoming", getLeagueUpcomingEvents);
 
-/**
- * Previous League Matches
- */
 router.get("/leagues/:id/events/past", getLeaguePastEvents);
 
-/**
- * Team Explorer
- */
+/*
+|--------------------------------------------------------------------------
+| TEAMS
+|--------------------------------------------------------------------------
+*/
+
 router.get("/teams", getTeams);
 
-/**
- * Team Details
- */
 router.get("/teams/:id", getTeamById);
 
-/**
- * Match Details
- */
+/*
+|--------------------------------------------------------------------------
+| MATCHES
+|--------------------------------------------------------------------------
+*/
+
 router.get("/events/:id", getEventById);
 
 module.exports = router;
