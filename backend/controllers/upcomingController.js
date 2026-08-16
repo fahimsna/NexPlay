@@ -11,16 +11,23 @@ const createUpcoming = async (req, res) => {
     console.log("CREATE COMPANY:", userId);
 
     const content = await UpcomingContent.create({
-      ...req.body,
-
+      title: req.body.title,
+      description: req.body.description,
+      genre: req.body.genre,
+      releaseDate: req.body.releaseDate,
+      image: req.body.image || req.body.imageUrl || "",
       companyId: userId,
+
+      // Backend model accepts only:
+      // pending, approved, rejected
+      status: "pending",
     });
 
-    res.status(201).json(content);
+    return res.status(201).json(content);
   } catch (error) {
-    console.log("CREATE ERROR:", error.message);
+    console.error("CREATE UPCOMING ERROR:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       message: error.message,
     });
   }
@@ -32,16 +39,17 @@ const createUpcoming = async (req, res) => {
 
 const getUpcoming = async (req, res) => {
   try {
-    const contents = await UpcomingContent.find().populate(
-      "companyId",
-      "companyName",
-    );
+    const contents = await UpcomingContent.find()
+      .populate("companyId", "companyName")
+      .sort({
+        releaseDate: 1,
+      });
 
-    res.json(contents);
+    return res.json(contents);
   } catch (error) {
-    console.log("PUBLIC ERROR:", error.message);
+    console.error("GET UPCOMING ERROR:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       message: error.message,
     });
   }
@@ -59,15 +67,17 @@ const getMyUpcoming = async (req, res) => {
 
     const contents = await UpcomingContent.find({
       companyId: userId,
+    }).sort({
+      releaseDate: 1,
     });
 
     console.log("MY CONTENT COUNT:", contents.length);
 
-    res.json(contents);
+    return res.json(contents);
   } catch (error) {
-    console.log("MY ERROR:", error.message);
+    console.error("MY ERROR:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       message: error.message,
     });
   }
@@ -89,21 +99,30 @@ const updateUpcoming = async (req, res) => {
       });
     }
 
+    // Only the company that created the content can update it
     if (content.companyId.toString() !== userId.toString()) {
       return res.status(403).json({
         message: "Access denied",
       });
     }
 
-    Object.assign(content, req.body);
+    const updateData = {
+      title: req.body.title,
+      description: req.body.description,
+      genre: req.body.genre,
+      releaseDate: req.body.releaseDate,
+      image: req.body.image || req.body.imageUrl || "",
+    };
+
+    Object.assign(content, updateData);
 
     await content.save();
 
-    res.json(content);
+    return res.json(content);
   } catch (error) {
-    console.log("UPDATE ERROR:", error.message);
+    console.error("UPDATE UPCOMING ERROR:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       message: error.message,
     });
   }
@@ -125,25 +144,25 @@ const deleteUpcoming = async (req, res) => {
       });
     }
 
-    console.log("DELETE CONTENT COMPANY:", content.companyId.toString());
-
-    console.log("LOGGED COMPANY:", userId.toString());
-
+    // Only the company that created the content can delete it
     if (content.companyId.toString() !== userId.toString()) {
       return res.status(403).json({
         message: "Access denied",
       });
     }
 
+    console.log("DELETE CONTENT COMPANY:", content.companyId.toString());
+    console.log("LOGGED COMPANY:", userId.toString());
+
     await content.deleteOne();
 
-    res.json({
+    return res.json({
       message: "Deleted successfully",
     });
   } catch (error) {
-    console.log("DELETE ERROR:", error.message);
+    console.error("DELETE UPCOMING ERROR:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       message: error.message,
     });
   }
@@ -151,12 +170,8 @@ const deleteUpcoming = async (req, res) => {
 
 module.exports = {
   createUpcoming,
-
   getUpcoming,
-
   getMyUpcoming,
-
   updateUpcoming,
-
   deleteUpcoming,
 };

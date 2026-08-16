@@ -21,7 +21,7 @@ Thank you......
 
 For testing the application, the following account can be used:
 
-### User Account
+### Company Account
 
 Email:fahim202678@gmail.com
 
