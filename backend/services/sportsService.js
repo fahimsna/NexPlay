@@ -4,7 +4,7 @@ const SPORTS_API_BASE_URL =
 const SPORTS_API_KEY = process.env.SPORTS_API_KEY || "123";
 
 /**
- * Build a TheSportsDB API URL.
+ * Build TheSportsDB API URL
  */
 const buildUrl = (endpoint, params = {}) => {
   const url = new URL(`${SPORTS_API_BASE_URL}/${SPORTS_API_KEY}/${endpoint}`);
@@ -19,7 +19,7 @@ const buildUrl = (endpoint, params = {}) => {
 };
 
 /**
- * Generic request helper.
+ * Generic API request
  */
 const requestSportsApi = async (endpoint, params = {}) => {
   const url = buildUrl(endpoint, params);
@@ -30,24 +30,22 @@ const requestSportsApi = async (endpoint, params = {}) => {
     throw new Error(`Sports API request failed with status ${response.status}`);
   }
 
-  const data = await response.json();
-
-  return data;
+  return response.json();
 };
 
 /**
- * Get all sports categories.
+ * Get all sports categories
  */
 const getAllSports = async () => {
   return requestSportsApi("all_sports.php");
 };
 
 /**
- * Get leagues.
+ * Get leagues
  *
  * Optional:
- * - sport
- * - country
+ * sport
+ * country
  */
 const getLeagues = async ({ sport, country } = {}) => {
   return requestSportsApi("search_all_leagues.php", {
@@ -57,7 +55,7 @@ const getLeagues = async ({ sport, country } = {}) => {
 };
 
 /**
- * Get a single league by ID.
+ * Get league by ID
  */
 const getLeagueById = async (leagueId) => {
   return requestSportsApi("lookupleague.php", {
@@ -66,12 +64,12 @@ const getLeagueById = async (leagueId) => {
 };
 
 /**
- * Get teams for a league.
+ * Get teams
  *
  * Optional:
- * - league
- * - sport
- * - country
+ * league
+ * sport
+ * country
  */
 const getTeams = async ({ league, sport, country } = {}) => {
   return requestSportsApi("search_all_teams.php", {
@@ -82,7 +80,7 @@ const getTeams = async ({ league, sport, country } = {}) => {
 };
 
 /**
- * Get a single team by ID.
+ * Get team by ID
  */
 const getTeamById = async (teamId) => {
   return requestSportsApi("lookupteam.php", {
@@ -91,7 +89,7 @@ const getTeamById = async (teamId) => {
 };
 
 /**
- * Get a single event/match by ID.
+ * Get match/event by ID
  */
 const getEventById = async (eventId) => {
   return requestSportsApi("lookupevent.php", {
