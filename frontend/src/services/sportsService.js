@@ -2,77 +2,166 @@ import axios from "axios";
 
 /*
 |--------------------------------------------------------------------------
-| TheSportsDB Configuration
+| TheSportsDB
+|--------------------------------------------------------------------------
+|
+| Used for:
+| - Sports categories
+| - Leagues
+| - Teams
+| - League events
+| - Event details
+|
 |--------------------------------------------------------------------------
 */
 
 const API_KEY = "123";
 
-const BASE_URL = `https://www.thesportsdb.com/api/v1/json/${API_KEY}`;
-
-/*
-|--------------------------------------------------------------------------
-| Axios Instance
-|--------------------------------------------------------------------------
-*/
+const SPORTS_DB_URL = `https://www.thesportsdb.com/api/v1/json/${API_KEY}`;
 
 const sportsApi = axios.create({
-  baseURL: BASE_URL,
+  baseURL: SPORTS_DB_URL,
   timeout: 15000,
 });
 
 /*
 |--------------------------------------------------------------------------
-| Sport Mapping
+| ESPN SCOREBOARD API
+|--------------------------------------------------------------------------
+|
+| Used for:
+| - Live matches
+| - Today's matches
+| - Upcoming matches
+|
+| ESPN does not require an API key for these public scoreboard endpoints.
+|
+|--------------------------------------------------------------------------
+*/
+
+const ESPN_URLS = [
+  {
+    name: "Football",
+    icon: "⚽",
+    sport: "football",
+    url: "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard",
+  },
+
+  {
+    name: "College Football",
+    icon: "🏈",
+    sport: "football",
+    url: "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard",
+  },
+
+  {
+    name: "Soccer",
+    icon: "⚽",
+    sport: "soccer",
+    url: "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard",
+  },
+
+  {
+    name: "MLS",
+    icon: "⚽",
+    sport: "soccer",
+    url: "https://site.api.espn.com/apis/site/v2/sports/soccer/usa.1/scoreboard",
+  },
+
+  {
+    name: "NBA",
+    icon: "🏀",
+    sport: "basketball",
+    url: "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard",
+  },
+
+  {
+    name: "WNBA",
+    icon: "🏀",
+    sport: "basketball",
+    url: "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/scoreboard",
+  },
+
+  {
+    name: "NCAA Basketball",
+    icon: "🏀",
+    sport: "basketball",
+    url: "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard",
+  },
+
+  {
+    name: "MLB",
+    icon: "⚾",
+    sport: "baseball",
+    url: "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard",
+  },
+
+  {
+    name: "NHL",
+    icon: "🏒",
+    sport: "hockey",
+    url: "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard",
+  },
+
+  {
+    name: "Tennis",
+    icon: "🎾",
+    sport: "tennis",
+    url: "https://site.api.espn.com/apis/site/v2/sports/tennis/atp/scoreboard",
+  },
+
+  {
+    name: "Golf",
+    icon: "⛳",
+    sport: "golf",
+    url: "https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard",
+  },
+];
+
+/*
+|--------------------------------------------------------------------------
+| DATE
+|--------------------------------------------------------------------------
+*/
+
+const getToday = () => {
+  const date = new Date();
+
+  const year = date.getFullYear();
+
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}${month}${day}`;
+};
+
+/*
+|--------------------------------------------------------------------------
+| NORMALIZE SPORT
 |--------------------------------------------------------------------------
 */
 
 const SPORT_MAPPING = {
   football: "Soccer",
   soccer: "Soccer",
-
   cricket: "Cricket",
-
   basketball: "Basketball",
-
   tennis: "Tennis",
-
   baseball: "Baseball",
-
-  rugby: "Rugby",
-
-  golf: "Golf",
-
-  hockey: "Ice Hockey",
-
   volleyball: "Volleyball",
-
+  hockey: "Ice Hockey",
+  "ice hockey": "Ice Hockey",
+  rugby: "Rugby",
+  golf: "Golf",
   handball: "Handball",
-
   boxing: "Boxing",
-
   wrestling: "Wrestling",
-
   motorsport: "Motorsport",
-
   formula1: "Motorsport",
 };
 
-/*
-|--------------------------------------------------------------------------
-| Normalize Sport
-|--------------------------------------------------------------------------
-*/
-
 const normalizeSport = (sport) => {
-  /*
-  If an object is accidentally passed:
-  
-  {
-    sport: "Basketball"
-  }
-  */
-
   if (typeof sport === "object" && sport !== null) {
     sport = sport.sport || sport.name || sport.strSport || "";
   }
@@ -88,22 +177,20 @@ const normalizeSport = (sport) => {
 
 /*
 |--------------------------------------------------------------------------
+| THE SPORT DB
+|--------------------------------------------------------------------------
+*/
+
+/*
+|--------------------------------------------------------------------------
 | GET SPORTS
 |--------------------------------------------------------------------------
 */
 
 export const getSports = async () => {
-  try {
-    const response = await sportsApi.get("/all_sports.php");
+  const response = await sportsApi.get("/all_sports.php");
 
-    console.log("GET SPORTS:", response.data);
-
-    return response.data?.sports || [];
-  } catch (error) {
-    console.error("GET SPORTS ERROR:", error);
-
-    throw error;
-  }
+  return response.data?.sports || [];
 };
 
 /*
@@ -123,17 +210,9 @@ export const getSportsCategories = async () => {
 */
 
 export const getAllLeagues = async () => {
-  try {
-    const response = await sportsApi.get("/all_leagues.php");
+  const response = await sportsApi.get("/all_leagues.php");
 
-    console.log("GET ALL LEAGUES:", response.data);
-
-    return response.data?.leagues || [];
-  } catch (error) {
-    console.error("GET ALL LEAGUES ERROR:", error);
-
-    throw error;
-  }
+  return response.data?.leagues || [];
 };
 
 /*
@@ -143,82 +222,20 @@ export const getAllLeagues = async () => {
 */
 
 export const getLeagues = async (sport) => {
-  try {
-    console.log("Loading leagues for:", sport);
+  const normalizedSport = normalizeSport(sport);
 
-    /*
-      --------------------------------------------------------------
-      Normalize object/string
-      --------------------------------------------------------------
-      */
-
-    const normalizedSport = normalizeSport(sport);
-
-    console.log("SPORT SELECTED:", {
-      sport: normalizedSport,
-    });
-
-    if (!normalizedSport) {
-      console.warn("No sport supplied.");
-
-      return [];
-    }
-
-    console.log("SPORT SENT TO API:", {
-      sport: normalizedSport,
-    });
-
-    /*
-      --------------------------------------------------------------
-      IMPORTANT
-      --------------------------------------------------------------
-      
-      Use params:
-      
-      {
-        s: "Basketball"
-      }
-      
-      NOT:
-      
-      {
-        sport]: "Basketball"
-      }
-      
-      --------------------------------------------------------------
-      */
-
-    const response = await sportsApi.get("/search_all_leagues.php", {
-      params: {
-        s: normalizedSport,
-      },
-    });
-
-    console.log("LEAGUE API RESPONSE:", response.data);
-
-    const leagues = response.data?.countries || response.data?.leagues || [];
-
-    console.log("LEAGUES FOUND:", leagues.length);
-
-    return leagues;
-  } catch (error) {
-    console.error("GET LEAGUES ERROR:", error);
-
-    if (error.response) {
-      console.error("STATUS:", error.response.status);
-
-      console.error("DATA:", error.response.data);
-    }
-
-    throw error;
+  if (!normalizedSport) {
+    return [];
   }
-};
 
-/*
-|--------------------------------------------------------------------------
-| GET LEAGUES BY SPORT
-|--------------------------------------------------------------------------
-*/
+  const response = await sportsApi.get("/search_all_leagues.php", {
+    params: {
+      s: normalizedSport,
+    },
+  });
+
+  return response.data?.countries || response.data?.leagues || [];
+};
 
 export const getLeaguesBySport = async (sport) => {
   return getLeagues(sport);
@@ -226,157 +243,107 @@ export const getLeaguesBySport = async (sport) => {
 
 /*
 |--------------------------------------------------------------------------
-| GET LEAGUE BY ID
+| GET LEAGUE
 |--------------------------------------------------------------------------
 */
 
 export const getLeagueById = async (id) => {
-  try {
-    if (!id) {
-      return null;
-    }
-
-    const response = await sportsApi.get("/lookupleague.php", {
-      params: {
-        id: id,
-      },
-    });
-
-    console.log("LEAGUE DETAILS:", response.data);
-
-    return response.data?.leagues?.[0] || null;
-  } catch (error) {
-    console.error("GET LEAGUE ERROR:", error);
-
-    throw error;
+  if (!id) {
+    return null;
   }
+
+  const response = await sportsApi.get("/lookupleague.php", {
+    params: {
+      id,
+    },
+  });
+
+  return response.data?.leagues?.[0] || null;
 };
 
 /*
 |--------------------------------------------------------------------------
-| GET TEAMS BY LEAGUE
+| TEAMS
 |--------------------------------------------------------------------------
 */
 
 export const getTeamsByLeague = async (leagueName) => {
-  try {
-    if (!leagueName) {
-      return [];
-    }
-
-    const response = await sportsApi.get("/search_all_teams.php", {
-      params: {
-        l: leagueName,
-      },
-    });
-
-    console.log("TEAMS RESPONSE:", response.data);
-
-    return response.data?.teams || [];
-  } catch (error) {
-    console.error("GET TEAMS ERROR:", error);
-
-    throw error;
+  if (!leagueName) {
+    return [];
   }
+
+  const response = await sportsApi.get("/search_all_teams.php", {
+    params: {
+      l: leagueName,
+    },
+  });
+
+  return response.data?.teams || [];
 };
 
 /*
 |--------------------------------------------------------------------------
-| GET TEAM BY ID
+| GET TEAM
 |--------------------------------------------------------------------------
 */
 
 export const getTeamById = async (id) => {
-  try {
-    if (!id) {
-      return null;
-    }
-
-    const response = await sportsApi.get("/lookupteam.php", {
-      params: {
-        id: id,
-      },
-    });
-
-    return response.data?.teams?.[0] || null;
-  } catch (error) {
-    console.error("GET TEAM ERROR:", error);
-
-    throw error;
+  if (!id) {
+    return null;
   }
+
+  const response = await sportsApi.get("/lookupteam.php", {
+    params: {
+      id,
+    },
+  });
+
+  return response.data?.teams?.[0] || null;
 };
 
 /*
 |--------------------------------------------------------------------------
-| GET EVENT BY ID
+| GET EVENT
 |--------------------------------------------------------------------------
 */
 
 export const getEventById = async (id) => {
-  try {
-    if (!id) {
-      return null;
-    }
-
-    const response = await sportsApi.get("/lookupevent.php", {
-      params: {
-        id: id,
-      },
-    });
-
-    console.log("EVENT DETAILS:", response.data);
-
-    return response.data?.events?.[0] || null;
-  } catch (error) {
-    console.error("GET EVENT ERROR:", error);
-
-    throw error;
+  if (!id) {
+    return null;
   }
+
+  const response = await sportsApi.get("/lookupevent.php", {
+    params: {
+      id,
+    },
+  });
+
+  return response.data?.events?.[0] || null;
 };
 
 /*
 |--------------------------------------------------------------------------
-| UPCOMING LEAGUE EVENTS
+| LEAGUE EVENTS
 |--------------------------------------------------------------------------
 */
 
 export const getLeagueUpcomingEvents = async (leagueId) => {
-  try {
-    if (!leagueId) {
-      return [];
-    }
-
-    const response = await sportsApi.get("/eventsnextleague.php", {
-      params: {
-        id: leagueId,
-      },
-    });
-
-    console.log("UPCOMING LEAGUE EVENTS:", response.data);
-
-    return response.data?.events || [];
-  } catch (error) {
-    console.error("UPCOMING LEAGUE EVENTS ERROR:", error);
-
-    throw error;
+  if (!leagueId) {
+    return [];
   }
-};
 
-/*
-|--------------------------------------------------------------------------
-| NEXT LEAGUE EVENTS
-|--------------------------------------------------------------------------
-*/
+  const response = await sportsApi.get("/eventsnextleague.php", {
+    params: {
+      id: leagueId,
+    },
+  });
+
+  return response.data?.events || [];
+};
 
 export const getNextLeagueEvents = async (leagueId) => {
   return getLeagueUpcomingEvents(leagueId);
 };
-
-/*
-|--------------------------------------------------------------------------
-| LEAGUE NEXT EVENTS
-|--------------------------------------------------------------------------
-*/
 
 export const getLeagueNextEvents = async (leagueId) => {
   return getLeagueUpcomingEvents(leagueId);
@@ -384,37 +351,23 @@ export const getLeagueNextEvents = async (leagueId) => {
 
 /*
 |--------------------------------------------------------------------------
-| PAST LEAGUE EVENTS
+| PAST EVENTS
 |--------------------------------------------------------------------------
 */
 
 export const getLeaguePastEvents = async (leagueId) => {
-  try {
-    if (!leagueId) {
-      return [];
-    }
-
-    const response = await sportsApi.get("/eventspastleague.php", {
-      params: {
-        id: leagueId,
-      },
-    });
-
-    console.log("PAST LEAGUE EVENTS:", response.data);
-
-    return response.data?.events || [];
-  } catch (error) {
-    console.error("PAST LEAGUE EVENTS ERROR:", error);
-
-    throw error;
+  if (!leagueId) {
+    return [];
   }
-};
 
-/*
-|--------------------------------------------------------------------------
-| PAST LEAGUE EVENTS ALIAS
-|--------------------------------------------------------------------------
-*/
+  const response = await sportsApi.get("/eventspastleague.php", {
+    params: {
+      id: leagueId,
+    },
+  });
+
+  return response.data?.events || [];
+};
 
 export const getPastLeagueEvents = async (leagueId) => {
   return getLeaguePastEvents(leagueId);
@@ -422,122 +375,307 @@ export const getPastLeagueEvents = async (leagueId) => {
 
 /*
 |--------------------------------------------------------------------------
-| NEXT TEAM EVENTS
+| TEAM EVENTS
 |--------------------------------------------------------------------------
 */
 
 export const getNextTeamEvents = async (teamId) => {
-  try {
-    if (!teamId) {
-      return [];
-    }
-
-    const response = await sportsApi.get("/eventsnext.php", {
-      params: {
-        id: teamId,
-      },
-    });
-
-    return response.data?.events || [];
-  } catch (error) {
-    console.error("GET NEXT TEAM EVENTS ERROR:", error);
-
-    throw error;
+  if (!teamId) {
+    return [];
   }
-};
 
-/*
-|--------------------------------------------------------------------------
-| PAST TEAM EVENTS
-|--------------------------------------------------------------------------
-*/
+  const response = await sportsApi.get("/eventsnext.php", {
+    params: {
+      id: teamId,
+    },
+  });
+
+  return response.data?.events || [];
+};
 
 export const getPastTeamEvents = async (teamId) => {
-  try {
-    if (!teamId) {
-      return [];
-    }
-
-    const response = await sportsApi.get("/eventslast.php", {
-      params: {
-        id: teamId,
-      },
-    });
-
-    return response.data?.results || response.data?.events || [];
-  } catch (error) {
-    console.error("GET PAST TEAM EVENTS ERROR:", error);
-
-    throw error;
+  if (!teamId) {
+    return [];
   }
+
+  const response = await sportsApi.get("/eventslast.php", {
+    params: {
+      id: teamId,
+    },
+  });
+
+  return response.data?.results || response.data?.events || [];
 };
 
 /*
 |--------------------------------------------------------------------------
-| SEARCH TEAM
+| SEARCH
 |--------------------------------------------------------------------------
 */
 
 export const searchTeam = async (teamName) => {
-  try {
-    if (!teamName) {
-      return [];
-    }
-
-    const response = await sportsApi.get("/searchteams.php", {
-      params: {
-        t: teamName,
-      },
-    });
-
-    return response.data?.teams || [];
-  } catch (error) {
-    console.error("SEARCH TEAM ERROR:", error);
-
-    throw error;
+  if (!teamName) {
+    return [];
   }
+
+  const response = await sportsApi.get("/searchteams.php", {
+    params: {
+      t: teamName,
+    },
+  });
+
+  return response.data?.teams || [];
+};
+
+export const searchLeague = async (leagueName) => {
+  if (!leagueName) {
+    return [];
+  }
+
+  const response = await sportsApi.get("/search_all_leagues.php", {
+    params: {
+      l: leagueName,
+    },
+  });
+
+  return response.data?.countries || response.data?.leagues || [];
 };
 
 /*
 |--------------------------------------------------------------------------
-| SEARCH LEAGUE
+| ESPN EVENT NORMALIZER
 |--------------------------------------------------------------------------
 */
 
-export const searchLeague = async (leagueName) => {
-  try {
-    if (!leagueName) {
-      return [];
-    }
+const normalizeESPNEvent = (event, source) => {
+  const competition = event?.competitions?.[0] || {};
 
-    const response = await sportsApi.get("/search_all_leagues.php", {
+  const competitors = competition?.competitors || [];
+
+  const home = competitors.find((team) => team.homeAway === "home") || {};
+
+  const away = competitors.find((team) => team.homeAway === "away") || {};
+
+  const status = competition?.status || event?.status || {};
+
+  const state = status?.type?.state || "pre";
+
+  let normalizedStatus = "UPCOMING";
+
+  if (state === "in") {
+    normalizedStatus = "LIVE";
+  }
+
+  if (state === "post") {
+    normalizedStatus = "FINISHED";
+  }
+
+  return {
+    id: event?.id,
+
+    name:
+      event?.name ||
+      `${away?.team?.displayName || "Away"} vs ${
+        home?.team?.displayName || "Home"
+      }`,
+
+    shortName:
+      event?.shortName ||
+      `${away?.team?.abbreviation || "AWY"} vs ${
+        home?.team?.abbreviation || "HOM"
+      }`,
+
+    sport: source?.sport,
+
+    sportName: source?.name,
+
+    icon: source?.icon,
+
+    league:
+      event?.league?.name ||
+      event?.season?.name ||
+      event?.competitions?.[0]?.league?.name ||
+      source?.name,
+
+    venue: competition?.venue?.fullName || "",
+
+    date: event?.date || competition?.date || null,
+
+    status: normalizedStatus,
+
+    statusText:
+      status?.type?.shortDetail ||
+      status?.type?.detail ||
+      status?.type?.description ||
+      normalizedStatus,
+
+    clock: status?.displayClock || null,
+
+    period: status?.period || null,
+
+    homeTeam: {
+      id: home?.team?.id,
+      name: home?.team?.displayName || home?.team?.shortDisplayName || "Home",
+
+      abbreviation: home?.team?.abbreviation || "",
+
+      logo: home?.team?.logo || null,
+
+      score: home?.score ?? "0",
+    },
+
+    awayTeam: {
+      id: away?.team?.id,
+      name: away?.team?.displayName || away?.team?.shortDisplayName || "Away",
+
+      abbreviation: away?.team?.abbreviation || "",
+
+      logo: away?.team?.logo || null,
+
+      score: away?.score ?? "0",
+    },
+
+    link:
+      event?.links?.find((link) => link.rel?.includes("summary"))?.href ||
+      event?.links?.[0]?.href ||
+      null,
+
+    source: "ESPN",
+  };
+};
+
+/*
+|--------------------------------------------------------------------------
+| GET ESPN EVENTS FROM ONE LEAGUE
+|--------------------------------------------------------------------------
+*/
+
+const getESPNEvents = async (source) => {
+  try {
+    const today = getToday();
+
+    const response = await axios.get(source.url, {
       params: {
-        l: leagueName,
+        dates: today,
+        limit: 100,
       },
+
+      timeout: 15000,
     });
 
-    return response.data?.countries || response.data?.leagues || [];
-  } catch (error) {
-    console.error("SEARCH LEAGUE ERROR:", error);
+    const events = response.data?.events || [];
 
-    throw error;
+    return events.map((event) => normalizeESPNEvent(event, source));
+  } catch (error) {
+    console.error(`ESPN ${source.name} ERROR:`, error?.message);
+
+    return [];
   }
 };
 
 /*
 |--------------------------------------------------------------------------
-| LIVE MATCHES
+| GET ALL LIVE MATCHES
 |--------------------------------------------------------------------------
-|
-| Free TheSportsDB key does not provide
-| reliable live-score data.
-|
 */
 
 export const getLiveMatches = async () => {
-  console.warn("Live matches require TheSportsDB V2/Premium.");
+  const results = await Promise.all(
+    ESPN_URLS.map((source) => getESPNEvents(source)),
+  );
 
-  return [];
+  const events = results.flat().filter((event) => event.status === "LIVE");
+
+  return removeDuplicateEvents(events);
+};
+
+/*
+|--------------------------------------------------------------------------
+| GET TODAY'S MATCHES
+|--------------------------------------------------------------------------
+*/
+
+export const getTodayMatches = async () => {
+  const results = await Promise.all(
+    ESPN_URLS.map((source) => getESPNEvents(source)),
+  );
+
+  const events = results.flat();
+
+  return removeDuplicateEvents(events).sort(
+    (a, b) => new Date(a.date) - new Date(b.date),
+  );
+};
+
+/*
+|--------------------------------------------------------------------------
+| GET UPCOMING MATCHES
+|--------------------------------------------------------------------------
+*/
+
+export const getUpcomingMatches = async () => {
+  const todayMatches = await getTodayMatches();
+
+  return todayMatches.filter((event) => event.status === "UPCOMING");
+};
+
+/*
+|--------------------------------------------------------------------------
+| REMOVE DUPLICATES
+|--------------------------------------------------------------------------
+*/
+
+const removeDuplicateEvents = (events) => {
+  const map = new Map();
+
+  events.forEach((event) => {
+    if (!event?.id) {
+      return;
+    }
+
+    map.set(event.id, event);
+  });
+
+  return Array.from(map.values());
+};
+
+/*
+|--------------------------------------------------------------------------
+| REFRESH LIVE MATCHES
+|--------------------------------------------------------------------------
+|
+| Call this every 30 seconds from the Sports page.
+|
+|--------------------------------------------------------------------------
+*/
+
+export const startLiveScorePolling = (callback, interval = 30000) => {
+  let stopped = false;
+
+  const run = async () => {
+    if (stopped) {
+      return;
+    }
+
+    try {
+      const matches = await getLiveMatches();
+
+      if (!stopped) {
+        callback(matches);
+      }
+    } catch (error) {
+      console.error("Live score polling error:", error);
+    }
+  };
+
+  run();
+
+  const timer = setInterval(run, interval);
+
+  return () => {
+    stopped = true;
+    clearInterval(timer);
+  };
 };
 
 /*
@@ -548,40 +686,26 @@ export const getLiveMatches = async () => {
 
 export default {
   getSports,
-
   getSportsCategories,
-
   getAllLeagues,
-
   getLeagues,
-
   getLeaguesBySport,
-
   getLeagueById,
-
   getTeamsByLeague,
-
   getTeamById,
-
   getEventById,
-
   getLeagueUpcomingEvents,
-
   getNextLeagueEvents,
-
   getLeagueNextEvents,
-
   getLeaguePastEvents,
-
   getPastLeagueEvents,
-
   getNextTeamEvents,
-
   getPastTeamEvents,
-
   searchTeam,
-
   searchLeague,
 
   getLiveMatches,
+  getTodayMatches,
+  getUpcomingMatches,
+  startLiveScorePolling,
 };

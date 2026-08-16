@@ -1,12 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Link } from "react-router-dom";
 
-import { getSportsCategories, getLeagues } from "../services/sportsService";
+import {
+  getSportsCategories,
+  getLeagues,
+  getLiveMatches,
+  getTodayMatches,
+} from "../services/sportsService";
 
 /*
 |--------------------------------------------------------------------------
-| SPORTS REQUIRED BY SPRINT 3
+| MAIN SPORTS
 |--------------------------------------------------------------------------
 */
 
@@ -16,32 +21,87 @@ const SPORTS = [
     icon: "⚽",
     apiName: "Soccer",
   },
+
   {
     name: "Cricket",
     icon: "🏏",
     apiName: "Cricket",
   },
+
   {
     name: "Basketball",
     icon: "🏀",
     apiName: "Basketball",
   },
+
   {
     name: "Tennis",
     icon: "🎾",
     apiName: "Tennis",
   },
+
   {
     name: "Baseball",
     icon: "⚾",
     apiName: "Baseball",
   },
+
+  {
+    name: "Hockey",
+    icon: "🏒",
+    apiName: "Ice Hockey",
+  },
+
   {
     name: "Volleyball",
     icon: "🏐",
     apiName: "Volleyball",
   },
+
+  {
+    name: "Rugby",
+    icon: "🏉",
+    apiName: "Rugby",
+  },
+
+  {
+    name: "Golf",
+    icon: "⛳",
+    apiName: "Golf",
+  },
+
+  {
+    name: "Handball",
+    icon: "🤾",
+    apiName: "Handball",
+  },
+
+  {
+    name: "Boxing",
+    icon: "🥊",
+    apiName: "Boxing",
+  },
+
+  {
+    name: "Motorsport",
+    icon: "🏎️",
+    apiName: "Motorsport",
+  },
 ];
+
+/*
+|--------------------------------------------------------------------------
+| FILTERS
+|--------------------------------------------------------------------------
+*/
+
+const FILTERS = ["All", "Live", "Upcoming", "Finished"];
+
+/*
+|--------------------------------------------------------------------------
+| SPORTS PAGE
+|--------------------------------------------------------------------------
+*/
 
 function Sports() {
   const [apiSports, setApiSports] = useState([]);
@@ -50,9 +110,17 @@ function Sports() {
 
   const [leagues, setLeagues] = useState([]);
 
+  const [liveMatches, setLiveMatches] = useState([]);
+
+  const [todayMatches, setTodayMatches] = useState([]);
+
+  const [activeFilter, setActiveFilter] = useState("All");
+
   const [loadingSports, setLoadingSports] = useState(true);
 
   const [loadingLeagues, setLoadingLeagues] = useState(false);
+
+  const [loadingMatches, setLoadingMatches] = useState(true);
 
   const [error, setError] = useState("");
 
@@ -76,13 +144,11 @@ function Sports() {
 
       const data = await getSportsCategories();
 
-      console.log("API SPORTS:", data);
-
       setApiSports(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Sports error:", error);
 
-      setError("Could not load sports from API.");
+      setError("Could not load sports categories.");
     } finally {
       setLoadingSports(false);
     }
@@ -90,7 +156,48 @@ function Sports() {
 
   /*
   |--------------------------------------------------------------------------
-  | LOAD LEAGUES WHEN SPORT CHANGES
+  | LOAD LIVE + TODAY
+  |--------------------------------------------------------------------------
+  */
+
+  useEffect(() => {
+    loadMatches();
+
+    /*
+    |--------------------------------------------------------------------------
+    | AUTO REFRESH
+    |--------------------------------------------------------------------------
+    */
+
+    const timer = setInterval(loadMatches, 30000);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
+
+  const loadMatches = async () => {
+    try {
+      setLoadingMatches(true);
+
+      const [live, today] = await Promise.all([
+        getLiveMatches(),
+        getTodayMatches(),
+      ]);
+
+      setLiveMatches(Array.isArray(live) ? live : []);
+
+      setTodayMatches(Array.isArray(today) ? today : []);
+    } catch (error) {
+      console.error("Matches error:", error);
+    } finally {
+      setLoadingMatches(false);
+    }
+  };
+
+  /*
+  |--------------------------------------------------------------------------
+  | LOAD LEAGUES
   |--------------------------------------------------------------------------
   */
 
@@ -110,11 +217,7 @@ function Sports() {
 
       const apiSport = sport?.apiName || sportName;
 
-      console.log("Loading leagues for:", apiSport);
-
       const data = await getLeagues(apiSport);
-
-      console.log("LEAGUES:", data);
 
       setLeagues(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -126,26 +229,217 @@ function Sports() {
     }
   };
 
+  /*
+  |--------------------------------------------------------------------------
+  | MATCH FILTER
+  |--------------------------------------------------------------------------
+  */
+
+  const filteredMatches = useMemo(() => {
+    switch (activeFilter) {
+      case "Live":
+        return liveMatches;
+
+      case "Upcoming":
+        return todayMatches.filter((match) => match.status === "UPCOMING");
+
+      case "Finished":
+        return todayMatches.filter((match) => match.status === "FINISHED");
+
+      default:
+        return todayMatches;
+    }
+  }, [activeFilter, liveMatches, todayMatches]);
+
+  /*
+  |--------------------------------------------------------------------------
+  | FORMAT TIME
+  |--------------------------------------------------------------------------
+  */
+
+  const formatMatchTime = (date) => {
+    if (!date) {
+      return "";
+    }
+
+    return new Date(date).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  /*
+  |--------------------------------------------------------------------------
+  | RENDER
+  |--------------------------------------------------------------------------
+  */
+
   return (
     <div className="min-h-screen bg-[#17191D] text-white">
       {/* ================================================================
           HERO
       ================================================================= */}
 
-      <section className="px-5 sm:px-8 lg:px-12 pt-16 pb-12">
-        <div className="max-w-6xl mx-auto">
+      <section className="px-5 sm:px-8 lg:px-12 pt-16 pb-10">
+        <div className="max-w-7xl mx-auto">
           <p className="text-[#D4A017] uppercase tracking-[3px] text-sm font-semibold">
             Sports Explorer
           </p>
 
-          <h1 className="mt-3 text-4xl sm:text-5xl font-black">
-            Explore Sports
-          </h1>
+          <h1 className="mt-3 text-4xl sm:text-5xl font-black">Live Sports</h1>
 
-          <p className="mt-5 max-w-2xl text-gray-400 text-lg leading-8">
-            Discover sports, tournaments, leagues, teams and matches from around
-            the world.
+          <p className="mt-5 max-w-3xl text-gray-400 text-lg leading-8">
+            Follow live scores, today's matches, upcoming games, sports and
+            leagues from around the world.
           </p>
+        </div>
+      </section>
+
+      {/* ================================================================
+          LIVE NOW
+      ================================================================= */}
+
+      <section className="px-5 sm:px-8 lg:px-12 pb-10">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <div className="flex items-center gap-3">
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
+
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500" />
+                </span>
+
+                <p className="text-red-400 uppercase tracking-[2px] text-sm font-bold">
+                  Live Now
+                </p>
+              </div>
+
+              <h2 className="mt-2 text-2xl sm:text-3xl font-black">
+                Live Matches
+              </h2>
+            </div>
+
+            <button
+              onClick={loadMatches}
+              className="px-4 py-2 rounded-lg bg-[#24272D] border border-white/10 text-sm hover:border-[#D4A017]/50 transition"
+            >
+              Refresh
+            </button>
+          </div>
+
+          {loadingMatches ? (
+            <div className="bg-[#24272D] border border-white/10 rounded-2xl p-10 text-center">
+              <div className="w-9 h-9 mx-auto border-2 border-[#D4A017] border-t-transparent rounded-full animate-spin" />
+
+              <p className="mt-4 text-gray-400">Loading live matches...</p>
+            </div>
+          ) : liveMatches.length === 0 ? (
+            <div className="bg-[#24272D] border border-white/10 rounded-2xl p-10 text-center">
+              <div className="text-5xl">📺</div>
+
+              <h3 className="mt-4 text-xl font-bold">
+                No live matches right now
+              </h3>
+
+              <p className="mt-2 text-gray-500">
+                Live events will appear here automatically.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {liveMatches.map((match) => (
+                <MatchCard
+                  key={match.id}
+                  match={match}
+                  formatMatchTime={formatMatchTime}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ================================================================
+          MATCH FILTER
+      ================================================================= */}
+
+      <section className="px-5 sm:px-8 lg:px-12 pb-12">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-wrap gap-3">
+            {FILTERS.map((filter) => (
+              <button
+                key={filter}
+                onClick={() => setActiveFilter(filter)}
+                className={`px-5 py-2.5 rounded-xl font-semibold transition ${
+                  activeFilter === filter
+                    ? "bg-[#D4A017] text-[#17191D]"
+                    : "bg-[#24272D] text-gray-400 border border-white/10 hover:border-[#D4A017]/50"
+                }`}
+              >
+                {filter}
+
+                {filter === "Live" && liveMatches.length > 0 && (
+                  <span className="ml-2">{liveMatches.length}</span>
+                )}
+
+                {filter === "All" && todayMatches.length > 0 && (
+                  <span className="ml-2">{todayMatches.length}</span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ================================================================
+          TODAY'S MATCHES
+      ================================================================= */}
+
+      <section className="px-5 sm:px-8 lg:px-12 pb-14">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-6">
+            <p className="text-[#D4A017] text-sm uppercase tracking-[2px]">
+              Scoreboard
+            </p>
+
+            <h2 className="mt-1 text-2xl sm:text-3xl font-black">
+              {activeFilter === "All"
+                ? "Today's Matches"
+                : `${activeFilter} Matches`}
+            </h2>
+
+            <p className="mt-2 text-gray-500">
+              Automatically updated every 30 seconds
+            </p>
+          </div>
+
+          {loadingMatches ? (
+            <div className="text-center text-gray-500 py-10">
+              Loading matches...
+            </div>
+          ) : filteredMatches.length === 0 ? (
+            <div className="bg-[#24272D] border border-white/10 rounded-2xl p-10 text-center">
+              <div className="text-4xl">🏟️</div>
+
+              <h3 className="mt-4 text-lg font-bold">No matches found</h3>
+
+              <p className="mt-2 text-gray-500">
+                There are no {activeFilter.toLowerCase()} matches available
+                right now.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {filteredMatches.map((match) => (
+                <MatchCard
+                  key={match.id}
+                  match={match}
+                  formatMatchTime={formatMatchTime}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -154,7 +448,7 @@ function Sports() {
       ================================================================= */}
 
       <section className="px-5 sm:px-8 lg:px-12 pb-12">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <div className="flex items-end justify-between mb-6">
             <div>
               <p className="text-[#D4A017] text-sm uppercase tracking-[2px]">
@@ -173,21 +467,17 @@ function Sports() {
             {!loadingSports && (
               <p className="text-sm text-gray-500">
                 {apiSports.length > 0
-                  ? `${apiSports.length} sports available from the API`
-                  : "Sports explorer"}
+                  ? `${apiSports.length} sports available`
+                  : `${SPORTS.length} sports`}
               </p>
             )}
           </div>
-
-          {/* API ERROR */}
 
           {error && (
             <div className="mb-5 bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-300">
               {error}
             </div>
           )}
-
-          {/* SPORTS */}
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {SPORTS.map((sport) => {
@@ -243,7 +533,7 @@ function Sports() {
       ================================================================= */}
 
       <section className="px-5 sm:px-8 lg:px-12 pb-20">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <div className="flex items-end justify-between mb-7">
             <div>
               <p className="text-[#D4A017] text-sm uppercase tracking-[2px]">
@@ -264,8 +554,6 @@ function Sports() {
             )}
           </div>
 
-          {/* LOADING */}
-
           {loadingLeagues && (
             <div className="bg-[#24272D] border border-white/10 rounded-2xl p-12 text-center">
               <div className="w-9 h-9 mx-auto border-2 border-[#D4A017] border-t-transparent rounded-full animate-spin" />
@@ -275,8 +563,6 @@ function Sports() {
               </p>
             </div>
           )}
-
-          {/* ERROR */}
 
           {!loadingLeagues && leagueError && (
             <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-8 text-center">
@@ -291,8 +577,6 @@ function Sports() {
             </div>
           )}
 
-          {/* EMPTY */}
-
           {!loadingLeagues && !leagueError && leagues.length === 0 && (
             <div className="bg-[#24272D] border border-white/10 rounded-2xl p-12 text-center">
               <div className="text-5xl">🏆</div>
@@ -304,8 +588,6 @@ function Sports() {
               </p>
             </div>
           )}
-
-          {/* LEAGUE GRID */}
 
           {!loadingLeagues && !leagueError && leagues.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -322,6 +604,124 @@ function Sports() {
 
 /*
 |--------------------------------------------------------------------------
+| MATCH CARD
+|--------------------------------------------------------------------------
+*/
+
+function MatchCard({ match, formatMatchTime }) {
+  const isLive = match.status === "LIVE";
+
+  const isFinished = match.status === "FINISHED";
+
+  return (
+    <div
+      className={`bg-[#24272D] border rounded-2xl p-5 transition hover:-translate-y-1 ${
+        isLive
+          ? "border-red-500/40"
+          : "border-white/10 hover:border-[#D4A017]/40"
+      }`}
+    >
+      {/* HEADER */}
+
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-xl">{match.icon || "🏆"}</span>
+
+          <div>
+            <p className="text-xs text-gray-500">{match.sportName}</p>
+
+            <p className="text-sm font-semibold">{match.league}</p>
+          </div>
+        </div>
+
+        {isLive ? (
+          <span className="flex items-center gap-2 text-xs font-bold text-red-400">
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+            LIVE
+          </span>
+        ) : (
+          <span
+            className={`text-xs font-semibold ${
+              isFinished ? "text-gray-500" : "text-[#D4A017]"
+            }`}
+          >
+            {isFinished ? "FINISHED" : formatMatchTime(match.date)}
+          </span>
+        )}
+      </div>
+
+      {/* TEAMS */}
+
+      <div className="mt-5 space-y-4">
+        {/* AWAY */}
+
+        <TeamRow team={match.awayTeam} score={match.awayTeam?.score} />
+
+        {/* HOME */}
+
+        <TeamRow team={match.homeTeam} score={match.homeTeam?.score} />
+      </div>
+
+      {/* STATUS */}
+
+      <div className="mt-5 pt-4 border-t border-white/10 flex items-center justify-between">
+        <span className="text-xs text-gray-500">{match.statusText}</span>
+
+        {isLive && match.clock && (
+          <span className="text-xs text-red-400 font-bold">{match.clock}</span>
+        )}
+
+        {!isLive && match.venue && (
+          <span className="text-xs text-gray-600 truncate max-w-[180px]">
+            {match.venue}
+          </span>
+        )}
+      </div>
+
+      {/* ESPN LINK */}
+
+      {match.link && (
+        <a
+          href={match.link}
+          target="_blank"
+          rel="noreferrer"
+          className="block mt-4 text-center text-sm font-semibold text-[#D4A017] hover:underline"
+        >
+          View match details →
+        </a>
+      )}
+    </div>
+  );
+}
+
+/*
+|--------------------------------------------------------------------------
+| TEAM ROW
+|--------------------------------------------------------------------------
+*/
+
+function TeamRow({ team, score }) {
+  return (
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="w-9 h-9 rounded-full bg-[#17191D] flex items-center justify-center overflow-hidden shrink-0">
+          {team?.logo ? (
+            <img src={team.logo} alt="" className="w-7 h-7 object-contain" />
+          ) : (
+            <span className="text-sm">🏆</span>
+          )}
+        </div>
+
+        <p className="font-semibold truncate">{team?.name || "Unknown Team"}</p>
+      </div>
+
+      <p className="text-xl font-black ml-3">{score ?? "-"}</p>
+    </div>
+  );
+}
+
+/*
+|--------------------------------------------------------------------------
 | LEAGUE CARD
 |--------------------------------------------------------------------------
 */
@@ -332,8 +732,6 @@ function LeagueCard({ league }) {
       to={`/sports/league/${league.idLeague}`}
       className="group bg-[#24272D] border border-white/10 rounded-2xl p-6 hover:border-[#D4A017]/50 hover:-translate-y-1 transition"
     >
-      {/* LOGO */}
-
       <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center overflow-hidden">
         {league.strBadge ? (
           <img
@@ -352,25 +750,17 @@ function LeagueCard({ league }) {
         )}
       </div>
 
-      {/* NAME */}
-
       <h3 className="mt-5 text-lg font-bold group-hover:text-[#D4A017] transition">
         {league.strLeague}
       </h3>
-
-      {/* COUNTRY */}
 
       {league.strCountry && (
         <p className="mt-2 text-sm text-gray-500">🌍 {league.strCountry}</p>
       )}
 
-      {/* SPORT */}
-
       {league.strSport && (
         <p className="mt-1 text-sm text-gray-500">{league.strSport}</p>
       )}
-
-      {/* LINK */}
 
       <p className="mt-5 text-sm text-[#D4A017]">Explore league →</p>
     </Link>
