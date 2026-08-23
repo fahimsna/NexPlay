@@ -10,6 +10,7 @@ import {
 } from "react-icons/hi2";
 
 import { getMovieDetails } from "../services/tmdbService";
+import ReviewsSection from "../components/reviews/ReviewsSection";
 
 const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
@@ -423,6 +424,15 @@ function Details() {
                 ))}
               </div>
             </div>
+
+            {/* Ratings & Reviews (Sprint 4) */}
+
+            <ReviewsSection
+              contentId={movie.id}
+              contentType="movie"
+              contentTitle={movie.title}
+              contentPoster={movie.poster_path}
+            />
           </div>
         </div>
       </div>
