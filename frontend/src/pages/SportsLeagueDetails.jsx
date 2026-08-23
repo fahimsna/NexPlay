@@ -6,6 +6,7 @@ import {
   getLeagueById,
   getLeagueUpcomingEvents,
   getLeaguePastEvents,
+  getLeagueStandings,
 } from "../services/sportsService";
 
 function SportsLeagueDetails() {
@@ -16,6 +17,11 @@ function SportsLeagueDetails() {
   const [upcomingEvents, setUpcomingEvents] = useState([]);
 
   const [pastEvents, setPastEvents] = useState([]);
+
+  // Sprint 3: League Standings
+  const [standings, setStandings] = useState([]);
+  const [standingsLoading, setStandingsLoading] = useState(true);
+  const [standingsError, setStandingsError] = useState("");
 
   const [loading, setLoading] = useState(true);
 
@@ -99,12 +105,39 @@ function SportsLeagueDetails() {
 
         setPastEvents([]);
       }
+
+      /*
+      --------------------------------------------------------------
+      Standings (Sprint 3)
+      --------------------------------------------------------------
+      */
+
+      loadStandings(id, leagueData?.strCurrentSeason);
     } catch (error) {
       console.error("League details error:", error);
 
       setError("Failed to load league details.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadStandings = async (leagueId, season) => {
+    try {
+      setStandingsLoading(true);
+      setStandingsError("");
+
+      const table = await getLeagueStandings(leagueId, season);
+
+      setStandings(Array.isArray(table) ? table : []);
+    } catch (error) {
+      console.error("Standings error:", error);
+
+      setStandingsError("Standings are not available for this league right now.");
+
+      setStandings([]);
+    } finally {
+      setStandingsLoading(false);
     }
   };
 
@@ -233,6 +266,103 @@ function SportsLeagueDetails() {
       </section>
 
       {/* ================================================================
+          STANDINGS (Sprint 3)
+      ================================================================= */}
+
+      <section className="px-5 sm:px-8 lg:px-12 pb-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <p className="text-[#D4A017] text-sm uppercase tracking-[2px]">
+                Table
+              </p>
+
+              <h2 className="mt-1 text-2xl sm:text-3xl font-black">
+                League Standings
+              </h2>
+            </div>
+          </div>
+
+          {standingsLoading ? (
+            <div className="bg-[#24272D] border border-white/10 rounded-2xl p-10 text-center">
+              <div className="w-9 h-9 mx-auto border-2 border-[#D4A017] border-t-transparent rounded-full animate-spin" />
+
+              <p className="mt-4 text-gray-400">Loading standings...</p>
+            </div>
+          ) : standingsError || standings.length === 0 ? (
+            <div className="bg-[#24272D] border border-white/10 rounded-2xl p-10 text-center">
+              <div className="text-4xl">📊</div>
+
+              <h3 className="mt-4 text-lg font-bold">Standings unavailable</h3>
+
+              <p className="mt-2 text-gray-500 text-sm">
+                {standingsError ||
+                  "No standings table is currently available for this league/season."}
+              </p>
+            </div>
+          ) : (
+            <div className="bg-[#24272D] border border-white/10 rounded-2xl overflow-x-auto">
+              <table className="w-full text-left min-w-[560px]">
+                <thead className="bg-[#1B1E22] text-gray-500 text-xs uppercase">
+                  <tr>
+                    <th className="px-4 py-3">#</th>
+                    <th className="px-4 py-3">Team</th>
+                    <th className="px-4 py-3 text-center">P</th>
+                    <th className="px-4 py-3 text-center">W</th>
+                    <th className="px-4 py-3 text-center">D</th>
+                    <th className="px-4 py-3 text-center">L</th>
+                    <th className="px-4 py-3 text-center">GD</th>
+                    <th className="px-4 py-3 text-center">Pts</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {standings.map((row) => (
+                    <tr
+                      key={row.idTeam || row.intRank}
+                      className="border-t border-white/5 hover:bg-white/5 transition"
+                    >
+                      <td className="px-4 py-3 font-semibold text-gray-400">
+                        {row.intRank}
+                      </td>
+
+                      <td className="px-4 py-3">
+                        <Link
+                          to={row.idTeam ? `/sports/team/${row.idTeam}` : "#"}
+                          className="flex items-center gap-3 hover:text-[#D4A017] transition"
+                        >
+                          {row.strBadge && (
+                            <img
+                              src={row.strBadge}
+                              alt=""
+                              className="w-6 h-6 object-contain"
+                            />
+                          )}
+
+                          <span className="font-semibold">
+                            {row.strTeam}
+                          </span>
+                        </Link>
+                      </td>
+
+                      <td className="px-4 py-3 text-center">{row.intPlayed}</td>
+                      <td className="px-4 py-3 text-center">{row.intWin}</td>
+                      <td className="px-4 py-3 text-center">{row.intDraw}</td>
+                      <td className="px-4 py-3 text-center">{row.intLoss}</td>
+                      <td className="px-4 py-3 text-center">{row.intGoalDifference}</td>
+                      <td className="px-4 py-3 text-center font-bold text-[#D4A017]">
+                        {row.intPoints}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ================================================================
           MATCHES
       ================================================================= */}
 
@@ -242,7 +372,7 @@ function SportsLeagueDetails() {
               UPCOMING
           ============================================================= */}
 
-          <div>
+          <div className="mt-10">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <p className="text-[#D4A017] text-sm uppercase tracking-[2px]">

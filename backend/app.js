@@ -17,12 +17,20 @@ const authRoutes = require("./routes/authRoutes");
 const companyRoutes = require("./routes/companyRoutes");
 const testRoutes = require("./routes/testRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
+const adminRoutes = require("./routes/adminRoutes");
+const reviewRoutes = require("./routes/reviewRoutes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/company", companyRoutes);
 app.use("/api/advertisements", advertisementRoutes);
 app.use("/api/test", testRoutes);
 app.use("/api/campaigns", campaignRoutes);
+
+// Sprint 1: Admin Dashboard + Company Verification
+app.use("/api/admin", adminRoutes);
+
+// Sprint 4: Ratings & Reviews
+app.use("/api/reviews", reviewRoutes);
 
 // Root Test Route
 app.get("/", (req, res) => {
