@@ -44,7 +44,8 @@ const campaignRoutes = require("./routes/campaignRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const upcomingRoutes = require("./routes/upcomingRoutes");
-
+const adminRoutes = require("./routes/adminRoutes");
+const reviewRoutes = require("./routes/reviewRoutes");
 // =======================
 // API ROUTES
 // =======================
@@ -57,7 +58,8 @@ app.use("/api/analytics", analyticsRoutes);
 app.use("/api/upcoming", upcomingRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/sports", sportsRoutes);
-
+app.use("/api/admin", adminRoutes);
+app.use("/api/reviews", reviewRoutes);
 // =======================
 // ROOT ROUTE
 // =======================
