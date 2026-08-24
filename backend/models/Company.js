@@ -44,6 +44,13 @@ const companySchema = new mongoose.Schema(
       enum: ["pending", "approved", "rejected"],
       default: "pending",
     },
+
+    // Sprint 1: Company Verification
+    // Set by an admin when a company's verification is rejected.
+    rejectionReason: {
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true,

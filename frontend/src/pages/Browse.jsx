@@ -1,26 +1,29 @@
 import { useEffect, useState } from "react";
 
 import EntertainmentCard from "../components/entertainment/EntertainmentCard";
-
-
+import FilterDrawer from "../components/entertainment/FilterDrawer";
 
 import {
   getTrendingMovies,
   getTrendingTVShows,
   searchMovies,
-  getMoviesByGenre,
+  getGenreList,
+  discoverContent,
 } from "../services/tmdbService";
 
-const genres = [
-  { id: 0, name: "All" },
-  { id: 28, name: "Action" },
-  { id: 12, name: "Adventure" },
-  { id: 35, name: "Comedy" },
-  { id: 18, name: "Drama" },
-  { id: 27, name: "Horror" },
-  { id: 878, name: "Sci-Fi" },
-  { id: 16, name: "Animation" },
-];
+/*
+|--------------------------------------------------------------------------
+| BROWSE
+|--------------------------------------------------------------------------
+|
+| Sprint 2: Search & Advanced Filtering
+|
+| Basic search (keyword, movie/tv tab, trending) plus a slide-in
+| FilterDrawer for advanced filtering: genre (multi-select), language,
+| release year, and sort order - all backed by TMDB's /discover.
+|
+|--------------------------------------------------------------------------
+*/
 
 function Browse() {
   const [content, setContent] = useState([]);
@@ -33,13 +36,35 @@ function Browse() {
 
   const [search, setSearch] = useState("");
 
-  const [selectedGenre, setSelectedGenre] = useState(0);
-
   const [page, setPage] = useState(1);
+
+  // Sprint 2: Advanced Filtering
+  const [genres, setGenres] = useState([]);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [selectedGenres, setSelectedGenres] = useState([]);
+  const [language, setLanguage] = useState("");
+  const [year, setYear] = useState("");
+  const [sortBy, setSortBy] = useState("popularity.desc");
+
+  const hasActiveFilters =
+    selectedGenres.length > 0 ||
+    Boolean(language) ||
+    Boolean(year) ||
+    sortBy !== "popularity.desc";
 
   useEffect(() => {
     loadContent();
+    loadGenres();
   }, [contentType]);
+
+  async function loadGenres() {
+    try {
+      const data = await getGenreList(contentType);
+      setGenres(data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   async function loadContent() {
     try {
@@ -63,21 +88,58 @@ function Browse() {
     }
   }
 
+  async function runFiltered(targetPage = 1) {
+    try {
+      setLoading(true);
+
+      const data = await discoverContent({
+        type: contentType,
+        genreIds: selectedGenres,
+        year: year || undefined,
+        language: language || undefined,
+        sortBy,
+        page: targetPage,
+      });
+
+      if (targetPage === 1) {
+        setContent(data);
+      } else {
+        setContent((previous) => [...previous, ...data]);
+      }
+
+      setPage(targetPage);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function loadMore() {
     try {
       setLoadingMore(true);
 
       const nextPage = page + 1;
 
-      let data;
+      if (hasActiveFilters) {
+        const data = await discoverContent({
+          type: contentType,
+          genreIds: selectedGenres,
+          year: year || undefined,
+          language: language || undefined,
+          sortBy,
+          page: nextPage,
+        });
 
-      if (contentType === "movie") {
-        data = await getTrendingMovies(nextPage);
+        setContent((previous) => [...previous, ...data]);
       } else {
-        data = await getTrendingTVShows(nextPage);
-      }
+        const data =
+          contentType === "movie"
+            ? await getTrendingMovies(nextPage)
+            : await getTrendingTVShows(nextPage);
 
-      setContent((previous) => [...previous, ...data]);
+        setContent((previous) => [...previous, ...data]);
+      }
 
       setPage(nextPage);
     } catch (error) {
@@ -111,68 +173,32 @@ function Browse() {
     }
   }
 
-  async function handleGenre(id) {
-    setSelectedGenre(id);
-
+  function handleApplyFilters() {
     setSearch("");
+    setFilterOpen(false);
+    runFiltered(1);
+  }
 
-    if (id === 0) {
-      loadContent();
-
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      const data = await getMoviesByGenre(id);
-
-      setContent(data);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
+  function handleResetFilters() {
+    setSelectedGenres([]);
+    setLanguage("");
+    setYear("");
+    setSortBy("popularity.desc");
+    setFilterOpen(false);
+    loadContent();
   }
 
   return (
     <div className="min-h-screen bg-[#17191D] text-white">
-      {/* NAVBAR */}
-
-      
-
       <section className="px-5 sm:px-8 lg:px-12 py-10">
         {/* HEADER */}
 
         <div className="text-center max-w-3xl mx-auto">
-          <div
-            className="
-inline-flex
-px-4
-py-2
-rounded-full
-bg-white/5
-border
-border-white/10
-text-[#D4A017]
-text-xs
-uppercase
-tracking-[2px]
-"
-          >
+          <div className="inline-flex px-4 py-2 rounded-full bg-white/5 border border-white/10 text-[#D4A017] text-xs uppercase tracking-[2px]">
             Discover
           </div>
 
-          <h1
-            className="
-mt-6
-text-4xl
-sm:text-5xl
-lg:text-6xl
-font-black
-leading-tight
-"
-          >
+          <h1 className="mt-6 text-4xl sm:text-5xl lg:text-6xl font-black leading-tight">
             <span className="block">Explore</span>
 
             <span className="block text-[#D4A017] mt-1">Entertainment</span>
@@ -186,130 +212,60 @@ leading-tight
         {/* MOVIE / SERIES TAB */}
 
         <div className="flex justify-center mt-10">
-          <div
-            className="
-flex
-bg-[#24272D]
-rounded-full
-p-1
-w-full
-max-w-xs
-"
-          >
+          <div className="flex bg-[#24272D] rounded-full p-1 w-full max-w-xs">
             <button
               onClick={() => setContentType("movie")}
-              className={`
-flex-1
-px-5
-py-3
-rounded-full
-text-sm
-transition
-
-${contentType === "movie" ? "bg-[#D4A017] text-[#17191D]" : "text-gray-300"}
-
-`}
+              className={`flex-1 px-5 py-3 rounded-full text-sm transition ${
+                contentType === "movie"
+                  ? "bg-[#D4A017] text-[#17191D]"
+                  : "text-gray-300"
+              }`}
             >
               Movies
             </button>
 
             <button
               onClick={() => setContentType("tv")}
-              className={`
-flex-1
-px-5
-py-3
-rounded-full
-text-sm
-transition
-
-${contentType === "tv" ? "bg-[#D4A017] text-[#17191D]" : "text-gray-300"}
-
-`}
+              className={`flex-1 px-5 py-3 rounded-full text-sm transition ${
+                contentType === "tv" ? "bg-[#D4A017] text-[#17191D]" : "text-gray-300"
+              }`}
             >
               Series
             </button>
           </div>
         </div>
 
-        {/* SEARCH */}
+        {/* SEARCH + FILTERS */}
 
-        <div className="max-w-xl mx-auto mt-8">
+        <div className="max-w-xl mx-auto mt-8 flex gap-3">
           <input
             type="text"
             placeholder="Search movies..."
             value={search}
             onChange={handleSearch}
-            className="
-w-full
-px-5
-py-4
-rounded-2xl
-bg-[#24272D]
-border
-border-white/10
-outline-none
-focus:border-[#D4A017]
-"
+            className="flex-1 px-5 py-4 rounded-2xl bg-[#24272D] border border-white/10 outline-none focus:border-[#D4A017]"
           />
-        </div>
 
-        {/* GENRES */}
-
-        {contentType === "movie" && (
-          <div
-            className="
-flex
-flex-wrap
-justify-center
-gap-3
-mt-8
-"
+          <button
+            onClick={() => setFilterOpen(true)}
+            className={`relative shrink-0 px-5 rounded-2xl border font-semibold transition ${
+              hasActiveFilters
+                ? "bg-[#D4A017] text-[#17191D] border-[#D4A017]"
+                : "bg-[#24272D] border-white/10 text-gray-300 hover:border-white/30"
+            }`}
           >
-            {genres.map((genre) => (
-              <button
-                key={genre.id}
-                onClick={() => handleGenre(genre.id)}
-                className={`
-
-px-4
-
-py-2
-
-rounded-full
-
-text-sm
-
-
-${
-  selectedGenre === genre.id
-    ? "bg-[#D4A017] text-[#17191D]"
-    : "bg-[#24272D] text-gray-300"
-}
-
-`}
-              >
-                {genre.name}
-              </button>
-            ))}
-          </div>
-        )}
+            Filters
+            {hasActiveFilters && (
+              <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-red-500" />
+            )}
+          </button>
+        </div>
 
         {loading ? (
           <div className="text-center mt-20 text-2xl">Loading...</div>
         ) : (
           <>
-            <div
-              className="
-grid
-grid-cols--1
-sm:grid-cols-2
-lg:grid-cols-3
-xl:grid-cols-4
-gap-8
-mt-14
-"
-            >
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mt-14">
               {content.map((item) => (
                 <EntertainmentCard key={item.id} movie={item} />
               ))}
@@ -319,17 +275,7 @@ mt-14
               <button
                 onClick={loadMore}
                 disabled={loadingMore}
-                className="
-px-8
-py-3
-rounded-full
-bg-[#D4A017]
-text-[#17191D]
-font-semibold
-hover:scale-105
-transition
-disabled:opacity-50
-"
+                className="px-8 py-3 rounded-full bg-[#D4A017] text-[#17191D] font-semibold hover:scale-105 transition disabled:opacity-50"
               >
                 {loadingMore ? "Loading..." : "Load More"}
               </button>
@@ -337,6 +283,22 @@ disabled:opacity-50
           </>
         )}
       </section>
+
+      <FilterDrawer
+        isOpen={filterOpen}
+        onClose={() => setFilterOpen(false)}
+        onApply={handleApplyFilters}
+        onReset={handleResetFilters}
+        genres={genres}
+        selectedGenres={selectedGenres}
+        onChangeGenres={setSelectedGenres}
+        language={language}
+        onChangeLanguage={setLanguage}
+        year={year}
+        onChangeYear={setYear}
+        sortBy={sortBy}
+        onChangeSort={setSortBy}
+      />
     </div>
   );
 }

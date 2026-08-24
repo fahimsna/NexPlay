@@ -11,6 +11,7 @@ import axios from "axios";
 | - Teams
 | - League events
 | - Event details
+| - League standings (Sprint 3)
 |
 |--------------------------------------------------------------------------
 */
@@ -259,6 +260,39 @@ export const getLeagueById = async (id) => {
   });
 
   return response.data?.leagues?.[0] || null;
+};
+
+/*
+|--------------------------------------------------------------------------
+| LEAGUE STANDINGS (Sprint 3)
+|--------------------------------------------------------------------------
+|
+| TheSportsDB's lookuptable.php needs a season string, e.g. "2023-2024".
+| If no season is passed, we try the league's own strCurrentSeason first.
+|
+|--------------------------------------------------------------------------
+*/
+
+export const getLeagueStandings = async (leagueId, season) => {
+  if (!leagueId) {
+    return [];
+  }
+
+  let seasonToUse = season;
+
+  if (!seasonToUse) {
+    const league = await getLeagueById(leagueId);
+    seasonToUse = league?.strCurrentSeason || `${new Date().getFullYear() - 1}-${new Date().getFullYear()}`;
+  }
+
+  const response = await sportsApi.get("/lookuptable.php", {
+    params: {
+      l: leagueId,
+      s: seasonToUse,
+    },
+  });
+
+  return response.data?.table || [];
 };
 
 /*
@@ -691,6 +725,7 @@ export default {
   getLeagues,
   getLeaguesBySport,
   getLeagueById,
+  getLeagueStandings,
   getTeamsByLeague,
   getTeamById,
   getEventById,

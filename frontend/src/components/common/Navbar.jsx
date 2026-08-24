@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { HiOutlineSearch, HiMenu, HiX } from "react-icons/hi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import useAuth from "../../hooks/useAuth";
 
 function Navbar() {
   const [open, setOpen] = useState(false);
+  const { isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
 
   const menuItems = [
     {
@@ -30,7 +33,17 @@ function Navbar() {
       name: "Upcoming",
       path: "/upcoming",
     },
+    {
+      name: "Top Rated",
+      path: "/top-rated",
+    },
   ];
+
+  const handleLogout = () => {
+    logout();
+    setOpen(false);
+    navigate("/");
+  };
 
   return (
     <nav
@@ -97,6 +110,18 @@ function Navbar() {
               {item.name}
             </Link>
           ))}
+
+          {isAuthenticated && (
+            <Link
+              to="/my-reviews"
+              className="
+              hover:text-[#D4A017]
+              transition
+              "
+            >
+              My Reviews
+            </Link>
+          )}
         </div>
 
         {/* Desktop Actions */}
@@ -130,21 +155,41 @@ function Navbar() {
             Search
           </Link>
 
-          <Link
-            to="/login"
-            className="
-            px-6
-            py-2.5
-            rounded-full
-            bg-[#D4A017]
-            text-[#17191D]
-            font-semibold
-            hover:scale-105
-            transition
-            "
-          >
-            Login
-          </Link>
+          {isAuthenticated ? (
+            <button
+              onClick={handleLogout}
+              className="
+              hidden
+              sm:inline-flex
+              px-6
+              py-2.5
+              rounded-full
+              bg-[#D4A017]
+              text-[#17191D]
+              font-semibold
+              hover:scale-105
+              transition
+              "
+            >
+              Logout
+            </button>
+          ) : (
+            <Link
+              to="/login"
+              className="
+              px-6
+              py-2.5
+              rounded-full
+              bg-[#D4A017]
+              text-[#17191D]
+              font-semibold
+              hover:scale-105
+              transition
+              "
+            >
+              Login
+            </Link>
+          )}
 
           {/* Mobile Button */}
 
@@ -194,6 +239,18 @@ function Navbar() {
               </Link>
             ))}
 
+            {isAuthenticated && (
+              <Link
+                to="/my-reviews"
+                onClick={() => setOpen(false)}
+                className="
+                  hover:text-[#D4A017]
+                  "
+              >
+                My Reviews
+              </Link>
+            )}
+
             <Link
               to="/browse"
               onClick={() => setOpen(false)}
@@ -207,20 +264,36 @@ function Navbar() {
               Search
             </Link>
 
-            <Link
-              to="/login"
-              onClick={() => setOpen(false)}
-              className="
-                text-center
-                py-2.5
-                rounded-full
-                bg-[#D4A017]
-                text-[#17191D]
-                font-semibold
-                "
-            >
-              Login
-            </Link>
+            {isAuthenticated ? (
+              <button
+                onClick={handleLogout}
+                className="
+                  text-center
+                  py-2.5
+                  rounded-full
+                  bg-[#D4A017]
+                  text-[#17191D]
+                  font-semibold
+                  "
+              >
+                Logout
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                onClick={() => setOpen(false)}
+                className="
+                  text-center
+                  py-2.5
+                  rounded-full
+                  bg-[#D4A017]
+                  text-[#17191D]
+                  font-semibold
+                  "
+              >
+                Login
+              </Link>
+            )}
           </div>
         </div>
       )}

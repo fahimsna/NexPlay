@@ -107,6 +107,63 @@ function SportsMatchDetails() {
 
   /*
   |--------------------------------------------------------------------------
+  | MATCH STATISTICS (Sprint 3)
+  |--------------------------------------------------------------------------
+  |
+  | TheSportsDB only fills these fields in for some leagues/events, so
+  | everything here is shown conditionally - if nothing is available we
+  | show a friendly "not available" message instead of an empty section.
+  |
+  |--------------------------------------------------------------------------
+  */
+
+  const hasShots =
+    event.intHomeShots !== null &&
+    event.intHomeShots !== undefined &&
+    event.intHomeShots !== "" &&
+    event.intAwayShots !== null &&
+    event.intAwayShots !== undefined &&
+    event.intAwayShots !== "";
+
+  const statRows = [
+    hasShots && {
+      label: "Shots",
+      home: event.intHomeShots,
+      away: event.intAwayShots,
+      numeric: true,
+    },
+    event.strHomeFormation && {
+      label: "Formation",
+      home: event.strHomeFormation,
+      away: event.strAwayFormation,
+    },
+    event.strHomeGoalDetails && {
+      label: "Goal Scorers",
+      home: event.strHomeGoalDetails,
+      away: event.strAwayGoalDetails,
+    },
+    event.strHomeRedCards && {
+      label: "Red Cards",
+      home: event.strHomeRedCards,
+      away: event.strAwayRedCards,
+    },
+    event.strHomeYellowCards && {
+      label: "Yellow Cards",
+      home: event.strHomeYellowCards,
+      away: event.strAwayYellowCards,
+    },
+  ].filter(Boolean);
+
+  const hasStatistics = statRows.length > 0;
+
+  // Sprint 3: for numeric stats (currently just Shots - the only side-by-side
+  // number TheSportsDB reliably fills in), show a proportional home/away bar
+  // like the comparison bars in your own MatchDetailPage stats tab, instead
+  // of just printing the two numbers.
+  const maxStatValue = (a, b) => Math.max(Number(a) || 0, Number(b) || 0, 1);
+
+  /*
+  |--------------------------------------------------------------------------
   | RENDER
   |--------------------------------------------------------------------------
   */
@@ -226,6 +283,79 @@ function SportsMatchDetails() {
                 </div>
               </div>
             )}
+
+            {/* ==========================================================
+                MATCH STATISTICS (Sprint 3)
+            ========================================================== */}
+
+            <div className="mt-8 bg-[#1B1E22] rounded-2xl p-6">
+              <h2 className="text-lg font-bold">Match Statistics</h2>
+
+              {hasStatistics ? (
+                <div className="mt-5 space-y-4">
+                  {statRows.map((row) => {
+                    if (row.numeric) {
+                      const max = maxStatValue(row.home, row.away);
+                      const homePct = (((Number(row.home) || 0) / max) * 80) || 0;
+                      const awayPct = (((Number(row.away) || 0) / max) * 80) || 0;
+
+                      return (
+                        <div key={row.label} className="space-y-1.5">
+                          <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3">
+                            <p className="min-w-0 truncate text-right text-sm font-semibold">
+                              {row.home ?? "-"}
+                            </p>
+
+                            <p className="text-center text-xs uppercase tracking-wider text-gray-500 px-3">
+                              {row.label}
+                            </p>
+
+                            <p className="min-w-0 truncate text-left text-sm font-semibold">
+                              {row.away ?? "-"}
+                            </p>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 h-1.5 rounded-full bg-[#17191D] overflow-hidden">
+                              <div
+                                className="h-full rounded-full bg-[#D4A017]/70 ml-auto"
+                                style={{ width: `${homePct}%` }}
+                              />
+                            </div>
+
+                            <div className="flex-1 h-1.5 rounded-full bg-[#17191D] overflow-hidden">
+                              <div
+                                className="h-full rounded-full bg-[#D4A017]/70"
+                                style={{ width: `${awayPct}%` }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div
+                        key={row.label}
+                        className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-3"
+                      >
+                        <p className="min-w-0 text-right text-sm break-words">{row.home ?? "-"}</p>
+
+                        <p className="text-center text-xs uppercase tracking-wider text-gray-500 px-3">
+                          {row.label}
+                        </p>
+
+                        <p className="min-w-0 text-left text-sm break-words">{row.away ?? "-"}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="mt-3 text-gray-500 text-sm">
+                  Detailed statistics are not available for this match.
+                </p>
+              )}
+            </div>
 
             {/* ==========================================================
                 MATCH DESCRIPTION
