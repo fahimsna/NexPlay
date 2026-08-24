@@ -88,13 +88,13 @@ function AdminActivityLog() {
         </div>
       )}
 
-      <div className="mt-6 bg-[#24272D] border border-white/10 rounded-2xl overflow-hidden">
+      <div className="mt-6 bg-[#24272D] border border-white/10 rounded-2xl overflow-x-auto">
         {loading ? (
           <p className="text-gray-400 text-center py-10">Loading...</p>
         ) : logs.length === 0 ? (
           <p className="text-gray-400 text-center py-10">No activity logs found.</p>
         ) : (
-          <table className="w-full text-left">
+          <table className="w-full text-left min-w-[640px]">
             <thead className="bg-[#1B1E22] text-gray-500 text-sm uppercase">
               <tr>
                 <th className="px-6 py-4">Action</th>

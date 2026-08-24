@@ -40,11 +40,11 @@ function AdminUsers() {
         </div>
       )}
 
-      <div className="mt-6 bg-[#24272D] border border-white/10 rounded-2xl overflow-hidden">
+      <div className="mt-6 bg-[#24272D] border border-white/10 rounded-2xl overflow-x-auto">
         {loading ? (
           <p className="text-gray-400 text-center py-10">Loading...</p>
         ) : (
-          <table className="w-full text-left">
+          <table className="w-full text-left min-w-[700px]">
             <thead className="bg-[#1B1E22] text-gray-500 text-sm uppercase">
               <tr>
                 <th className="px-6 py-4">Name</th>
