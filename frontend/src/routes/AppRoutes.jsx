@@ -9,6 +9,7 @@ import Watchlist from "../pages/Watchlist";
 import About from "../pages/About";
 import Contact from "../pages/Contact";
 import Partner from "../pages/Partner";
+import Advertise from "../pages/Advertise";
 import UpcomingReleaseCalendar from "../pages/UpcomingReleaseCalendar";
 import TopRated from "../pages/TopRated";
 
@@ -47,17 +48,32 @@ import MyReviews from "../pages/user/MyReviews";
 function AppRoutes() {
   return (
     <Routes>
-      {/* PUBLIC WEBSITE */}
+      {/* =======================
+          PUBLIC WEBSITE
+      ======================= */}
+
       <Route element={<PublicLayout />}>
         <Route path="/" element={<Home />} />
+
         <Route path="/browse" element={<Browse />} />
+
         <Route path="/movies" element={<Movies />} />
+
         <Route path="/series" element={<Series />} />
+
         <Route path="/details/:id" element={<Details />} />
+
         <Route path="/watchlist" element={<Watchlist />} />
+
         <Route path="/about" element={<About />} />
+
         <Route path="/contact" element={<Contact />} />
+
         <Route path="/partner" element={<Partner />} />
+
+        {/* Public Advertising Page */}
+        <Route path="/advertise" element={<Advertise />} />
+
         <Route path="/sports" element={<Sports />} />
 
         <Route path="/sports/league/:id" element={<SportsLeagueDetails />} />
@@ -85,11 +101,18 @@ function AppRoutes() {
         />
       </Route>
 
-      {/* AUTH */}
+      {/* =======================
+          AUTH
+      ======================= */}
+
       <Route path="/login" element={<Login />} />
+
       <Route path="/register" element={<Register />} />
 
-      {/* COMPANY DASHBOARD */}
+      {/* =======================
+          COMPANY DASHBOARD
+      ======================= */}
+
       <Route
         path="/company"
         element={
@@ -101,15 +124,25 @@ function AppRoutes() {
         }
       >
         <Route index element={<CompanyDashboard />} />
+
         <Route path="profile" element={<CompanyProfile />} />
+
         <Route path="advertisements" element={<AdvertisementManagement />} />
+
         <Route path="campaigns" element={<CampaignManagement />} />
+
         <Route path="analytics" element={<CompanyAnalytics />} />
+
         <Route path="settings" element={<CompanySettings />} />
+
         <Route path="content" element={<CompanyUpcomingContent />} />
       </Route>
 
-      {/* ADMIN DASHBOARD (Sprint 1) */}
+      {/* =======================
+          ADMIN DASHBOARD
+          Sprint 1
+      ======================= */}
+
       <Route
         path="/admin"
         element={
@@ -119,8 +152,11 @@ function AppRoutes() {
         }
       >
         <Route index element={<AdminDashboard />} />
+
         <Route path="companies" element={<AdminCompanyVerification />} />
+
         <Route path="users" element={<AdminUsers />} />
+
         <Route path="activity-log" element={<AdminActivityLog />} />
       </Route>
     </Routes>
