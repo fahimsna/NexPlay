@@ -7,9 +7,14 @@ import {
   HiCalendarDays,
   HiClock,
   HiGlobeAlt,
+  HiArrowTopRightOnSquare,
 } from "react-icons/hi2";
 
-import { getMovieDetails } from "../services/tmdbService";
+import {
+  getMovieDetails,
+  getMovieWatchProviders,
+} from "../services/tmdbService";
+
 import ReviewsSection from "../components/reviews/ReviewsSection";
 
 const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
@@ -18,6 +23,8 @@ function Details() {
   const { id } = useParams();
 
   const [movie, setMovie] = useState(null);
+
+  const [watchProviders, setWatchProviders] = useState({});
 
   const [loading, setLoading] = useState(true);
 
@@ -30,10 +37,21 @@ function Details() {
   async function fetchMovie() {
     try {
       setLoading(true);
+      setError("");
 
-      const data = await getMovieDetails(id);
+      const [movieData, providerData] = await Promise.all([
+        getMovieDetails(id),
 
-      setMovie(data);
+        getMovieWatchProviders(id).catch((providerError) => {
+          console.error("Failed to load watch providers:", providerError);
+
+          return {};
+        }),
+      ]);
+
+      setMovie(movieData);
+
+      setWatchProviders(providerData);
     } catch (err) {
       console.error(err);
 
@@ -76,6 +94,124 @@ function Details() {
       </div>
     );
   }
+
+  // =======================
+  // Watch Providers
+  // =======================
+
+  /*
+    TMDB returns providers grouped by region.
+
+    Example:
+
+    {
+      US: {
+        link: "...",
+        flatrate: [...],
+        rent: [...],
+        buy: [...]
+      },
+
+      GB: {
+        link: "...",
+        flatrate: [...]
+      }
+    }
+
+    We collect providers from ALL regions.
+  */
+
+  const allRegions = Object.entries(watchProviders || {});
+
+  const streamingProviders = [];
+
+  const rentProviders = [];
+
+  const buyProviders = [];
+
+  // Collect streaming providers
+
+  allRegions.forEach(([regionCode, regionData]) => {
+    if (!regionData?.flatrate) return;
+
+    regionData.flatrate.forEach((provider) => {
+      streamingProviders.push({
+        ...provider,
+        regionCode,
+        regionLink: regionData.link,
+      });
+    });
+  });
+
+  // Collect rental providers
+
+  allRegions.forEach(([regionCode, regionData]) => {
+    if (!regionData?.rent) return;
+
+    regionData.rent.forEach((provider) => {
+      rentProviders.push({
+        ...provider,
+        regionCode,
+        regionLink: regionData.link,
+      });
+    });
+  });
+
+  // Collect purchase providers
+
+  allRegions.forEach(([regionCode, regionData]) => {
+    if (!regionData?.buy) return;
+
+    regionData.buy.forEach((provider) => {
+      buyProviders.push({
+        ...provider,
+        regionCode,
+        regionLink: regionData.link,
+      });
+    });
+  });
+
+  // =======================
+  // Remove duplicates
+  // =======================
+
+  const uniqueStreamingProviders = Array.from(
+    new Map(
+      streamingProviders.map((provider) => [provider.provider_id, provider]),
+    ).values(),
+  );
+
+  const uniqueRentProviders = Array.from(
+    new Map(
+      rentProviders.map((provider) => [provider.provider_id, provider]),
+    ).values(),
+  );
+
+  const uniqueBuyProviders = Array.from(
+    new Map(
+      buyProviders.map((provider) => [provider.provider_id, provider]),
+    ).values(),
+  );
+
+  const hasProviders =
+    uniqueStreamingProviders.length > 0 ||
+    uniqueRentProviders.length > 0 ||
+    uniqueBuyProviders.length > 0;
+
+  // =======================
+  // Get country name
+  // =======================
+
+  function getRegionName(regionCode) {
+    try {
+      return new Intl.DisplayNames(["en"], {
+        type: "region",
+      }).of(regionCode);
+    } catch {
+      return regionCode;
+    }
+  }
+
   return (
     <section
       className="
@@ -84,7 +220,9 @@ function Details() {
         text-white
       "
     >
-      {/* Hero Banner */}
+      {/* =======================
+          Hero Banner
+      ======================= */}
 
       <div
         className="
@@ -140,7 +278,9 @@ function Details() {
         </div>
       </div>
 
-      {/* Main */}
+      {/* =======================
+          Main
+      ======================= */}
 
       <div
         className="
@@ -160,7 +300,9 @@ function Details() {
             gap-10
           "
         >
-          {/* Poster */}
+          {/* =======================
+              Poster
+          ======================= */}
 
           <div>
             <img
@@ -176,9 +318,13 @@ function Details() {
             />
           </div>
 
-          {/* Information */}
+          {/* =======================
+              Information
+          ======================= */}
 
           <div className="lg:col-span-2">
+            {/* Type */}
+
             <span
               className="
                 inline-block
@@ -193,6 +339,8 @@ function Details() {
               Movie
             </span>
 
+            {/* Title */}
+
             <h1
               className="
                 mt-6
@@ -202,6 +350,10 @@ function Details() {
             >
               {movie.title}
             </h1>
+
+            {/* =======================
+                Basic Information
+            ======================= */}
 
             <div
               className="
@@ -307,7 +459,10 @@ function Details() {
                 </div>
               </div>
             </div>
-            {/* Genres */}
+
+            {/* =======================
+                Genres
+            ======================= */}
 
             <div className="mt-10">
               <h2 className="text-2xl font-bold">Genres</h2>
@@ -332,7 +487,9 @@ function Details() {
               </div>
             </div>
 
-            {/* Overview */}
+            {/* =======================
+                Overview
+            ======================= */}
 
             <div className="mt-12">
               <h2 className="text-2xl font-bold">Overview</h2>
@@ -348,7 +505,9 @@ function Details() {
               </p>
             </div>
 
-            {/* Production Companies */}
+            {/* =======================
+                Production Companies
+            ======================= */}
 
             <div className="mt-12">
               <h2 className="text-2xl font-bold">Production Companies</h2>
@@ -359,13 +518,13 @@ function Details() {
                     <span
                       key={company.id}
                       className="
-                        px-4
-                        py-2
-                        rounded-full
-                        bg-[#24272D]
-                        border
-                        border-white/10
-                      "
+                          px-4
+                          py-2
+                          rounded-full
+                          bg-[#24272D]
+                          border
+                          border-white/10
+                        "
                     >
                       {company.name}
                     </span>
@@ -376,7 +535,9 @@ function Details() {
               </div>
             </div>
 
-            {/* Where to Watch */}
+            {/* =======================
+                Where to Watch
+            ======================= */}
 
             <div
               className="
@@ -388,44 +549,320 @@ function Details() {
                 p-8
               "
             >
-              <h2 className="text-3xl font-bold">Where to Watch</h2>
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-3xl font-bold">Where to Watch</h2>
 
-              <p className="text-gray-400 mt-3 leading-7">
-                NexPlay helps you discover entertainment. Streaming availability
-                varies by country. Check official streaming services such as
-                Netflix, Prime Video, Disney+, Apple TV+, Max, or Hulu to see
-                where this title is available.
-              </p>
+                  <p className="text-gray-400 mt-3 leading-7">
+                    Streaming, rental, and purchase options available for this
+                    movie.
+                  </p>
+                </div>
 
-              <div className="flex flex-wrap gap-3 mt-6">
-                {[
-                  "Netflix",
-                  "Prime Video",
-                  "Disney+",
-                  "Apple TV+",
-                  "Max",
-                  "Hulu",
-                ].map((platform) => (
-                  <span
-                    key={platform}
-                    className="
-                      px-4
-                      py-2
-                      rounded-full
-                      bg-[#17191D]
-                      border
-                      border-white/10
-                      hover:border-[#D4A017]
-                      transition
-                    "
-                  >
-                    {platform}
-                  </span>
-                ))}
+                <span
+                  className="
+                    hidden
+                    sm:block
+                    px-3
+                    py-1
+                    rounded-full
+                    bg-[#17191D]
+                    border
+                    border-white/10
+                    text-sm
+                    text-gray-400
+                  "
+                >
+                  🌎 Worldwide
+                </span>
               </div>
+
+              {hasProviders ? (
+                <>
+                  {/* =======================
+                      Streaming
+                  ======================= */}
+
+                  {uniqueStreamingProviders.length > 0 && (
+                    <div className="mt-7">
+                      <h3 className="text-sm font-semibold text-gray-400 mb-4">
+                        Stream with Subscription
+                      </h3>
+
+                      <div className="flex flex-wrap gap-4">
+                        {uniqueStreamingProviders.map((provider) => (
+                          <a
+                            key={`stream-${provider.provider_id}`}
+                            href={provider.regionLink || "#"}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={`Watch ${movie.title} on ${provider.provider_name}`}
+                            className="
+                                group
+                                flex
+                                items-center
+                                gap-3
+                                px-4
+                                py-3
+                                rounded-2xl
+                                bg-[#17191D]
+                                border
+                                border-white/10
+                                hover:border-[#D4A017]
+                                hover:-translate-y-1
+                                transition-all
+                                duration-200
+                              "
+                          >
+                            {provider.logo_path && (
+                              <img
+                                src={`${IMAGE_BASE_URL}${provider.logo_path}`}
+                                alt={provider.provider_name}
+                                className="
+                                    w-11
+                                    h-11
+                                    rounded-xl
+                                    object-cover
+                                  "
+                              />
+                            )}
+
+                            <div>
+                              <p className="font-semibold">
+                                {provider.provider_name}
+                              </p>
+
+                              <p
+                                className="
+                                    text-xs
+                                    text-gray-500
+                                    group-hover:text-[#D4A017]
+                                    transition
+                                  "
+                              >
+                                Watch now
+                              </p>
+
+                              <p className="text-[10px] text-gray-600 mt-1">
+                                {getRegionName(provider.regionCode)}
+                              </p>
+                            </div>
+
+                            <HiArrowTopRightOnSquare
+                              className="
+                                  text-gray-500
+                                  group-hover:text-[#D4A017]
+                                  transition
+                                "
+                            />
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* =======================
+                      Rent
+                  ======================= */}
+
+                  {uniqueRentProviders.length > 0 && (
+                    <div className="mt-8">
+                      <h3 className="text-sm font-semibold text-gray-400 mb-4">
+                        Rent
+                      </h3>
+
+                      <div className="flex flex-wrap gap-4">
+                        {uniqueRentProviders.map((provider) => (
+                          <a
+                            key={`rent-${provider.provider_id}`}
+                            href={provider.regionLink || "#"}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={`Rent ${movie.title} from ${provider.provider_name}`}
+                            className="
+                                group
+                                flex
+                                items-center
+                                gap-3
+                                px-4
+                                py-3
+                                rounded-2xl
+                                bg-[#17191D]
+                                border
+                                border-white/10
+                                hover:border-[#D4A017]
+                                hover:-translate-y-1
+                                transition-all
+                                duration-200
+                              "
+                          >
+                            {provider.logo_path && (
+                              <img
+                                src={`${IMAGE_BASE_URL}${provider.logo_path}`}
+                                alt={provider.provider_name}
+                                className="
+                                    w-11
+                                    h-11
+                                    rounded-xl
+                                    object-cover
+                                  "
+                              />
+                            )}
+
+                            <div>
+                              <p className="font-semibold">
+                                {provider.provider_name}
+                              </p>
+
+                              <p
+                                className="
+                                    text-xs
+                                    text-gray-500
+                                    group-hover:text-[#D4A017]
+                                    transition
+                                  "
+                              >
+                                Rent
+                              </p>
+
+                              <p className="text-[10px] text-gray-600 mt-1">
+                                {getRegionName(provider.regionCode)}
+                              </p>
+                            </div>
+
+                            <HiArrowTopRightOnSquare
+                              className="
+                                  text-gray-500
+                                  group-hover:text-[#D4A017]
+                                  transition
+                                "
+                            />
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* =======================
+                      Buy
+                  ======================= */}
+
+                  {uniqueBuyProviders.length > 0 && (
+                    <div className="mt-8">
+                      <h3 className="text-sm font-semibold text-gray-400 mb-4">
+                        Buy
+                      </h3>
+
+                      <div className="flex flex-wrap gap-4">
+                        {uniqueBuyProviders.map((provider) => (
+                          <a
+                            key={`buy-${provider.provider_id}`}
+                            href={provider.regionLink || "#"}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={`Buy ${movie.title} from ${provider.provider_name}`}
+                            className="
+                                group
+                                flex
+                                items-center
+                                gap-3
+                                px-4
+                                py-3
+                                rounded-2xl
+                                bg-[#17191D]
+                                border
+                                border-white/10
+                                hover:border-[#D4A017]
+                                hover:-translate-y-1
+                                transition-all
+                                duration-200
+                              "
+                          >
+                            {provider.logo_path && (
+                              <img
+                                src={`${IMAGE_BASE_URL}${provider.logo_path}`}
+                                alt={provider.provider_name}
+                                className="
+                                    w-11
+                                    h-11
+                                    rounded-xl
+                                    object-cover
+                                  "
+                              />
+                            )}
+
+                            <div>
+                              <p className="font-semibold">
+                                {provider.provider_name}
+                              </p>
+
+                              <p
+                                className="
+                                    text-xs
+                                    text-gray-500
+                                    group-hover:text-[#D4A017]
+                                    transition
+                                  "
+                              >
+                                Buy
+                              </p>
+
+                              <p className="text-[10px] text-gray-600 mt-1">
+                                {getRegionName(provider.regionCode)}
+                              </p>
+                            </div>
+
+                            <HiArrowTopRightOnSquare
+                              className="
+                                  text-gray-500
+                                  group-hover:text-[#D4A017]
+                                  transition
+                                "
+                            />
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* =======================
+                      Attribution
+                  ======================= */}
+
+                  <div className="mt-8 pt-5 border-t border-white/10">
+                    <p className="text-xs text-gray-500">
+                      Streaming availability powered by JustWatch via TMDB.
+                      Availability may vary by region and time.
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <div
+                  className="
+                    mt-7
+                    p-5
+                    rounded-2xl
+                    bg-[#17191D]
+                    border
+                    border-white/10
+                  "
+                >
+                  <p className="text-gray-400">
+                    No streaming, rental, or purchase providers are currently
+                    listed for this movie.
+                  </p>
+
+                  <p className="text-sm text-gray-500 mt-2">
+                    Provider availability is supplied by TMDB and may vary by
+                    region and time.
+                  </p>
+                </div>
+              )}
             </div>
 
-            {/* Ratings & Reviews (Sprint 4) */}
+            {/* =======================
+                Ratings & Reviews
+            ======================= */}
 
             <ReviewsSection
               contentId={movie.id}

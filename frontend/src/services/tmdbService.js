@@ -25,7 +25,7 @@ export async function getTrendingMovies(page = 1) {
 
   const data = await response.json();
 
-  return data.results;
+  return data.results || [];
 }
 
 // =======================
@@ -44,7 +44,7 @@ export async function getTrendingTVShows(page = 1) {
 
   const data = await response.json();
 
-  return data.results;
+  return data.results || [];
 }
 
 // =======================
@@ -63,7 +63,7 @@ export async function getPopularMovies() {
 
   const data = await response.json();
 
-  return data.results;
+  return data.results || [];
 }
 
 // =======================
@@ -82,7 +82,7 @@ export async function getPopularTVShows() {
 
   const data = await response.json();
 
-  return data.results;
+  return data.results || [];
 }
 
 // =======================
@@ -101,7 +101,7 @@ export async function getMoviesByGenre(genreId) {
 
   const data = await response.json();
 
-  return data.results;
+  return data.results || [];
 }
 
 // =======================
@@ -122,12 +122,76 @@ export async function getMovieDetails(id) {
 }
 
 // =======================
+// Movie Watch Providers
+// =======================
+//
+// Returns watch-provider information
+// for ALL available regions.
+//
+// Example:
+//
+// {
+//   BD: {
+//     link: "...",
+//     flatrate: [...],
+//     rent: [...],
+//     buy: [...]
+//   },
+//   US: {
+//     link: "...",
+//     flatrate: [...],
+//     rent: [...],
+//     buy: [...]
+//   }
+// }
+
+export async function getMovieWatchProviders(id) {
+  const response = await fetch(
+    `${BASE_URL}/movie/${id}/watch/providers?api_key=${API_KEY}`,
+    options,
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch movie watch providers");
+  }
+
+  const data = await response.json();
+
+  return data.results || {};
+}
+
+// =======================
+// TV Watch Providers
+// =======================
+//
+// Returns watch-provider information
+// for ALL available regions
+// for a TV series.
+
+export async function getTVWatchProviders(id) {
+  const response = await fetch(
+    `${BASE_URL}/tv/${id}/watch/providers?api_key=${API_KEY}`,
+    options,
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch TV watch providers");
+  }
+
+  const data = await response.json();
+
+  return data.results || {};
+}
+
+// =======================
 // Search Movies
 // =======================
 
 export async function searchMovies(query) {
   const response = await fetch(
-    `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}`,
+    `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(
+      query,
+    )}`,
     options,
   );
 
@@ -137,13 +201,15 @@ export async function searchMovies(query) {
 
   const data = await response.json();
 
-  return data.results;
+  return data.results || [];
 }
 
 // =======================
-// Genre List (movie / tv)
+// Genre List
 // =======================
-// Sprint 2: Search & Advanced Filtering
+// Supports both:
+// movie
+// tv
 
 export async function getGenreList(type = "movie") {
   const response = await fetch(
@@ -161,22 +227,22 @@ export async function getGenreList(type = "movie") {
 }
 
 // =======================
-// Advanced Discover (movie / tv)
+// Advanced Discover
 // =======================
-// Sprint 2: Search & Advanced Filtering
 //
-// Supports combining: multiple genres, release year, minimum rating,
-// sort order, and pagination - the "advanced filtering" on top of the
-// basic keyword search / single-genre filter already in Browse.jsx.
+// Supports:
 //
-// filters:
-//   type        "movie" | "tv"              (default "movie")
-//   genreIds    array of genre ids           (default [])
-//   year        4-digit release year, OR a string like "Before 2020" (optional)
-//   minRating   0-10, minimum vote average    (optional)
-//   language    ISO 639-1 code (with_original_language) (optional)
-//   sortBy      TMDB sort_by value            (default "popularity.desc")
-//   page        page number                   (default 1)
+// - Multiple genres
+// - Release year
+// - Before year
+// - Minimum rating
+// - Original language
+// - Sorting
+// - Pagination
+//
+// type:
+// movie
+// tv
 
 export async function discoverContent({
   type = "movie",
@@ -196,9 +262,13 @@ export async function discoverContent({
 
   const dateField = type === "movie" ? "primary_release" : "first_air_date";
 
+  // Genres
+
   if (genreIds.length > 0) {
     params.set("with_genres", genreIds.join(","));
   }
+
+  // Year
 
   if (year) {
     const beforeMatch = /^Before (\d{4})$/.exec(year);
@@ -212,13 +282,19 @@ export async function discoverContent({
     }
   }
 
+  // Minimum Rating
+
   if (minRating) {
     params.set("vote_average.gte", String(minRating));
   }
 
+  // Original Language
+
   if (language) {
     params.set("with_original_language", language);
   }
+
+  // Request
 
   const response = await fetch(
     `${BASE_URL}/discover/${type}?${params.toString()}`,
@@ -234,10 +310,29 @@ export async function discoverContent({
   return data.results || [];
 }
 
+// =======================
+// Sort Options
+// =======================
+
 export const SORT_OPTIONS = [
-  { value: "popularity.desc", label: "Most Popular" },
-  { value: "vote_average.desc", label: "Highest Rated" },
-  { value: "primary_release_date.desc", label: "Newest First" },
-  { value: "primary_release_date.asc", label: "Oldest First" },
-  { value: "original_title.asc", label: "A–Z" },
+  {
+    value: "popularity.desc",
+    label: "Most Popular",
+  },
+  {
+    value: "vote_average.desc",
+    label: "Highest Rated",
+  },
+  {
+    value: "primary_release_date.desc",
+    label: "Newest First",
+  },
+  {
+    value: "primary_release_date.asc",
+    label: "Oldest First",
+  },
+  {
+    value: "original_title.asc",
+    label: "A–Z",
+  },
 ];
