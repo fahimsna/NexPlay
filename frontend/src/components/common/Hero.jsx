@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { HiPlay } from "react-icons/hi2";
 
 function Hero() {
+  const [showAllPlatforms, setShowAllPlatforms] = useState(false);
+
   const platforms = [
     {
       name: "Netflix",
@@ -27,6 +30,30 @@ function Hero() {
       name: "Hulu",
       link: "https://www.hulu.com/",
     },
+  ];
+
+  // The extra platforms behind "More platforms" - revealed when clicked.
+  const morePlatforms = [
+    { name: "Peacock", link: "https://www.peacocktv.com" },
+    { name: "Paramount+", link: "https://www.paramountplus.com" },
+    { name: "Crunchyroll", link: "https://www.crunchyroll.com" },
+    { name: "discovery+", link: "https://www.discoveryplus.com" },
+    { name: "Starz", link: "https://www.starz.com" },
+    { name: "AMC+", link: "https://www.amcplus.com" },
+    { name: "BritBox", link: "https://www.britbox.com" },
+    { name: "ESPN+", link: "https://plus.espn.com" },
+    { name: "Showtime", link: "https://www.showtime.com" },
+    { name: "fuboTV", link: "https://www.fubo.tv" },
+    { name: "Sling TV", link: "https://www.sling.com" },
+    { name: "Tubi", link: "https://tubitv.com" },
+    { name: "Pluto TV", link: "https://pluto.tv" },
+    { name: "Fandango at Home", link: "https://www.fandangoathome.com" },
+    { name: "YouTube TV", link: "https://tv.youtube.com" },
+    { name: "Google TV", link: "https://tv.google.com" },
+    { name: "Mubi", link: "https://mubi.com" },
+    { name: "Shudder", link: "https://www.shudder.com" },
+    { name: "Amazon Freevee", link: "https://www.amazon.com/freevee" },
+    { name: "Xumo", link: "https://www.xumo.com" },
   ];
 
   return (
@@ -286,23 +313,65 @@ function Hero() {
                   {platform.name}
                 </a>
               ))}
+
+              {showAllPlatforms &&
+                morePlatforms.map((platform) => (
+                  <a
+                    key={platform.name}
+                    href={platform.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="
+                    h-12
+                    sm:h-14
+                    flex
+                    items-center
+                    justify-center
+                    text-center
+                    px-2
+                    rounded-xl
+                    bg-white/5
+                    border
+                    border-white/10
+                    text-xs
+                    sm:text-sm
+                    hover:border-[#D4A017]
+                    hover:text-[#D4A017]
+                    transition
+                    cursor-pointer
+                    "
+                  >
+                    {platform.name}
+                  </a>
+                ))}
             </div>
 
-            <div
+            <button
+              type="button"
+              onClick={() => setShowAllPlatforms((prev) => !prev)}
               className="
               mt-6
               pt-4
               border-t
               border-white/10
               flex
+              items-center
               justify-between
               text-sm
+              w-full
+              text-left
+              hover:text-[#D4A017]
+              transition
               "
             >
-              <span className="text-gray-400">More platforms</span>
+              <span className="text-gray-400">
+                {showAllPlatforms ? "Show less" : "More platforms"}
+              </span>
 
-              <span className="text-[#D4A017]">+20</span>
-            </div>
+              <span className="text-[#D4A017]">
+                {showAllPlatforms ? "−" : "+20"}
+              </span>
+            </button>
           </div>
         </div>
       </div>

@@ -10,6 +10,7 @@ import About from "../pages/About";
 import Contact from "../pages/Contact";
 import Partner from "../pages/Partner";
 import UpcomingReleaseCalendar from "../pages/UpcomingReleaseCalendar";
+import TopRated from "../pages/TopRated";
 
 import CompanySettings from "../pages/company/CompanySettings";
 
@@ -31,6 +32,17 @@ import Sports from "../pages/Sports";
 import SportsLeagueDetails from "../pages/SportsLeagueDetails";
 import SportsTeamDetails from "../pages/SportsTeamDetails";
 import SportsMatchDetails from "../pages/SportsMatchDetails";
+
+// Sprint 1: Admin Dashboard + Company Verification
+import AdminDashboardLayout from "../layouts/AdminDashboardLayout";
+import AdminDashboard from "../pages/admin/AdminDashboard";
+import AdminCompanyVerification from "../pages/admin/AdminCompanyVerification";
+import AdminUsers from "../pages/admin/AdminUsers";
+import AdminActivityLog from "../pages/admin/AdminActivityLog";
+import CompanyVerificationGate from "../components/company/CompanyVerificationGate";
+
+// Sprint 4: Ratings & Reviews
+import MyReviews from "../pages/user/MyReviews";
 
 function AppRoutes() {
   return (
@@ -58,6 +70,19 @@ function AppRoutes() {
         <Route path="/calendar" element={<UpcomingReleaseCalendar />} />
 
         <Route path="/upcoming" element={<UpcomingReleaseCalendar />} />
+
+        {/* Sprint 4: Top Rated Content */}
+        <Route path="/top-rated" element={<TopRated />} />
+
+        {/* Sprint 4: My Reviews (any logged-in user) */}
+        <Route
+          path="/my-reviews"
+          element={
+            <ProtectedRoute>
+              <MyReviews />
+            </ProtectedRoute>
+          }
+        />
       </Route>
 
       {/* AUTH */}
@@ -69,7 +94,9 @@ function AppRoutes() {
         path="/company"
         element={
           <ProtectedRoute allowedRoles={["company"]}>
-            <CompanyDashboardLayout />
+            <CompanyVerificationGate>
+              <CompanyDashboardLayout />
+            </CompanyVerificationGate>
           </ProtectedRoute>
         }
       >
@@ -80,6 +107,21 @@ function AppRoutes() {
         <Route path="analytics" element={<CompanyAnalytics />} />
         <Route path="settings" element={<CompanySettings />} />
         <Route path="content" element={<CompanyUpcomingContent />} />
+      </Route>
+
+      {/* ADMIN DASHBOARD (Sprint 1) */}
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminDashboardLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<AdminDashboard />} />
+        <Route path="companies" element={<AdminCompanyVerification />} />
+        <Route path="users" element={<AdminUsers />} />
+        <Route path="activity-log" element={<AdminActivityLog />} />
       </Route>
     </Routes>
   );

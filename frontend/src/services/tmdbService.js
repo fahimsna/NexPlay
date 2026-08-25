@@ -139,3 +139,105 @@ export async function searchMovies(query) {
 
   return data.results;
 }
+
+// =======================
+// Genre List (movie / tv)
+// =======================
+// Sprint 2: Search & Advanced Filtering
+
+export async function getGenreList(type = "movie") {
+  const response = await fetch(
+    `${BASE_URL}/genre/${type}/list?api_key=${API_KEY}`,
+    options,
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch genre list");
+  }
+
+  const data = await response.json();
+
+  return data.genres || [];
+}
+
+// =======================
+// Advanced Discover (movie / tv)
+// =======================
+// Sprint 2: Search & Advanced Filtering
+//
+// Supports combining: multiple genres, release year, minimum rating,
+// sort order, and pagination - the "advanced filtering" on top of the
+// basic keyword search / single-genre filter already in Browse.jsx.
+//
+// filters:
+//   type        "movie" | "tv"              (default "movie")
+//   genreIds    array of genre ids           (default [])
+//   year        4-digit release year, OR a string like "Before 2020" (optional)
+//   minRating   0-10, minimum vote average    (optional)
+//   language    ISO 639-1 code (with_original_language) (optional)
+//   sortBy      TMDB sort_by value            (default "popularity.desc")
+//   page        page number                   (default 1)
+
+export async function discoverContent({
+  type = "movie",
+  genreIds = [],
+  year,
+  minRating,
+  language,
+  sortBy = "popularity.desc",
+  page = 1,
+} = {}) {
+  const params = new URLSearchParams({
+    api_key: API_KEY,
+    sort_by: sortBy,
+    page: String(page),
+    "vote_count.gte": "20",
+  });
+
+  const dateField = type === "movie" ? "primary_release" : "first_air_date";
+
+  if (genreIds.length > 0) {
+    params.set("with_genres", genreIds.join(","));
+  }
+
+  if (year) {
+    const beforeMatch = /^Before (\d{4})$/.exec(year);
+
+    if (beforeMatch) {
+      params.set(`${dateField}.lte`, `${beforeMatch[1]}-01-01`);
+    } else if (type === "movie") {
+      params.set("primary_release_year", String(year));
+    } else {
+      params.set("first_air_date_year", String(year));
+    }
+  }
+
+  if (minRating) {
+    params.set("vote_average.gte", String(minRating));
+  }
+
+  if (language) {
+    params.set("with_original_language", language);
+  }
+
+  const response = await fetch(
+    `${BASE_URL}/discover/${type}?${params.toString()}`,
+    options,
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch filtered content");
+  }
+
+  const data = await response.json();
+
+  return data.results || [];
+}
+
+export const SORT_OPTIONS = [
+  { value: "popularity.desc", label: "Most Popular" },
+  { value: "vote_average.desc", label: "Highest Rated" },
+  { value: "primary_release_date.desc", label: "Newest First" },
+  { value: "primary_release_date.asc", label: "Oldest First" },
+  { value: "original_title.asc", label: "A–Z" },
+];
