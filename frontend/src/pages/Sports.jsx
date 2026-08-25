@@ -672,7 +672,7 @@ function MatchCard({ match, formatMatchTime }) {
         )}
 
         {!isLive && match.venue && (
-          <span className="text-xs text-gray-600 truncate max-w-[180px]">
+          <span className="text-xs text-gray-600 truncate max-w-45">
             {match.venue}
           </span>
         )}
