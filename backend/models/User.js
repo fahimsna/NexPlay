@@ -33,6 +33,26 @@ const userSchema = new mongoose.Schema(
       enum: ["admin", "company", "user"],
       default: "user",
     },
+
+    // =======================
+    // Sprint 4
+    // Favourite Genres
+    // =======================
+
+    favouriteGenres: {
+      type: [String],
+      default: [],
+    },
+
+    // =======================
+    // Sprint 4
+    // Favourite Sports
+    // =======================
+
+    favouriteSports: {
+      type: [String],
+      default: [],
+    },
   },
   {
     timestamps: true,
