@@ -227,7 +227,7 @@ function Details() {
       <div
         className="
           relative
-          h-[500px]
+          h-125
           bg-cover
           bg-center
         "
@@ -245,7 +245,7 @@ function Details() {
           className="
             absolute
             inset-0
-            bg-gradient-to-t
+            bg-linear-to-t
             from-[#17191D]
             via-[#17191D]/60
             to-transparent
