@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+
 import { HiClock } from "react-icons/hi2";
 
 const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
@@ -58,9 +59,9 @@ function RecentlyViewed({ items = [] }) {
             gap-5
           "
         >
-          {items.map((item) => (
+          {items.map((item, index) => (
             <Link
-              key={`${item.type}-${item.id}`}
+              key={`${item.type}-${item.id}-${index}`}
               to={`/details/${item.id}`}
               className="
                 group

@@ -38,12 +38,12 @@ function ActivityHistory({ activities = [] }) {
           </div>
         ) : (
           <div className="divide-y divide-white/10">
-            {activities.map((activity) => {
+            {activities.map((activity, index) => {
               const Icon = getIcon(activity.type);
 
               return (
                 <div
-                  key={activity.id}
+                  key={`${activity.id}-${index}`}
                   className="
                     p-5
                     flex
