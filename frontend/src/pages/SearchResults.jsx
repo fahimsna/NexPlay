@@ -47,6 +47,14 @@ function SearchResults() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialQuery]);
 
+  // Some third-party endpoints (TheSportsDB in particular) don't always
+  // return an array - depending on the query they can send back an
+  // object, null, or nothing at all. Guard every result so a weird API
+  // response can never crash the page.
+  function toArray(value) {
+    return Array.isArray(value) ? value : [];
+  }
+
   async function runSearch(term) {
     try {
       setLoading(true);
@@ -62,10 +70,18 @@ function SearchResults() {
           searchLeague(term),
         ]);
 
-      setMovies(movieResult.status === "fulfilled" ? movieResult.value : []);
-      setSeries(seriesResult.status === "fulfilled" ? seriesResult.value : []);
-      setTeams(teamResult.status === "fulfilled" ? teamResult.value : []);
-      setLeagues(leagueResult.status === "fulfilled" ? leagueResult.value : []);
+      setMovies(
+        toArray(movieResult.status === "fulfilled" ? movieResult.value : []),
+      );
+      setSeries(
+        toArray(seriesResult.status === "fulfilled" ? seriesResult.value : []),
+      );
+      setTeams(
+        toArray(teamResult.status === "fulfilled" ? teamResult.value : []),
+      );
+      setLeagues(
+        toArray(leagueResult.status === "fulfilled" ? leagueResult.value : []),
+      );
     } catch (err) {
       console.error("Search error:", err);
       setError("Something went wrong while searching. Please try again.");
