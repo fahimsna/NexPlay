@@ -14,6 +14,7 @@ import UpcomingReleaseCalendar from "../pages/UpcomingReleaseCalendar";
 import TopRated from "../pages/TopRated";
 import UserProfile from "../pages/user/UserProfile";
 import SearchResults from "../pages/SearchResults";
+import Notifications from "../pages/Notifications";
 
 import CompanySettings from "../pages/company/CompanySettings";
 
@@ -42,6 +43,7 @@ import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminCompanyVerification from "../pages/admin/AdminCompanyVerification";
 import AdminUsers from "../pages/admin/AdminUsers";
 import AdminActivityLog from "../pages/admin/AdminActivityLog";
+import CommentModeration from "../pages/admin/CommentModeration";
 import CompanyVerificationGate from "../components/company/CompanyVerificationGate";
 
 // Sprint 4: Ratings & Reviews
@@ -94,6 +96,17 @@ function AppRoutes() {
 
         {/* Sprint 4: Top Rated Content */}
         <Route path="/top-rated" element={<TopRated />} />
+
+        {/* Notifications: new releases + live sports */}
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+              <Notifications />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/profile"
           element={
@@ -171,6 +184,7 @@ function AppRoutes() {
         <Route path="users" element={<AdminUsers />} />
 
         <Route path="activity-log" element={<AdminActivityLog />} />
+        <Route path="discussion-moderation" element={<CommentModeration />} />
       </Route>
     </Routes>
   );

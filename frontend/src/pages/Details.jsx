@@ -19,6 +19,8 @@ import { recordActivity } from "../services/activityService";
 import useAuth from "../hooks/useAuth";
 
 import ReviewsSection from "../components/reviews/ReviewsSection";
+import WhereToWatch from "../components/streaming/WhereToWatch";
+import DiscussionForum from "../components/discussion/DiscussionForum";
 
 const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
@@ -570,7 +572,7 @@ function Details() {
             </div>
 
             {/* =======================
-                Where to Watch
+                Where to Watch (TMDB / JustWatch providers)
             ======================= */}
 
             <div
@@ -625,7 +627,7 @@ function Details() {
 
                       <div className="flex flex-wrap gap-4">
                         {uniqueStreamingProviders.map((provider) => (
-                          <a
+                         <a 
                             key={`stream-${provider.provider_id}`}
                             href={provider.regionLink || "#"}
                             target="_blank"
@@ -893,6 +895,16 @@ function Details() {
                 </div>
               )}
             </div>
+
+            {/* =======================
+                Official Broadcaster / Watch Official Redirect
+            ======================= */}
+
+            <WhereToWatch tmdbId={movie.id} mediaType="movie" title={movie.title} />
+
+            {/* Discussion Forum */}
+
+            <DiscussionForum tmdbId={movie.id} mediaType="movie" />
 
             {/* =======================
                 Ratings & Reviews

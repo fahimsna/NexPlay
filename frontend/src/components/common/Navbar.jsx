@@ -5,24 +5,12 @@ import {
   HiX,
   HiOutlineUserCircle,
   HiChevronDown,
+  HiOutlineBell,
 } from "react-icons/hi";
 import { Link, useNavigate } from "react-router-dom";
 
 import useAuth from "../../hooks/useAuth";
-
-/*
-|--------------------------------------------------------------------------
-| NAV SEARCH FORM
-|--------------------------------------------------------------------------
-|
-| A real, typeable search box (movies, series, AND sports by name) -
-| replaces the old plain "Search" link that just sent everyone to the
-| Browse page without actually searching anything. Submitting goes to
-| /search?q=... which looks across movies, series, and sports at once.
-| Shared between the desktop bar and both mobile menu states.
-|
-|--------------------------------------------------------------------------
-*/
+import useNotifications from "../../hooks/useNotifications";
 
 function NavSearchForm({ onSubmitted, compact }) {
   const [value, setValue] = useState("");
@@ -94,12 +82,9 @@ function Navbar() {
   const profileRef = useRef(null);
 
   const { isAuthenticated, logout } = useAuth();
+  const { unseenCount } = useNotifications();
 
   const navigate = useNavigate();
-
-  // =======================
-  // Close dropdowns
-  // =======================
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -119,63 +104,21 @@ function Navbar() {
     };
   }, []);
 
-  // =======================
-  // Main Menu
-  // =======================
-
   const menuItems = [
-    {
-      name: "Home",
-      path: "/",
-    },
-    {
-      name: "Discover",
-      path: "/browse",
-    },
-    {
-      name: "Movies",
-      path: "/movies",
-    },
-    {
-      name: "Series",
-      path: "/series",
-    },
-    {
-      name: "Sports",
-      path: "/sports",
-    },
+    { name: "Home", path: "/" },
+    { name: "Discover", path: "/browse" },
+    { name: "Movies", path: "/movies" },
+    { name: "Series", path: "/series" },
+    { name: "Sports", path: "/sports" },
   ];
-
-  // =======================
-  // More Menu
-  // =======================
 
   const moreItems = [
-    {
-      name: "Upcoming",
-      path: "/upcoming",
-    },
-    {
-      name: "Top Rated",
-      path: "/top-rated",
-    },
-    {
-      name: "About",
-      path: "/about",
-    },
-    {
-      name: "Contact",
-      path: "/contact",
-    },
-    {
-      name: "Partner",
-      path: "/partner",
-    },
+    { name: "Upcoming", path: "/upcoming" },
+    { name: "Top Rated", path: "/top-rated" },
+    { name: "About", path: "/about" },
+    { name: "Contact", path: "/contact" },
+    { name: "Partner", path: "/partner" },
   ];
-
-  // =======================
-  // Logout
-  // =======================
 
   const handleLogout = () => {
     logout();
@@ -185,10 +128,6 @@ function Navbar() {
 
     navigate("/");
   };
-
-  // =======================
-  // Close Mobile Menu
-  // =======================
 
   const closeMobileMenu = () => {
     setOpen(false);
@@ -219,10 +158,6 @@ function Navbar() {
           justify-between
         "
       >
-        {/* =======================
-            Logo
-        ======================= */}
-
         <Link
           to="/"
           className="
@@ -239,10 +174,6 @@ function Navbar() {
           <span className="text-white">Play</span>
         </Link>
 
-        {/* =======================
-            Desktop Navigation
-        ======================= */}
-
         <div
           className="
             hidden
@@ -253,8 +184,6 @@ function Navbar() {
             flex-1
           "
         >
-          {/* Main Links */}
-
           {menuItems.map((item) => (
             <Link
               key={item.name}
@@ -271,10 +200,6 @@ function Navbar() {
               {item.name}
             </Link>
           ))}
-
-          {/* =======================
-              More Dropdown
-          ======================= */}
 
           <div ref={moreRef} className="relative">
             <button
@@ -343,10 +268,6 @@ function Navbar() {
           </div>
         </div>
 
-        {/* =======================
-            Right Side
-        ======================= */}
-
         <div
           className="
             flex
@@ -355,13 +276,7 @@ function Navbar() {
             ml-auto
           "
         >
-          {/* Search */}
-
           <NavSearchForm />
-
-          {/* =======================
-              Profile Dropdown
-          ======================= */}
 
           {isAuthenticated ? (
             <div ref={profileRef} className="relative hidden sm:block">
@@ -414,8 +329,6 @@ function Navbar() {
                     p-2
                   "
                 >
-                  {/* Profile */}
-
                   <Link
                     to="/profile"
                     onClick={() => setProfileOpen(false)}
@@ -433,8 +346,6 @@ function Navbar() {
                   >
                     My Profile
                   </Link>
-
-                  {/* My Reviews */}
 
                   <Link
                     to="/my-reviews"
@@ -454,8 +365,6 @@ function Navbar() {
                     My Reviews
                   </Link>
 
-                  {/* Watchlist */}
-
                   <Link
                     to="/watchlist"
                     onClick={() => setProfileOpen(false)}
@@ -474,11 +383,51 @@ function Navbar() {
                     Watchlist
                   </Link>
 
-                  {/* Divider */}
+                  <Link
+                    to="/notifications"
+                    onClick={() => setProfileOpen(false)}
+                    className="
+                      flex
+                      items-center
+                      justify-between
+                      gap-2
+                      px-4
+                      py-3
+                      rounded-xl
+                      text-sm
+                      text-gray-300
+                      hover:bg-[#393E46]
+                      hover:text-[#D4A017]
+                      transition
+                    "
+                  >
+                    <span className="flex items-center gap-2">
+                      <HiOutlineBell size={16} />
+                      Notifications
+                    </span>
+
+                    {unseenCount > 0 && (
+                      <span
+                        className="
+                          flex
+                          items-center
+                          justify-center
+                          min-w-5
+                          h-5
+                          px-1.5
+                          rounded-full
+                          bg-[#D4A017]
+                          text-[#17191D]
+                          text-xs
+                          font-bold
+                        "
+                      >
+                        {unseenCount > 9 ? "9+" : unseenCount}
+                      </span>
+                    )}
+                  </Link>
 
                   <div className="my-2 border-t border-white/10" />
-
-                  {/* Logout */}
 
                   <button
                     onClick={handleLogout}
@@ -500,8 +449,6 @@ function Navbar() {
               )}
             </div>
           ) : (
-            /* Login */
-
             <Link
               to="/login"
               className="
@@ -522,10 +469,6 @@ function Navbar() {
             </Link>
           )}
 
-          {/* =======================
-              Mobile Button
-          ======================= */}
-
           <button
             onClick={() => setOpen((prev) => !prev)}
             className="
@@ -540,10 +483,6 @@ function Navbar() {
           </button>
         </div>
       </div>
-
-      {/* =======================
-          Mobile Menu
-      ======================= */}
 
       {open && (
         <div
@@ -563,8 +502,6 @@ function Navbar() {
               gap-2
             "
           >
-            {/* Main Links */}
-
             {menuItems.map((item) => (
               <Link
                 key={item.name}
@@ -583,8 +520,6 @@ function Navbar() {
                 {item.name}
               </Link>
             ))}
-
-            {/* More Section */}
 
             <div className="mt-2 pt-4 border-t border-white/10">
               <p
@@ -620,8 +555,6 @@ function Navbar() {
                 </Link>
               ))}
             </div>
-
-            {/* User Section */}
 
             <div className="mt-2 pt-4 border-t border-white/10">
               {isAuthenticated ? (
@@ -690,13 +623,52 @@ function Navbar() {
                     Watchlist
                   </Link>
 
-                  {/* Search */}
+                  <Link
+                    to="/notifications"
+                    onClick={closeMobileMenu}
+                    className="
+                      flex
+                      items-center
+                      justify-between
+                      gap-2
+                      px-4
+                      py-3
+                      rounded-xl
+                      text-gray-300
+                      hover:bg-[#393E46]
+                      hover:text-[#D4A017]
+                      transition
+                    "
+                  >
+                    <span className="flex items-center gap-2">
+                      <HiOutlineBell size={16} />
+                      Notifications
+                    </span>
+
+                    {unseenCount > 0 && (
+                      <span
+                        className="
+                          flex
+                          items-center
+                          justify-center
+                          min-w-5
+                          h-5
+                          px-1.5
+                          rounded-full
+                          bg-[#D4A017]
+                          text-[#17191D]
+                          text-xs
+                          font-bold
+                        "
+                      >
+                        {unseenCount > 9 ? "9+" : unseenCount}
+                      </span>
+                    )}
+                  </Link>
 
                   <div className="px-4 py-2">
                     <NavSearchForm compact onSubmitted={closeMobileMenu} />
                   </div>
-
-                  {/* Logout */}
 
                   <button
                     onClick={handleLogout}
@@ -716,13 +688,9 @@ function Navbar() {
                 </>
               ) : (
                 <>
-                  {/* Search */}
-
                   <div className="px-4 py-2">
                     <NavSearchForm compact onSubmitted={closeMobileMenu} />
                   </div>
-
-                  {/* Login */}
 
                   <Link
                     to="/login"
