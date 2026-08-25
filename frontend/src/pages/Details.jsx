@@ -99,29 +99,118 @@ function Details() {
   // Watch Providers
   // =======================
 
-  // Bangladesh first.
-  // If Bangladesh has no provider information,
-  // we don't show providers from another country
-  // because that could be misleading.
+  /*
+    TMDB returns providers grouped by region.
 
-  const bdProviders = watchProviders?.BD;
+    Example:
 
-  const streamingProviders = bdProviders?.flatrate || [];
+    {
+      US: {
+        link: "...",
+        flatrate: [...],
+        rent: [...],
+        buy: [...]
+      },
 
-  const rentProviders = bdProviders?.rent || [];
+      GB: {
+        link: "...",
+        flatrate: [...]
+      }
+    }
 
-  const buyProviders = bdProviders?.buy || [];
+    We collect providers from ALL regions.
+  */
 
-  // Remove duplicate providers between
-  // streaming / rent / buy sections.
+  const allRegions = Object.entries(watchProviders || {});
 
-  const uniqueProviders = Array.from(
+  const streamingProviders = [];
+
+  const rentProviders = [];
+
+  const buyProviders = [];
+
+  // Collect streaming providers
+
+  allRegions.forEach(([regionCode, regionData]) => {
+    if (!regionData?.flatrate) return;
+
+    regionData.flatrate.forEach((provider) => {
+      streamingProviders.push({
+        ...provider,
+        regionCode,
+        regionLink: regionData.link,
+      });
+    });
+  });
+
+  // Collect rental providers
+
+  allRegions.forEach(([regionCode, regionData]) => {
+    if (!regionData?.rent) return;
+
+    regionData.rent.forEach((provider) => {
+      rentProviders.push({
+        ...provider,
+        regionCode,
+        regionLink: regionData.link,
+      });
+    });
+  });
+
+  // Collect purchase providers
+
+  allRegions.forEach(([regionCode, regionData]) => {
+    if (!regionData?.buy) return;
+
+    regionData.buy.forEach((provider) => {
+      buyProviders.push({
+        ...provider,
+        regionCode,
+        regionLink: regionData.link,
+      });
+    });
+  });
+
+  // =======================
+  // Remove duplicates
+  // =======================
+
+  const uniqueStreamingProviders = Array.from(
     new Map(
-      [...streamingProviders, ...rentProviders, ...buyProviders].map(
-        (provider) => [provider.provider_id, provider],
-      ),
+      streamingProviders.map((provider) => [provider.provider_id, provider]),
     ).values(),
   );
+
+  const uniqueRentProviders = Array.from(
+    new Map(
+      rentProviders.map((provider) => [provider.provider_id, provider]),
+    ).values(),
+  );
+
+  const uniqueBuyProviders = Array.from(
+    new Map(
+      buyProviders.map((provider) => [provider.provider_id, provider]),
+    ).values(),
+  );
+
+  const hasProviders =
+    uniqueStreamingProviders.length > 0 ||
+    uniqueRentProviders.length > 0 ||
+    uniqueBuyProviders.length > 0;
+
+  // =======================
+  // Get country name
+  // =======================
+
+  function getRegionName(regionCode) {
+    try {
+      return new Intl.DisplayNames(["en"], {
+        type: "region",
+      }).of(regionCode);
+    } catch {
+      return regionCode;
+    }
+  }
 
   return (
     <section
@@ -131,7 +220,9 @@ function Details() {
         text-white
       "
     >
-      {/* Hero Banner */}
+      {/* =======================
+          Hero Banner
+      ======================= */}
 
       <div
         className="
@@ -187,7 +278,9 @@ function Details() {
         </div>
       </div>
 
-      {/* Main */}
+      {/* =======================
+          Main
+      ======================= */}
 
       <div
         className="
@@ -207,7 +300,9 @@ function Details() {
             gap-10
           "
         >
-          {/* Poster */}
+          {/* =======================
+              Poster
+          ======================= */}
 
           <div>
             <img
@@ -223,9 +318,13 @@ function Details() {
             />
           </div>
 
-          {/* Information */}
+          {/* =======================
+              Information
+          ======================= */}
 
           <div className="lg:col-span-2">
+            {/* Type */}
+
             <span
               className="
                 inline-block
@@ -240,6 +339,8 @@ function Details() {
               Movie
             </span>
 
+            {/* Title */}
+
             <h1
               className="
                 mt-6
@@ -249,6 +350,10 @@ function Details() {
             >
               {movie.title}
             </h1>
+
+            {/* =======================
+                Basic Information
+            ======================= */}
 
             <div
               className="
@@ -355,7 +460,9 @@ function Details() {
               </div>
             </div>
 
-            {/* Genres */}
+            {/* =======================
+                Genres
+            ======================= */}
 
             <div className="mt-10">
               <h2 className="text-2xl font-bold">Genres</h2>
@@ -380,7 +487,9 @@ function Details() {
               </div>
             </div>
 
-            {/* Overview */}
+            {/* =======================
+                Overview
+            ======================= */}
 
             <div className="mt-12">
               <h2 className="text-2xl font-bold">Overview</h2>
@@ -396,7 +505,9 @@ function Details() {
               </p>
             </div>
 
-            {/* Production Companies */}
+            {/* =======================
+                Production Companies
+            ======================= */}
 
             <div className="mt-12">
               <h2 className="text-2xl font-bold">Production Companies</h2>
@@ -407,13 +518,13 @@ function Details() {
                     <span
                       key={company.id}
                       className="
-                        px-4
-                        py-2
-                        rounded-full
-                        bg-[#24272D]
-                        border
-                        border-white/10
-                      "
+                          px-4
+                          py-2
+                          rounded-full
+                          bg-[#24272D]
+                          border
+                          border-white/10
+                        "
                     >
                       {company.name}
                     </span>
@@ -443,8 +554,8 @@ function Details() {
                   <h2 className="text-3xl font-bold">Where to Watch</h2>
 
                   <p className="text-gray-400 mt-3 leading-7">
-                    Streaming availability in Bangladesh. Availability may
-                    change over time.
+                    Streaming, rental, and purchase options available for this
+                    movie.
                   </p>
                 </div>
 
@@ -462,55 +573,57 @@ function Details() {
                     text-gray-400
                   "
                 >
-                  🇧🇩 Bangladesh
+                  🌎 Worldwide
                 </span>
               </div>
 
-              {uniqueProviders.length > 0 ? (
+              {hasProviders ? (
                 <>
-                  {/* Streaming */}
+                  {/* =======================
+                      Streaming
+                  ======================= */}
 
-                  {streamingProviders.length > 0 && (
+                  {uniqueStreamingProviders.length > 0 && (
                     <div className="mt-7">
                       <h3 className="text-sm font-semibold text-gray-400 mb-4">
                         Stream with Subscription
                       </h3>
 
                       <div className="flex flex-wrap gap-4">
-                        {streamingProviders.map((provider) => (
+                        {uniqueStreamingProviders.map((provider) => (
                           <a
                             key={`stream-${provider.provider_id}`}
-                            href={bdProviders.link}
+                            href={provider.regionLink || "#"}
                             target="_blank"
                             rel="noopener noreferrer"
                             title={`Watch ${movie.title} on ${provider.provider_name}`}
                             className="
-                              group
-                              flex
-                              items-center
-                              gap-3
-                              px-4
-                              py-3
-                              rounded-2xl
-                              bg-[#17191D]
-                              border
-                              border-white/10
-                              hover:border-[#D4A017]
-                              hover:-translate-y-1
-                              transition-all
-                              duration-200
-                            "
+                                group
+                                flex
+                                items-center
+                                gap-3
+                                px-4
+                                py-3
+                                rounded-2xl
+                                bg-[#17191D]
+                                border
+                                border-white/10
+                                hover:border-[#D4A017]
+                                hover:-translate-y-1
+                                transition-all
+                                duration-200
+                              "
                           >
                             {provider.logo_path && (
                               <img
                                 src={`${IMAGE_BASE_URL}${provider.logo_path}`}
                                 alt={provider.provider_name}
                                 className="
-                                  w-11
-                                  h-11
-                                  rounded-xl
-                                  object-cover
-                                "
+                                    w-11
+                                    h-11
+                                    rounded-xl
+                                    object-cover
+                                  "
                               />
                             )}
 
@@ -521,22 +634,26 @@ function Details() {
 
                               <p
                                 className="
-                                  text-xs
-                                  text-gray-500
-                                  group-hover:text-[#D4A017]
-                                  transition
-                                "
+                                    text-xs
+                                    text-gray-500
+                                    group-hover:text-[#D4A017]
+                                    transition
+                                  "
                               >
                                 Watch now
+                              </p>
+
+                              <p className="text-[10px] text-gray-600 mt-1">
+                                {getRegionName(provider.regionCode)}
                               </p>
                             </div>
 
                             <HiArrowTopRightOnSquare
                               className="
-                                text-gray-500
-                                group-hover:text-[#D4A017]
-                                transition
-                              "
+                                  text-gray-500
+                                  group-hover:text-[#D4A017]
+                                  transition
+                                "
                             />
                           </a>
                         ))}
@@ -544,49 +661,51 @@ function Details() {
                     </div>
                   )}
 
-                  {/* Rent */}
+                  {/* =======================
+                      Rent
+                  ======================= */}
 
-                  {rentProviders.length > 0 && (
+                  {uniqueRentProviders.length > 0 && (
                     <div className="mt-8">
                       <h3 className="text-sm font-semibold text-gray-400 mb-4">
                         Rent
                       </h3>
 
                       <div className="flex flex-wrap gap-4">
-                        {rentProviders.map((provider) => (
+                        {uniqueRentProviders.map((provider) => (
                           <a
                             key={`rent-${provider.provider_id}`}
-                            href={bdProviders.link}
+                            href={provider.regionLink || "#"}
                             target="_blank"
                             rel="noopener noreferrer"
                             title={`Rent ${movie.title} from ${provider.provider_name}`}
                             className="
-                              group
-                              flex
-                              items-center
-                              gap-3
-                              px-4
-                              py-3
-                              rounded-2xl
-                              bg-[#17191D]
-                              border
-                              border-white/10
-                              hover:border-[#D4A017]
-                              hover:-translate-y-1
-                              transition-all
-                              duration-200
-                            "
+                                group
+                                flex
+                                items-center
+                                gap-3
+                                px-4
+                                py-3
+                                rounded-2xl
+                                bg-[#17191D]
+                                border
+                                border-white/10
+                                hover:border-[#D4A017]
+                                hover:-translate-y-1
+                                transition-all
+                                duration-200
+                              "
                           >
                             {provider.logo_path && (
                               <img
                                 src={`${IMAGE_BASE_URL}${provider.logo_path}`}
                                 alt={provider.provider_name}
                                 className="
-                                  w-11
-                                  h-11
-                                  rounded-xl
-                                  object-cover
-                                "
+                                    w-11
+                                    h-11
+                                    rounded-xl
+                                    object-cover
+                                  "
                               />
                             )}
 
@@ -597,22 +716,26 @@ function Details() {
 
                               <p
                                 className="
-                                  text-xs
-                                  text-gray-500
-                                  group-hover:text-[#D4A017]
-                                  transition
-                                "
+                                    text-xs
+                                    text-gray-500
+                                    group-hover:text-[#D4A017]
+                                    transition
+                                  "
                               >
                                 Rent
+                              </p>
+
+                              <p className="text-[10px] text-gray-600 mt-1">
+                                {getRegionName(provider.regionCode)}
                               </p>
                             </div>
 
                             <HiArrowTopRightOnSquare
                               className="
-                                text-gray-500
-                                group-hover:text-[#D4A017]
-                                transition
-                              "
+                                  text-gray-500
+                                  group-hover:text-[#D4A017]
+                                  transition
+                                "
                             />
                           </a>
                         ))}
@@ -620,49 +743,51 @@ function Details() {
                     </div>
                   )}
 
-                  {/* Buy */}
+                  {/* =======================
+                      Buy
+                  ======================= */}
 
-                  {buyProviders.length > 0 && (
+                  {uniqueBuyProviders.length > 0 && (
                     <div className="mt-8">
                       <h3 className="text-sm font-semibold text-gray-400 mb-4">
                         Buy
                       </h3>
 
                       <div className="flex flex-wrap gap-4">
-                        {buyProviders.map((provider) => (
+                        {uniqueBuyProviders.map((provider) => (
                           <a
                             key={`buy-${provider.provider_id}`}
-                            href={bdProviders.link}
+                            href={provider.regionLink || "#"}
                             target="_blank"
                             rel="noopener noreferrer"
                             title={`Buy ${movie.title} from ${provider.provider_name}`}
                             className="
-                              group
-                              flex
-                              items-center
-                              gap-3
-                              px-4
-                              py-3
-                              rounded-2xl
-                              bg-[#17191D]
-                              border
-                              border-white/10
-                              hover:border-[#D4A017]
-                              hover:-translate-y-1
-                              transition-all
-                              duration-200
-                            "
+                                group
+                                flex
+                                items-center
+                                gap-3
+                                px-4
+                                py-3
+                                rounded-2xl
+                                bg-[#17191D]
+                                border
+                                border-white/10
+                                hover:border-[#D4A017]
+                                hover:-translate-y-1
+                                transition-all
+                                duration-200
+                              "
                           >
                             {provider.logo_path && (
                               <img
                                 src={`${IMAGE_BASE_URL}${provider.logo_path}`}
                                 alt={provider.provider_name}
                                 className="
-                                  w-11
-                                  h-11
-                                  rounded-xl
-                                  object-cover
-                                "
+                                    w-11
+                                    h-11
+                                    rounded-xl
+                                    object-cover
+                                  "
                               />
                             )}
 
@@ -673,22 +798,26 @@ function Details() {
 
                               <p
                                 className="
-                                  text-xs
-                                  text-gray-500
-                                  group-hover:text-[#D4A017]
-                                  transition
-                                "
+                                    text-xs
+                                    text-gray-500
+                                    group-hover:text-[#D4A017]
+                                    transition
+                                  "
                               >
                                 Buy
+                              </p>
+
+                              <p className="text-[10px] text-gray-600 mt-1">
+                                {getRegionName(provider.regionCode)}
                               </p>
                             </div>
 
                             <HiArrowTopRightOnSquare
                               className="
-                                text-gray-500
-                                group-hover:text-[#D4A017]
-                                transition
-                              "
+                                  text-gray-500
+                                  group-hover:text-[#D4A017]
+                                  transition
+                                "
                             />
                           </a>
                         ))}
@@ -696,29 +825,16 @@ function Details() {
                     </div>
                   )}
 
-                  {/* View all */}
+                  {/* =======================
+                      Attribution
+                  ======================= */}
 
-                  {bdProviders.link && (
-                    <div className="mt-8 pt-6 border-t border-white/10">
-                      <a
-                        href={bdProviders.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="
-                          inline-flex
-                          items-center
-                          gap-2
-                          text-[#D4A017]
-                          hover:text-[#e7bb3c]
-                          font-semibold
-                          transition
-                        "
-                      >
-                        View all watch options
-                        <HiArrowTopRightOnSquare />
-                      </a>
-                    </div>
-                  )}
+                  <div className="mt-8 pt-5 border-t border-white/10">
+                    <p className="text-xs text-gray-500">
+                      Streaming availability powered by JustWatch via TMDB.
+                      Availability may vary by region and time.
+                    </p>
+                  </div>
                 </>
               ) : (
                 <div
@@ -733,7 +849,7 @@ function Details() {
                 >
                   <p className="text-gray-400">
                     No streaming, rental, or purchase providers are currently
-                    listed for this movie in Bangladesh.
+                    listed for this movie.
                   </p>
 
                   <p className="text-sm text-gray-500 mt-2">
@@ -744,7 +860,9 @@ function Details() {
               )}
             </div>
 
-            {/* Ratings & Reviews */}
+            {/* =======================
+                Ratings & Reviews
+            ======================= */}
 
             <ReviewsSection
               contentId={movie.id}
