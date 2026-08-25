@@ -627,7 +627,7 @@ function Details() {
 
                       <div className="flex flex-wrap gap-4">
                         {uniqueStreamingProviders.map((provider) => (
-                          
+                         <a 
                             key={`stream-${provider.provider_id}`}
                             href={provider.regionLink || "#"}
                             target="_blank"
@@ -709,7 +709,7 @@ function Details() {
 
                       <div className="flex flex-wrap gap-4">
                         {uniqueRentProviders.map((provider) => (
-                          
+                          <a
                             key={`rent-${provider.provider_id}`}
                             href={provider.regionLink || "#"}
                             target="_blank"
@@ -791,7 +791,7 @@ function Details() {
 
                       <div className="flex flex-wrap gap-4">
                         {uniqueBuyProviders.map((provider) => (
-                          
+                          <a
                             key={`buy-${provider.provider_id}`}
                             href={provider.regionLink || "#"}
                             target="_blank"
