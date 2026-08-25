@@ -15,6 +15,8 @@ import {
   getMovieWatchProviders,
 } from "../services/tmdbService";
 
+import { recordActivity } from "../services/activityService";
+
 import ReviewsSection from "../components/reviews/ReviewsSection";
 
 const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
@@ -52,6 +54,34 @@ function Details() {
       setMovie(movieData);
 
       setWatchProviders(providerData);
+
+      // =======================
+      // Sprint 4
+      // Record Recently Viewed
+      // =======================
+
+      const storedUser = localStorage.getItem("user");
+
+      if (storedUser) {
+        try {
+          await recordActivity({
+            contentId: movieData.id,
+            contentType: "movie",
+            title: movieData.title,
+            posterPath: movieData.poster_path,
+            metadata: {
+              releaseDate: movieData.release_date,
+              genres: movieData.genres?.map((genre) => genre.name) || [],
+            },
+          });
+        } catch (activityError) {
+          /*
+           * Activity tracking should never
+           * break the Details page.
+           */
+          console.error("Failed to record movie activity:", activityError);
+        }
+      }
     } catch (err) {
       console.error(err);
 
@@ -129,7 +159,9 @@ function Details() {
 
   const buyProviders = [];
 
-  // Collect streaming providers
+  // =======================
+  // Collect Streaming
+  // =======================
 
   allRegions.forEach(([regionCode, regionData]) => {
     if (!regionData?.flatrate) return;
@@ -143,7 +175,9 @@ function Details() {
     });
   });
 
-  // Collect rental providers
+  // =======================
+  // Collect Rental
+  // =======================
 
   allRegions.forEach(([regionCode, regionData]) => {
     if (!regionData?.rent) return;
@@ -157,7 +191,9 @@ function Details() {
     });
   });
 
-  // Collect purchase providers
+  // =======================
+  // Collect Purchase
+  // =======================
 
   allRegions.forEach(([regionCode, regionData]) => {
     if (!regionData?.buy) return;
@@ -172,7 +208,7 @@ function Details() {
   });
 
   // =======================
-  // Remove duplicates
+  // Remove Duplicates
   // =======================
 
   const uniqueStreamingProviders = Array.from(
@@ -199,7 +235,7 @@ function Details() {
     uniqueBuyProviders.length > 0;
 
   // =======================
-  // Get country name
+  // Get Country Name
   // =======================
 
   function getRegionName(regionCode) {
@@ -518,13 +554,13 @@ function Details() {
                     <span
                       key={company.id}
                       className="
-                          px-4
-                          py-2
-                          rounded-full
-                          bg-[#24272D]
-                          border
-                          border-white/10
-                        "
+                        px-4
+                        py-2
+                        rounded-full
+                        bg-[#24272D]
+                        border
+                        border-white/10
+                      "
                     >
                       {company.name}
                     </span>
