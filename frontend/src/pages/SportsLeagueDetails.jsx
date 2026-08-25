@@ -491,7 +491,7 @@ function MatchCard({ event, upcoming }) {
 
       {/* TEAMS */}
 
-      <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-center mt-6">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-4 items-center mt-6">
         {/* HOME */}
 
         <TeamMini
@@ -551,12 +551,12 @@ function MatchCard({ event, upcoming }) {
 function TeamMini({ name, badge, align }) {
   return (
     <div
-      className={`flex items-center gap-3 ${
+      className={`flex items-center gap-3 min-w-0 ${
         align === "right" ? "justify-end" : "justify-start"
       }`}
     >
       {align === "right" && (
-        <p className="font-semibold text-sm sm:text-base text-right">
+        <p className="min-w-0 truncate font-semibold text-sm sm:text-base text-right">
           {name || "Home Team"}
         </p>
       )}
@@ -570,7 +570,7 @@ function TeamMini({ name, badge, align }) {
       </div>
 
       {align === "left" && (
-        <p className="font-semibold text-sm sm:text-base">
+        <p className="min-w-0 truncate font-semibold text-sm sm:text-base">
           {name || "Away Team"}
         </p>
       )}

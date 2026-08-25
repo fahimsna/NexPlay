@@ -4,8 +4,10 @@ const cors = require("cors");
 const path = require("path");
 
 const connectDB = require("./config/db");
+
 const settingsRoutes = require("./routes/settingsRoutes");
 const sportsRoutes = require("./routes/sportsRoutes");
+const activityRoutes = require("./routes/activityRoutes");
 
 dotenv.config();
 
@@ -14,11 +16,13 @@ const app = express();
 // =======================
 // DATABASE CONNECTION
 // =======================
+
 connectDB();
 
 // =======================
 // MIDDLEWARE
 // =======================
+
 app.use(
   cors({
     origin: ["http://localhost:5173", "http://localhost:5174"],
@@ -32,11 +36,13 @@ app.use(express.urlencoded({ extended: true }));
 // =======================
 // STATIC FILES
 // =======================
+
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // =======================
 // ROUTES
 // =======================
+
 const authRoutes = require("./routes/authRoutes");
 const companyRoutes = require("./routes/companyRoutes");
 const advertisementRoutes = require("./routes/advertisementRoutes");
@@ -50,27 +56,76 @@ const featuredContentRoutes = require("./routes/featuredContentRoutes");
 const streamingPlatformRoutes = require("./routes/streamingPlatformRoutes");
 const streamingAvailabilityRoutes = require("./routes/streamingAvailabilityRoutes");
 const commentRoutes = require("./routes/commentRoutes");
+
+// =======================
+// SPRINT 4 - USER ROUTES
+// =======================
+
+const userRoutes = require("./routes/userRoutes");
+
+// =======================
+// SPRINT 4 - WATCHLIST
+// =======================
+
+const watchlistRoutes = require("./routes/watchlistRoutes");
+
 // =======================
 // API ROUTES
 // =======================
+
 app.use("/api/auth", authRoutes);
+
 app.use("/api/company", companyRoutes);
+
 app.use("/api/advertisements", advertisementRoutes);
+
 app.use("/api/campaigns", campaignRoutes);
+
 app.use("/api/dashboard", dashboardRoutes);
+
 app.use("/api/analytics", analyticsRoutes);
+
 app.use("/api/upcoming", upcomingRoutes);
+
 app.use("/api/settings", settingsRoutes);
+
 app.use("/api/sports", sportsRoutes);
+
 app.use("/api/admin", adminRoutes);
+
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/featured-content", featuredContentRoutes);
 app.use("/api/streaming-platforms", streamingPlatformRoutes);
 app.use("/api/streaming-availability", streamingAvailabilityRoutes);
 app.use("/api/comments", commentRoutes);
+
+// =======================
+// SPRINT 4
+// User Activity History
+// =======================
+
+app.use("/api/activity", activityRoutes);
+
+// =======================
+// SPRINT 4
+// User Profile
+// Favourite Genres
+// Favourite Sports
+// =======================
+
+app.use("/api/users", userRoutes);
+
+// =======================
+// SPRINT 4
+// Watchlist
+// =======================
+
+app.use("/api/watchlist", watchlistRoutes);
+
 // =======================
 // ROOT ROUTE
 // =======================
+
 app.get("/", (req, res) => {
   res.send("NexPlay Backend Running");
 });
@@ -78,6 +133,7 @@ app.get("/", (req, res) => {
 // =======================
 // SERVER
 // =======================
+
 const PORT = process.env.PORT || 8000;
 
 app.listen(PORT, () => {

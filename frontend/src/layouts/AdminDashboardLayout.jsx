@@ -10,12 +10,14 @@ function AdminDashboardLayout() {
 
   return (
     <div className="min-h-screen bg-[#17191D] text-white">
-      <button
-        onClick={() => setOpen(true)}
-        className="md:hidden fixed top-4 left-4 z-50 bg-[#D4A017] text-black p-3 rounded-xl shadow-lg"
-      >
-        <FiMenu size={24} />
-      </button>
+      {!open && (
+        <button
+          onClick={() => setOpen(true)}
+          className="md:hidden fixed top-4 left-4 z-50 bg-[#D4A017] text-black p-3 rounded-xl shadow-lg"
+        >
+          <FiMenu size={24} />
+        </button>
+      )}
 
       <AdminSidebar open={open} setOpen={setOpen} />
 

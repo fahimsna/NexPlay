@@ -302,8 +302,8 @@ function SportsMatchDetails() {
 
                       return (
                         <div key={row.label} className="space-y-1.5">
-                          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-                            <p className="text-right text-sm font-semibold">
+                          <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3">
+                            <p className="min-w-0 truncate text-right text-sm font-semibold">
                               {row.home ?? "-"}
                             </p>
 
@@ -311,7 +311,7 @@ function SportsMatchDetails() {
                               {row.label}
                             </p>
 
-                            <p className="text-left text-sm font-semibold">
+                            <p className="min-w-0 truncate text-left text-sm font-semibold">
                               {row.away ?? "-"}
                             </p>
                           </div>
@@ -338,15 +338,15 @@ function SportsMatchDetails() {
                     return (
                       <div
                         key={row.label}
-                        className="grid grid-cols-[1fr_auto_1fr] items-center gap-3"
+                        className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-3"
                       >
-                        <p className="text-right text-sm">{row.home ?? "-"}</p>
+                        <p className="min-w-0 text-right text-sm break-words">{row.home ?? "-"}</p>
 
                         <p className="text-center text-xs uppercase tracking-wider text-gray-500 px-3">
                           {row.label}
                         </p>
 
-                        <p className="text-left text-sm">{row.away ?? "-"}</p>
+                        <p className="min-w-0 text-left text-sm break-words">{row.away ?? "-"}</p>
                       </div>
                     );
                   })}
