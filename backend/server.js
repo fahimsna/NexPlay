@@ -4,6 +4,7 @@ const cors = require("cors");
 const path = require("path");
 
 const connectDB = require("./config/db");
+
 const settingsRoutes = require("./routes/settingsRoutes");
 const sportsRoutes = require("./routes/sportsRoutes");
 const activityRoutes = require("./routes/activityRoutes");
@@ -59,6 +60,12 @@ const reviewRoutes = require("./routes/reviewRoutes");
 const userRoutes = require("./routes/userRoutes");
 
 // =======================
+// SPRINT 4 - WATCHLIST
+// =======================
+
+const watchlistRoutes = require("./routes/watchlistRoutes");
+
+// =======================
 // API ROUTES
 // =======================
 
@@ -99,6 +106,13 @@ app.use("/api/activity", activityRoutes);
 // =======================
 
 app.use("/api/users", userRoutes);
+
+// =======================
+// SPRINT 4
+// Watchlist
+// =======================
+
+app.use("/api/watchlist", watchlistRoutes);
 
 // =======================
 // ROOT ROUTE
