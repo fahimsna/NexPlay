@@ -124,10 +124,25 @@ export async function getMovieDetails(id) {
 // =======================
 // Movie Watch Providers
 // =======================
-// Returns actual streaming, rent, and buy
-// availability for a specific movie and region.
+// Returns watch-provider data for ALL regions.
+//
+// Example:
+// {
+//   BD: {
+//     link: "...",
+//     flatrate: [...],
+//     rent: [...],
+//     buy: [...]
+//   },
+//   US: {
+//     link: "...",
+//     flatrate: [...],
+//     rent: [...],
+//     buy: [...]
+//   }
+// }
 
-export async function getMovieWatchProviders(id, region = "BD") {
+export async function getMovieWatchProviders(id) {
   const response = await fetch(
     `${BASE_URL}/movie/${id}/watch/providers?api_key=${API_KEY}`,
     options,
@@ -139,7 +154,28 @@ export async function getMovieWatchProviders(id, region = "BD") {
 
   const data = await response.json();
 
-  return data.results?.[region] || null;
+  return data.results || {};
+}
+
+// =======================
+// TV Watch Providers
+// =======================
+// Returns watch-provider data for ALL regions
+// for a TV series.
+
+export async function getTVWatchProviders(id) {
+  const response = await fetch(
+    `${BASE_URL}/tv/${id}/watch/providers?api_key=${API_KEY}`,
+    options,
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch TV watch providers");
+  }
+
+  const data = await response.json();
+
+  return data.results || {};
 }
 
 // =======================
@@ -189,7 +225,7 @@ export async function getGenreList(type = "movie") {
 // Sprint 2: Search & Advanced Filtering
 //
 // Supports combining: multiple genres, release year,
-// minimum rating, sort order, and pagination.
+// minimum rating, sort order, pagination.
 
 export async function discoverContent({
   type = "movie",
