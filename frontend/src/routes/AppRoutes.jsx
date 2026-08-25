@@ -13,6 +13,7 @@ import Advertise from "../pages/Advertise";
 import UpcomingReleaseCalendar from "../pages/UpcomingReleaseCalendar";
 import TopRated from "../pages/TopRated";
 import UserProfile from "../pages/user/UserProfile";
+import SearchResults from "../pages/SearchResults";
 
 import CompanySettings from "../pages/company/CompanySettings";
 
@@ -76,6 +77,9 @@ function AppRoutes() {
         <Route path="/advertise" element={<Advertise />} />
 
         <Route path="/sports" element={<Sports />} />
+
+        {/* Global search - movies, series, and sports teams/leagues */}
+        <Route path="/search" element={<SearchResults />} />
 
         <Route path="/sports/league/:id" element={<SportsLeagueDetails />} />
 

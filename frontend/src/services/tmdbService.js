@@ -205,6 +205,27 @@ export async function searchMovies(query) {
 }
 
 // =======================
+// Search TV Shows
+// =======================
+
+export async function searchTVShows(query) {
+  const response = await fetch(
+    `${BASE_URL}/search/tv?api_key=${API_KEY}&query=${encodeURIComponent(
+      query,
+    )}`,
+    options,
+  );
+
+  if (!response.ok) {
+    throw new Error("Search failed");
+  }
+
+  const data = await response.json();
+
+  return data.results || [];
+}
+
+// =======================
 // Genre List
 // =======================
 // Supports both:
