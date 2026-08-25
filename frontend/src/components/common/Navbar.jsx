@@ -10,6 +10,81 @@ import { Link, useNavigate } from "react-router-dom";
 
 import useAuth from "../../hooks/useAuth";
 
+/*
+|--------------------------------------------------------------------------
+| NAV SEARCH FORM
+|--------------------------------------------------------------------------
+|
+| A real, typeable search box (movies, series, AND sports by name) -
+| replaces the old plain "Search" link that just sent everyone to the
+| Browse page without actually searching anything. Submitting goes to
+| /search?q=... which looks across movies, series, and sports at once.
+| Shared between the desktop bar and both mobile menu states.
+|
+|--------------------------------------------------------------------------
+*/
+
+function NavSearchForm({ onSubmitted, compact }) {
+  const [value, setValue] = useState("");
+  const navigate = useNavigate();
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    const trimmed = value.trim();
+
+    if (!trimmed) {
+      return;
+    }
+
+    navigate(`/search?q=${encodeURIComponent(trimmed)}`);
+
+    setValue("");
+
+    if (onSubmitted) {
+      onSubmitted();
+    }
+  };
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className={`
+        flex
+        items-center
+        gap-2
+        px-4
+        py-2
+        rounded-full
+        bg-white/5
+        border
+        border-white/10
+        text-gray-300
+        focus-within:border-[#D4A017]
+        transition
+        ${compact ? "w-full" : "hidden sm:flex w-48 xl:w-56"}
+      `}
+    >
+      <HiOutlineSearch size={18} className="shrink-0" />
+
+      <input
+        type="text"
+        value={value}
+        onChange={(event) => setValue(event.target.value)}
+        placeholder="Search movies, sports..."
+        className="
+          w-full
+          bg-transparent
+          outline-none
+          text-sm
+          text-white
+          placeholder:text-gray-500
+        "
+      />
+    </form>
+  );
+}
+
 function Navbar() {
   const [open, setOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
@@ -282,29 +357,7 @@ function Navbar() {
         >
           {/* Search */}
 
-          <Link
-            to="/browse"
-            className="
-              hidden
-              sm:flex
-              items-center
-              gap-2
-              px-4
-              py-2
-              rounded-full
-              bg-white/5
-              border
-              border-white/10
-              text-gray-300
-              hover:border-[#D4A017]
-              hover:text-white
-              transition
-            "
-          >
-            <HiOutlineSearch size={18} />
-
-            <span className="hidden xl:inline">Search</span>
-          </Link>
+          <NavSearchForm />
 
           {/* =======================
               Profile Dropdown
@@ -639,25 +692,9 @@ function Navbar() {
 
                   {/* Search */}
 
-                  <Link
-                    to="/browse"
-                    onClick={closeMobileMenu}
-                    className="
-                      flex
-                      items-center
-                      gap-2
-                      px-4
-                      py-3
-                      rounded-xl
-                      text-gray-300
-                      hover:bg-[#393E46]
-                      hover:text-[#D4A017]
-                      transition
-                    "
-                  >
-                    <HiOutlineSearch size={19} />
-                    Search
-                  </Link>
+                  <div className="px-4 py-2">
+                    <NavSearchForm compact onSubmitted={closeMobileMenu} />
+                  </div>
 
                   {/* Logout */}
 
@@ -681,25 +718,9 @@ function Navbar() {
                 <>
                   {/* Search */}
 
-                  <Link
-                    to="/browse"
-                    onClick={closeMobileMenu}
-                    className="
-                      flex
-                      items-center
-                      gap-2
-                      px-4
-                      py-3
-                      rounded-xl
-                      text-gray-300
-                      hover:bg-[#393E46]
-                      hover:text-[#D4A017]
-                      transition
-                    "
-                  >
-                    <HiOutlineSearch size={19} />
-                    Search
-                  </Link>
+                  <div className="px-4 py-2">
+                    <NavSearchForm compact onSubmitted={closeMobileMenu} />
+                  </div>
 
                   {/* Login */}
 
