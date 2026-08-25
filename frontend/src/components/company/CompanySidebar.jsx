@@ -26,37 +26,31 @@ function CompanySidebar({ open, setOpen }) {
       icon: HiHome,
       exact: true,
     },
-
     {
       name: "Profile",
       path: "/company/profile",
       icon: HiBuildingOffice2,
     },
-
     {
       name: "Advertisements",
       path: "/company/advertisements",
       icon: HiMegaphone,
     },
-
     {
       name: "Campaigns",
       path: "/company/campaigns",
       icon: HiRocketLaunch,
     },
-
     {
       name: "Upcoming Content",
       path: "/company/content",
       icon: HiFilm,
     },
-
     {
       name: "Analytics",
       path: "/company/analytics",
       icon: HiChartBar,
     },
-
     {
       name: "Settings",
       path: "/company/settings",
@@ -66,98 +60,215 @@ function CompanySidebar({ open, setOpen }) {
 
   const handleLogout = () => {
     logout();
-
     navigate("/login");
   };
 
   return (
     <>
-      {/* Mobile Overlay */}
+      {/* =========================
+          Mobile Overlay
+      ========================= */}
 
-      {open && (
-        <div
-          onClick={() => setOpen(false)}
-          className="
+      <div
+        className={`
           fixed
           inset-0
-          bg-black/50
-          z-30
+          bg-black/60
+          backdrop-blur-sm
+          z-40
           md:hidden
-          "
-        />
-      )}
+          transition-opacity
+          duration-300
+          ${
+            open
+              ? "opacity-100 pointer-events-auto"
+              : "opacity-0 pointer-events-none"
+          }
+        `}
+        onClick={() => setOpen(false)}
+      />
+
+      {/* =========================
+          Sidebar
+      ========================= */}
 
       <aside
         className={`
-        
-        fixed
-        top-0
-        left-0
+          fixed
+          top-0
+          left-0
+          z-50
 
-        z-40
+          h-screen
+          w-64
 
-        h-screen
-        w-64
+          bg-[#17191D]
 
-        bg-[#222831]
+          border-r
+          border-white/10
 
-        border-r
-        border-white/10
+          flex
+          flex-col
 
-        transition-transform
-        duration-300
-        ease-in-out
+          shadow-2xl
 
+          transform
+          transition-transform
+          duration-300
+          ease-in-out
 
-        ${open ? "translate-x-0" : "-translate-x-full"}
+          ${open ? "translate-x-0" : "-translate-x-full"}
 
-        md:translate-x-0
-
+          md:translate-x-0
         `}
       >
-        {/* Logo */}
+        {/* =========================
+            Logo
+        ========================= */}
 
         <div
           className="
-          h-20
-          flex
-          items-center
-          justify-between
-          px-6
+            h-20
+            min-h-20
 
-          border-b
-          border-white/10
+            flex
+            items-center
+            justify-between
+
+            px-6
+
+            border-b
+            border-white/10
           "
         >
-          <h1
-            className="
-            text-2xl
-            font-black
-            text-[#D4A017]
-            "
+          <NavLink
+            to="/company"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-3 group"
           >
-            NexPlay
-          </h1>
+            {/* Logo Mark */}
+
+            <div
+              className="
+                w-9
+                h-9
+
+                rounded-xl
+
+                bg-[#D4A017]
+
+                flex
+                items-center
+                justify-center
+
+                shadow-lg
+                shadow-[#D4A017]/10
+
+                group-hover:scale-105
+
+                transition
+              "
+            >
+              <span
+                className="
+                  text-[#17191D]
+                  font-black
+                  text-lg
+                "
+              >
+                N
+              </span>
+            </div>
+
+            {/* Logo Name */}
+
+            <div>
+              <h1
+                className="
+                  text-xl
+                  font-black
+                  tracking-tight
+                  text-white
+                "
+              >
+                Nex<span className="text-[#D4A017]">Play</span>
+              </h1>
+
+              <p
+                className="
+                  text-[10px]
+                  text-gray-500
+                  uppercase
+                  tracking-wider
+                "
+              >
+                Company Portal
+              </p>
+            </div>
+          </NavLink>
+
+          {/* Mobile Close */}
 
           <button
+            type="button"
             onClick={() => setOpen(false)}
+            aria-label="Close sidebar"
             className="
-            md:hidden
-            text-white
+              md:hidden
+
+              w-9
+              h-9
+
+              rounded-lg
+
+              flex
+              items-center
+              justify-center
+
+              text-gray-400
+
+              hover:text-white
+              hover:bg-white/10
+
+              transition
             "
           >
-            <HiXMark size={28} />
+            <HiXMark size={24} />
           </button>
         </div>
 
-        {/* Menu */}
+        {/* =========================
+            Navigation
+        ========================= */}
 
         <nav
           className="
-          p-4
-          space-y-2
+            flex-1
+
+            p-4
+
+            space-y-1
+
+            overflow-y-auto
           "
         >
+          <p
+            className="
+              px-4
+              pt-2
+              pb-3
+
+              text-[11px]
+              font-semibold
+              uppercase
+              tracking-widest
+
+              text-gray-600
+            "
+          >
+            Workspace
+          </p>
+
           {menu.map((item) => {
             const Icon = item.icon;
 
@@ -169,75 +280,100 @@ function CompanySidebar({ open, setOpen }) {
                 onClick={() => setOpen(false)}
                 className={({ isActive }) =>
                   `
+                    group
 
-                flex
-                items-center
-                gap-3
+                    flex
+                    items-center
+                    gap-3
 
+                    px-4
+                    py-3
 
-                px-4
-                py-3
+                    rounded-xl
 
+                    text-sm
+                    font-medium
 
-                rounded-xl
+                    transition-all
+                    duration-200
 
-
-                transition
-
-
-                ${
-                  isActive
-                    ? "bg-[#D4A017] text-black font-semibold"
-                    : "text-[#EEEEEE] hover:bg-[#393E46]"
-                }
-
-
-                `
+                    ${
+                      isActive
+                        ? `
+                          bg-[#D4A017]
+                          text-[#17191D]
+                          shadow-lg
+                          shadow-[#D4A017]/10
+                          font-semibold
+                        `
+                        : `
+                          text-gray-400
+                          hover:text-white
+                          hover:bg-[#24272D]
+                        `
+                    }
+                  `
                 }
               >
-                <Icon size={22} />
+                {({ isActive }) => (
+                  <>
+                    <Icon
+                      size={21}
+                      className={`
+                        transition-transform
+                        duration-200
 
-                <span>{item.name}</span>
+                        ${isActive ? "" : "group-hover:scale-110"}
+                      `}
+                    />
+
+                    <span>{item.name}</span>
+                  </>
+                )}
               </NavLink>
             );
           })}
         </nav>
 
-        {/* Logout */}
+        {/* =========================
+            Logout
+        ========================= */}
 
         <div
           className="
-          absolute
-          bottom-6
-          left-4
-          right-4
+            p-4
+
+            border-t
+            border-white/10
           "
         >
           <button
+            type="button"
             onClick={handleLogout}
             className="
+              w-full
 
-            w-full
+              flex
+              items-center
+              gap-3
 
-            flex
-            items-center
-            gap-3
+              px-4
+              py-3
 
-            px-4
-            py-3
+              rounded-xl
 
-            rounded-xl
+              text-gray-400
 
-            text-[#EEEEEE]
+              hover:text-red-400
+              hover:bg-red-500/10
 
-            hover:bg-red-500/20
-
-            transition
-
+              transition-all
+              duration-200
             "
           >
-            <HiArrowRightOnRectangle size={22} />
-            Logout
+            <HiArrowRightOnRectangle size={21} />
+
+            <span className="text-sm font-medium">Logout</span>
           </button>
         </div>
       </aside>
