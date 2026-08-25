@@ -5,6 +5,7 @@ import {
   HiBuildingOffice2,
   HiUsers,
   HiClipboardDocumentList,
+  HiChatBubbleLeftRight,
   HiArrowRightOnRectangle,
   HiXMark,
 } from "react-icons/hi2";
@@ -40,6 +41,12 @@ function AdminSidebar({ open, setOpen }) {
       name: "Activity Log",
       path: "/admin/activity-log",
       icon: HiClipboardDocumentList,
+    },
+
+    {
+      name: "Discussion Moderation",
+      path: "/admin/discussion-moderation",
+      icon: HiChatBubbleLeftRight,
     },
   ];
 

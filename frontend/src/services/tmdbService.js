@@ -9,10 +9,6 @@ const options = {
   },
 };
 
-// =======================
-// Trending Movies
-// =======================
-
 export async function getTrendingMovies(page = 1) {
   const response = await fetch(
     `${BASE_URL}/trending/movie/week?api_key=${API_KEY}&page=${page}`,
@@ -27,10 +23,6 @@ export async function getTrendingMovies(page = 1) {
 
   return data.results || [];
 }
-
-// =======================
-// Trending TV Shows
-// =======================
 
 export async function getTrendingTVShows(page = 1) {
   const response = await fetch(
@@ -47,10 +39,6 @@ export async function getTrendingTVShows(page = 1) {
   return data.results || [];
 }
 
-// =======================
-// Popular Movies
-// =======================
-
 export async function getPopularMovies() {
   const response = await fetch(
     `${BASE_URL}/movie/popular?api_key=${API_KEY}`,
@@ -65,10 +53,6 @@ export async function getPopularMovies() {
 
   return data.results || [];
 }
-
-// =======================
-// Popular TV Shows
-// =======================
 
 export async function getPopularTVShows() {
   const response = await fetch(
@@ -85,10 +69,6 @@ export async function getPopularTVShows() {
   return data.results || [];
 }
 
-// =======================
-// Movies By Genre
-// =======================
-
 export async function getMoviesByGenre(genreId) {
   const response = await fetch(
     `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${genreId}`,
@@ -103,10 +83,6 @@ export async function getMoviesByGenre(genreId) {
 
   return data.results || [];
 }
-
-// =======================
-// Movie Details
-// =======================
 
 export async function getMovieDetails(id) {
   const response = await fetch(
@@ -357,3 +333,26 @@ export const SORT_OPTIONS = [
     label: "A–Z",
   },
 ];
+
+export async function getTVShowDetails(id) {
+  const response = await fetch(
+    `${BASE_URL}/tv/${id}?api_key=${API_KEY}`,
+    options,
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch TV show details");
+  }
+
+  return await response.json();
+}
+
+export async function getDetailsByType(mediaType, id) {
+  if (mediaType === "tv") {
+    const data = await getTVShowDetails(id);
+
+    return { ...data, title: data.name };
+  }
+
+  return await getMovieDetails(id);
+}
