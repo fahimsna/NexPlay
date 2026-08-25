@@ -9,7 +9,11 @@ import {
   HiGlobeAlt,
 } from "react-icons/hi2";
 
-import { getMovieDetails } from "../services/tmdbService";
+import {
+  getMovieDetails,
+  getMovieWatchProviders,
+} from "../services/tmdbService";
+
 import ReviewsSection from "../components/reviews/ReviewsSection";
 
 const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
@@ -18,6 +22,8 @@ function Details() {
   const { id } = useParams();
 
   const [movie, setMovie] = useState(null);
+
+  const [watchProviders, setWatchProviders] = useState(null);
 
   const [loading, setLoading] = useState(true);
 
@@ -30,10 +36,21 @@ function Details() {
   async function fetchMovie() {
     try {
       setLoading(true);
+      setError("");
 
-      const data = await getMovieDetails(id);
+      const [movieData, providerData] = await Promise.all([
+        getMovieDetails(id),
 
-      setMovie(data);
+        getMovieWatchProviders(id, "BD").catch((providerError) => {
+          console.error("Failed to load watch providers:", providerError);
+
+          return null;
+        }),
+      ]);
+
+      setMovie(movieData);
+
+      setWatchProviders(providerData);
     } catch (err) {
       console.error(err);
 
@@ -76,6 +93,7 @@ function Details() {
       </div>
     );
   }
+
   return (
     <section
       className="
@@ -307,6 +325,7 @@ function Details() {
                 </div>
               </div>
             </div>
+
             {/* Genres */}
 
             <div className="mt-10">
@@ -391,38 +410,160 @@ function Details() {
               <h2 className="text-3xl font-bold">Where to Watch</h2>
 
               <p className="text-gray-400 mt-3 leading-7">
-                NexPlay helps you discover entertainment. Streaming availability
-                varies by country. Check official streaming services such as
-                Netflix, Prime Video, Disney+, Apple TV+, Max, or Hulu to see
-                where this title is available.
+                Streaming availability in Bangladesh. Availability may change
+                over time and can differ by region.
               </p>
 
-              <div className="flex flex-wrap gap-3 mt-6">
-                {[
-                  "Netflix",
-                  "Prime Video",
-                  "Disney+",
-                  "Apple TV+",
-                  "Max",
-                  "Hulu",
-                ].map((platform) => (
-                  <span
-                    key={platform}
-                    className="
-                      px-4
-                      py-2
-                      rounded-full
-                      bg-[#17191D]
-                      border
-                      border-white/10
-                      hover:border-[#D4A017]
-                      transition
-                    "
-                  >
-                    {platform}
-                  </span>
-                ))}
-              </div>
+              {/* Subscription */}
+
+              {watchProviders?.flatrate?.length > 0 && (
+                <div className="mt-6">
+                  <h3 className="text-sm font-semibold text-gray-400 mb-4">
+                    Stream with Subscription
+                  </h3>
+
+                  <div className="flex flex-wrap gap-3">
+                    {watchProviders.flatrate.map((provider) => (
+                      <div
+                        key={provider.provider_id}
+                        className="
+                          flex
+                          items-center
+                          gap-3
+                          px-3
+                          py-2
+                          rounded-2xl
+                          bg-[#17191D]
+                          border
+                          border-white/10
+                          hover:border-[#D4A017]
+                          transition
+                        "
+                      >
+                        {provider.logo_path && (
+                          <img
+                            src={`${IMAGE_BASE_URL}${provider.logo_path}`}
+                            alt={provider.provider_name}
+                            className="
+                              w-10
+                              h-10
+                              rounded-lg
+                              object-cover
+                            "
+                          />
+                        )}
+
+                        <span>{provider.provider_name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Rent */}
+
+              {watchProviders?.rent?.length > 0 && (
+                <div className="mt-8">
+                  <h3 className="text-sm font-semibold text-gray-400 mb-4">
+                    Rent
+                  </h3>
+
+                  <div className="flex flex-wrap gap-3">
+                    {watchProviders.rent.map((provider) => (
+                      <div
+                        key={provider.provider_id}
+                        className="
+                          flex
+                          items-center
+                          gap-3
+                          px-3
+                          py-2
+                          rounded-2xl
+                          bg-[#17191D]
+                          border
+                          border-white/10
+                          hover:border-[#D4A017]
+                          transition
+                        "
+                      >
+                        {provider.logo_path && (
+                          <img
+                            src={`${IMAGE_BASE_URL}${provider.logo_path}`}
+                            alt={provider.provider_name}
+                            className="
+                              w-10
+                              h-10
+                              rounded-lg
+                              object-cover
+                            "
+                          />
+                        )}
+
+                        <span>{provider.provider_name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Buy */}
+
+              {watchProviders?.buy?.length > 0 && (
+                <div className="mt-8">
+                  <h3 className="text-sm font-semibold text-gray-400 mb-4">
+                    Buy
+                  </h3>
+
+                  <div className="flex flex-wrap gap-3">
+                    {watchProviders.buy.map((provider) => (
+                      <div
+                        key={provider.provider_id}
+                        className="
+                          flex
+                          items-center
+                          gap-3
+                          px-3
+                          py-2
+                          rounded-2xl
+                          bg-[#17191D]
+                          border
+                          border-white/10
+                          hover:border-[#D4A017]
+                          transition
+                        "
+                      >
+                        {provider.logo_path && (
+                          <img
+                            src={`${IMAGE_BASE_URL}${provider.logo_path}`}
+                            alt={provider.provider_name}
+                            className="
+                              w-10
+                              h-10
+                              rounded-lg
+                              object-cover
+                            "
+                          />
+                        )}
+
+                        <span>{provider.provider_name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* No Providers */}
+
+              {!watchProviders?.flatrate?.length &&
+                !watchProviders?.rent?.length &&
+                !watchProviders?.buy?.length && (
+                  <div className="mt-6">
+                    <p className="text-gray-400">
+                      No streaming, rental, or purchase providers are currently
+                      listed for this movie in Bangladesh.
+                    </p>
+                  </div>
+                )}
             </div>
 
             {/* Ratings & Reviews (Sprint 4) */}
