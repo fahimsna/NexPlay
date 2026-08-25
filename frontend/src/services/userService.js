@@ -11,6 +11,20 @@ export async function getUserProfile() {
 }
 
 // =======================
+// UPDATE USER PROFILE
+// =======================
+
+export async function updateUserProfile(profileData) {
+  const response = await axios.put("/users/profile", {
+    fullName: profileData.fullName,
+    username: profileData.username,
+    email: profileData.email,
+  });
+
+  return response.data.user;
+}
+
+// =======================
 // UPDATE FAVOURITE GENRES
 // =======================
 
