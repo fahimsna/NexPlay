@@ -34,8 +34,9 @@ const userSchema = new mongoose.Schema(
       default: "user",
     },
 
+
     // =======================
-    // Sprint 4
+    // Sprint 2
     // Favourite Genres
     // =======================
 
@@ -44,8 +45,9 @@ const userSchema = new mongoose.Schema(
       default: [],
     },
 
+
     // =======================
-    // Sprint 4
+    // Sprint 3
     // Favourite Sports
     // =======================
 
@@ -53,6 +55,51 @@ const userSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+
+
+    // =======================
+    // Sprint 3
+    // Favourite Teams
+    // =======================
+
+    favouriteTeams: {
+      type: [String],
+      default: [],
+    },
+
+
+    // =======================
+    // Sprint 3
+    // Favourite Tournaments
+    // =======================
+
+    favouriteTournaments: {
+      type: [String],
+      default: [],
+    },
+
+
+    // =======================
+    // Sprint 3
+    // Match Reminders
+    // =======================
+
+    matchReminders: [
+      {
+        matchId: {
+          type: String,
+        },
+
+        matchName: {
+          type: String,
+        },
+
+        reminderTime: {
+          type: Date,
+        },
+      },
+    ],
+
 
     // =======================
     // Sprint 4
@@ -108,10 +155,62 @@ const userSchema = new mongoose.Schema(
         },
       },
     ],
+
+
+    // =======================
+    // Sprint 4
+    // Activity Points
+    // =======================
+
+    activityPoints: {
+      type: Number,
+      default: 0,
+    },
+
+
+    // =======================
+    // Sprint 4
+    // User Level
+    // =======================
+
+    level: {
+      type: String,
+      enum: [
+        "Bronze",
+        "Silver",
+        "Gold",
+        "Platinum"
+      ],
+      default: "Bronze",
+    },
+
+
+    // =======================
+    // Sprint 4
+    // Achievement Badges
+    // =======================
+
+    badges: {
+      type: [String],
+      default: [],
+    },
+
+
+    // =======================
+    // Sprint 4
+    // Notification Settings
+    // =======================
+
+    notificationsEnabled: {
+      type: Boolean,
+      default: true,
+    },
+
   },
   {
     timestamps: true,
-  },
+  }
 );
+
 
 module.exports = mongoose.model("User", userSchema);
