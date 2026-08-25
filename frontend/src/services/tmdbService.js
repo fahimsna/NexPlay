@@ -122,12 +122,35 @@ export async function getMovieDetails(id) {
 }
 
 // =======================
+// Movie Watch Providers
+// =======================
+// Returns actual streaming, rent, and buy
+// availability for a specific movie and region.
+
+export async function getMovieWatchProviders(id, region = "BD") {
+  const response = await fetch(
+    `${BASE_URL}/movie/${id}/watch/providers?api_key=${API_KEY}`,
+    options,
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch movie watch providers");
+  }
+
+  const data = await response.json();
+
+  return data.results?.[region] || null;
+}
+
+// =======================
 // Search Movies
 // =======================
 
 export async function searchMovies(query) {
   const response = await fetch(
-    `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}`,
+    `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(
+      query,
+    )}`,
     options,
   );
 
@@ -165,18 +188,8 @@ export async function getGenreList(type = "movie") {
 // =======================
 // Sprint 2: Search & Advanced Filtering
 //
-// Supports combining: multiple genres, release year, minimum rating,
-// sort order, and pagination - the "advanced filtering" on top of the
-// basic keyword search / single-genre filter already in Browse.jsx.
-//
-// filters:
-//   type        "movie" | "tv"              (default "movie")
-//   genreIds    array of genre ids           (default [])
-//   year        4-digit release year, OR a string like "Before 2020" (optional)
-//   minRating   0-10, minimum vote average    (optional)
-//   language    ISO 639-1 code (with_original_language) (optional)
-//   sortBy      TMDB sort_by value            (default "popularity.desc")
-//   page        page number                   (default 1)
+// Supports combining: multiple genres, release year,
+// minimum rating, sort order, and pagination.
 
 export async function discoverContent({
   type = "movie",
@@ -234,10 +247,29 @@ export async function discoverContent({
   return data.results || [];
 }
 
+// =======================
+// Sort Options
+// =======================
+
 export const SORT_OPTIONS = [
-  { value: "popularity.desc", label: "Most Popular" },
-  { value: "vote_average.desc", label: "Highest Rated" },
-  { value: "primary_release_date.desc", label: "Newest First" },
-  { value: "primary_release_date.asc", label: "Oldest First" },
-  { value: "original_title.asc", label: "A–Z" },
+  {
+    value: "popularity.desc",
+    label: "Most Popular",
+  },
+  {
+    value: "vote_average.desc",
+    label: "Highest Rated",
+  },
+  {
+    value: "primary_release_date.desc",
+    label: "Newest First",
+  },
+  {
+    value: "primary_release_date.asc",
+    label: "Oldest First",
+  },
+  {
+    value: "original_title.asc",
+    label: "A–Z",
+  },
 ];
