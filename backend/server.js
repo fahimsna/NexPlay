@@ -6,6 +6,7 @@ const path = require("path");
 const connectDB = require("./config/db");
 const settingsRoutes = require("./routes/settingsRoutes");
 const sportsRoutes = require("./routes/sportsRoutes");
+const activityRoutes = require("./routes/activityRoutes");
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.use(express.urlencoded({ extended: true }));
 // STATIC FILES
 // =======================
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/api/activity", activityRoutes);
 
 // =======================
 // ROUTES
