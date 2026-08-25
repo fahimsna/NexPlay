@@ -4,16 +4,15 @@ import UserProfileCard from "../../components/user/UserProfileCard";
 import ProfileStats from "../../components/user/ProfileStats";
 import RecentlyViewed from "../../components/user/RecentlyViewed";
 import ActivityHistory from "../../components/user/ActivityHistory";
+import FavouriteGenres from "../../components/user/FavouriteGenres";
+import FavouriteSports from "../../components/user/FavouriteSports";
 
 function UserProfile() {
   /*
-   * For the first UI implementation we read the
-   * already-existing authenticated user from localStorage.
+   * Read the existing authenticated user
+   * from localStorage.
    *
    * This does NOT change authentication logic.
-   *
-   * Backend profile/activity integration will be added
-   * separately.
    */
 
   const storedUser = localStorage.getItem("user");
@@ -23,9 +22,9 @@ function UserProfile() {
   const [showEditMessage, setShowEditMessage] = useState(false);
 
   /*
-   * Temporary empty data.
+   * Sprint 4 statistics.
    *
-   * These will later come from the Sprint 4 API.
+   * Backend integration can be connected later.
    */
   const stats = {
     moviesViewed: 0,
@@ -35,9 +34,36 @@ function UserProfile() {
     totalActivity: 0,
   };
 
+  /*
+   * Existing Sprint 4 activity data.
+   *
+   * These remain untouched for now.
+   */
   const recentlyViewed = [];
 
   const activities = [];
+
+  /*
+   * Favourite Genres & Sports
+   *
+   * UI is implemented first.
+   * Database persistence will be connected separately.
+   */
+  const favouriteGenres = [];
+
+  const favouriteSports = [];
+
+  const handleSaveGenres = async (genres) => {
+    console.log("Favourite genres:", genres);
+
+    // Backend persistence will be added next.
+  };
+
+  const handleSaveSports = async (sports) => {
+    console.log("Favourite sports:", sports);
+
+    // Backend persistence will be added next.
+  };
 
   if (!user) {
     return (
@@ -76,25 +102,48 @@ function UserProfile() {
       "
     >
       <div className="max-w-7xl mx-auto space-y-10">
-        {/* Page Header */}
+        {/* =========================
+            PAGE HEADER
+        ========================== */}
 
         <div>
-          <p className="text-[#D4A017] font-semibold text-sm uppercase tracking-[2px]">
+          <p
+            className="
+              text-[#D4A017]
+              font-semibold
+              text-sm
+              uppercase
+              tracking-[2px]
+            "
+          >
             My Account
           </p>
 
-          <h1 className="text-4xl sm:text-5xl font-black mt-2">My Profile</h1>
+          <h1
+            className="
+              text-4xl
+              sm:text-5xl
+              font-black
+              mt-2
+            "
+          >
+            My Profile
+          </h1>
 
           <p className="text-gray-400 mt-3">
             Manage your NexPlay profile and track your entertainment activity.
           </p>
         </div>
 
-        {/* Profile */}
+        {/* =========================
+            PROFILE CARD
+        ========================== */}
 
         <UserProfileCard user={user} onEdit={() => setShowEditMessage(true)} />
 
-        {/* Edit placeholder */}
+        {/* =========================
+            EDIT PLACEHOLDER
+        ========================== */}
 
         {showEditMessage && (
           <div
@@ -112,15 +161,33 @@ function UserProfile() {
           </div>
         )}
 
-        {/* Statistics */}
+        {/* =========================
+            PROFILE STATISTICS
+        ========================== */}
 
         <ProfileStats stats={stats} />
 
-        {/* Recently Viewed */}
+        {/* =========================
+            FAVOURITE GENRES
+        ========================== */}
+
+        <FavouriteGenres genres={favouriteGenres} onSave={handleSaveGenres} />
+
+        {/* =========================
+            FAVOURITE SPORTS
+        ========================== */}
+
+        <FavouriteSports sports={favouriteSports} onSave={handleSaveSports} />
+
+        {/* =========================
+            RECENTLY VIEWED
+        ========================== */}
 
         <RecentlyViewed items={recentlyViewed} />
 
-        {/* Activity */}
+        {/* =========================
+            ACTIVITY HISTORY
+        ========================== */}
 
         <ActivityHistory activities={activities} />
       </div>
