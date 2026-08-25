@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { getEventById } from "../services/sportsService";
+import WhereToWatch from "../components/streaming/WhereToWatch";
 
 function SportsMatchDetails() {
   const { id } = useParams();
@@ -370,6 +371,16 @@ function SportsMatchDetails() {
                 </p>
               </div>
             )}
+
+            {/* ==========================================================
+                OFFICIAL BROADCASTER / WATCH OFFICIAL
+            ========================================================== */}
+
+            <WhereToWatch
+              tmdbId={Number(event.idEvent)}
+              mediaType="sports"
+              title={`${event.strHomeTeam || "Home"} vs ${event.strAwayTeam || "Away"}`}
+            />
 
             {/* ==========================================================
                 POSTPONED

@@ -39,6 +39,7 @@ import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminCompanyVerification from "../pages/admin/AdminCompanyVerification";
 import AdminUsers from "../pages/admin/AdminUsers";
 import AdminActivityLog from "../pages/admin/AdminActivityLog";
+import CommentModeration from "../pages/admin/CommentModeration";
 import CompanyVerificationGate from "../components/company/CompanyVerificationGate";
 
 // Sprint 4: Ratings & Reviews
@@ -122,6 +123,7 @@ function AppRoutes() {
         <Route path="companies" element={<AdminCompanyVerification />} />
         <Route path="users" element={<AdminUsers />} />
         <Route path="activity-log" element={<AdminActivityLog />} />
+        <Route path="discussion-moderation" element={<CommentModeration />} />
       </Route>
     </Routes>
   );

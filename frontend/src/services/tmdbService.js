@@ -9,10 +9,6 @@ const options = {
   },
 };
 
-// =======================
-// Trending Movies
-// =======================
-
 export async function getTrendingMovies(page = 1) {
   const response = await fetch(
     `${BASE_URL}/trending/movie/week?api_key=${API_KEY}&page=${page}`,
@@ -27,10 +23,6 @@ export async function getTrendingMovies(page = 1) {
 
   return data.results;
 }
-
-// =======================
-// Trending TV Shows
-// =======================
 
 export async function getTrendingTVShows(page = 1) {
   const response = await fetch(
@@ -47,10 +39,6 @@ export async function getTrendingTVShows(page = 1) {
   return data.results;
 }
 
-// =======================
-// Popular Movies
-// =======================
-
 export async function getPopularMovies() {
   const response = await fetch(
     `${BASE_URL}/movie/popular?api_key=${API_KEY}`,
@@ -65,10 +53,6 @@ export async function getPopularMovies() {
 
   return data.results;
 }
-
-// =======================
-// Popular TV Shows
-// =======================
 
 export async function getPopularTVShows() {
   const response = await fetch(
@@ -85,10 +69,6 @@ export async function getPopularTVShows() {
   return data.results;
 }
 
-// =======================
-// Movies By Genre
-// =======================
-
 export async function getMoviesByGenre(genreId) {
   const response = await fetch(
     `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${genreId}`,
@@ -104,10 +84,6 @@ export async function getMoviesByGenre(genreId) {
   return data.results;
 }
 
-// =======================
-// Movie Details
-// =======================
-
 export async function getMovieDetails(id) {
   const response = await fetch(
     `${BASE_URL}/movie/${id}?api_key=${API_KEY}`,
@@ -120,10 +96,6 @@ export async function getMovieDetails(id) {
 
   return await response.json();
 }
-
-// =======================
-// Search Movies
-// =======================
 
 export async function searchMovies(query) {
   const response = await fetch(
@@ -140,11 +112,6 @@ export async function searchMovies(query) {
   return data.results;
 }
 
-// =======================
-// Genre List (movie / tv)
-// =======================
-// Sprint 2: Search & Advanced Filtering
-
 export async function getGenreList(type = "movie") {
   const response = await fetch(
     `${BASE_URL}/genre/${type}/list?api_key=${API_KEY}`,
@@ -159,24 +126,6 @@ export async function getGenreList(type = "movie") {
 
   return data.genres || [];
 }
-
-// =======================
-// Advanced Discover (movie / tv)
-// =======================
-// Sprint 2: Search & Advanced Filtering
-//
-// Supports combining: multiple genres, release year, minimum rating,
-// sort order, and pagination - the "advanced filtering" on top of the
-// basic keyword search / single-genre filter already in Browse.jsx.
-//
-// filters:
-//   type        "movie" | "tv"              (default "movie")
-//   genreIds    array of genre ids           (default [])
-//   year        4-digit release year, OR a string like "Before 2020" (optional)
-//   minRating   0-10, minimum vote average    (optional)
-//   language    ISO 639-1 code (with_original_language) (optional)
-//   sortBy      TMDB sort_by value            (default "popularity.desc")
-//   page        page number                   (default 1)
 
 export async function discoverContent({
   type = "movie",
@@ -241,3 +190,26 @@ export const SORT_OPTIONS = [
   { value: "primary_release_date.asc", label: "Oldest First" },
   { value: "original_title.asc", label: "A–Z" },
 ];
+
+export async function getTVShowDetails(id) {
+  const response = await fetch(
+    `${BASE_URL}/tv/${id}?api_key=${API_KEY}`,
+    options,
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch TV show details");
+  }
+
+  return await response.json();
+}
+
+export async function getDetailsByType(mediaType, id) {
+  if (mediaType === "tv") {
+    const data = await getTVShowDetails(id);
+
+    return { ...data, title: data.name };
+  }
+
+  return await getMovieDetails(id);
+}

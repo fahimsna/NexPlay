@@ -11,6 +11,8 @@ import {
 
 import { getMovieDetails } from "../services/tmdbService";
 import ReviewsSection from "../components/reviews/ReviewsSection";
+import WhereToWatch from "../components/streaming/WhereToWatch";
+import DiscussionForum from "../components/discussion/DiscussionForum";
 
 const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
@@ -378,52 +380,11 @@ function Details() {
 
             {/* Where to Watch */}
 
-            <div
-              className="
-                mt-12
-                bg-[#24272D]
-                border
-                border-white/10
-                rounded-3xl
-                p-8
-              "
-            >
-              <h2 className="text-3xl font-bold">Where to Watch</h2>
+            <WhereToWatch tmdbId={movie.id} mediaType="movie" title={movie.title} />
 
-              <p className="text-gray-400 mt-3 leading-7">
-                NexPlay helps you discover entertainment. Streaming availability
-                varies by country. Check official streaming services such as
-                Netflix, Prime Video, Disney+, Apple TV+, Max, or Hulu to see
-                where this title is available.
-              </p>
+            {/* Discussion Forum */}
 
-              <div className="flex flex-wrap gap-3 mt-6">
-                {[
-                  "Netflix",
-                  "Prime Video",
-                  "Disney+",
-                  "Apple TV+",
-                  "Max",
-                  "Hulu",
-                ].map((platform) => (
-                  <span
-                    key={platform}
-                    className="
-                      px-4
-                      py-2
-                      rounded-full
-                      bg-[#17191D]
-                      border
-                      border-white/10
-                      hover:border-[#D4A017]
-                      transition
-                    "
-                  >
-                    {platform}
-                  </span>
-                ))}
-              </div>
-            </div>
+            <DiscussionForum tmdbId={movie.id} mediaType="movie" />
 
             {/* Ratings & Reviews (Sprint 4) */}
 

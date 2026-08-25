@@ -21,7 +21,7 @@ connectDB();
 // =======================
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "http://localhost:5174"],
     credentials: true,
   }),
 );
@@ -46,6 +46,10 @@ const analyticsRoutes = require("./routes/analyticsRoutes");
 const upcomingRoutes = require("./routes/upcomingRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
+const featuredContentRoutes = require("./routes/featuredContentRoutes");
+const streamingPlatformRoutes = require("./routes/streamingPlatformRoutes");
+const streamingAvailabilityRoutes = require("./routes/streamingAvailabilityRoutes");
+const commentRoutes = require("./routes/commentRoutes");
 // =======================
 // API ROUTES
 // =======================
@@ -60,6 +64,10 @@ app.use("/api/settings", settingsRoutes);
 app.use("/api/sports", sportsRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/reviews", reviewRoutes);
+app.use("/api/featured-content", featuredContentRoutes);
+app.use("/api/streaming-platforms", streamingPlatformRoutes);
+app.use("/api/streaming-availability", streamingAvailabilityRoutes);
+app.use("/api/comments", commentRoutes);
 // =======================
 // ROOT ROUTE
 // =======================
