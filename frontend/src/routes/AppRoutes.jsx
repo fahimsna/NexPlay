@@ -12,6 +12,7 @@ import Partner from "../pages/Partner";
 import Advertise from "../pages/Advertise";
 import UpcomingReleaseCalendar from "../pages/UpcomingReleaseCalendar";
 import TopRated from "../pages/TopRated";
+import UserProfile from "../pages/user/UserProfile";
 
 import CompanySettings from "../pages/company/CompanySettings";
 
@@ -89,6 +90,14 @@ function AppRoutes() {
 
         {/* Sprint 4: Top Rated Content */}
         <Route path="/top-rated" element={<TopRated />} />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <UserProfile />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Sprint 4: My Reviews (any logged-in user) */}
         <Route
