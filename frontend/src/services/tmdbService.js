@@ -25,7 +25,7 @@ export async function getTrendingMovies(page = 1) {
 
   const data = await response.json();
 
-  return data.results;
+  return data.results || [];
 }
 
 // =======================
@@ -44,7 +44,7 @@ export async function getTrendingTVShows(page = 1) {
 
   const data = await response.json();
 
-  return data.results;
+  return data.results || [];
 }
 
 // =======================
@@ -63,7 +63,7 @@ export async function getPopularMovies() {
 
   const data = await response.json();
 
-  return data.results;
+  return data.results || [];
 }
 
 // =======================
@@ -82,7 +82,7 @@ export async function getPopularTVShows() {
 
   const data = await response.json();
 
-  return data.results;
+  return data.results || [];
 }
 
 // =======================
@@ -101,7 +101,7 @@ export async function getMoviesByGenre(genreId) {
 
   const data = await response.json();
 
-  return data.results;
+  return data.results || [];
 }
 
 // =======================
@@ -124,9 +124,12 @@ export async function getMovieDetails(id) {
 // =======================
 // Movie Watch Providers
 // =======================
-// Returns watch-provider data for ALL regions.
+//
+// Returns watch-provider information
+// for ALL available regions.
 //
 // Example:
+//
 // {
 //   BD: {
 //     link: "...",
@@ -160,7 +163,9 @@ export async function getMovieWatchProviders(id) {
 // =======================
 // TV Watch Providers
 // =======================
-// Returns watch-provider data for ALL regions
+//
+// Returns watch-provider information
+// for ALL available regions
 // for a TV series.
 
 export async function getTVWatchProviders(id) {
@@ -196,13 +201,15 @@ export async function searchMovies(query) {
 
   const data = await response.json();
 
-  return data.results;
+  return data.results || [];
 }
 
 // =======================
-// Genre List (movie / tv)
+// Genre List
 // =======================
-// Sprint 2: Search & Advanced Filtering
+// Supports both:
+// movie
+// tv
 
 export async function getGenreList(type = "movie") {
   const response = await fetch(
@@ -220,12 +227,22 @@ export async function getGenreList(type = "movie") {
 }
 
 // =======================
-// Advanced Discover (movie / tv)
+// Advanced Discover
 // =======================
-// Sprint 2: Search & Advanced Filtering
 //
-// Supports combining: multiple genres, release year,
-// minimum rating, sort order, pagination.
+// Supports:
+//
+// - Multiple genres
+// - Release year
+// - Before year
+// - Minimum rating
+// - Original language
+// - Sorting
+// - Pagination
+//
+// type:
+// movie
+// tv
 
 export async function discoverContent({
   type = "movie",
@@ -245,9 +262,13 @@ export async function discoverContent({
 
   const dateField = type === "movie" ? "primary_release" : "first_air_date";
 
+  // Genres
+
   if (genreIds.length > 0) {
     params.set("with_genres", genreIds.join(","));
   }
+
+  // Year
 
   if (year) {
     const beforeMatch = /^Before (\d{4})$/.exec(year);
@@ -261,13 +282,19 @@ export async function discoverContent({
     }
   }
 
+  // Minimum Rating
+
   if (minRating) {
     params.set("vote_average.gte", String(minRating));
   }
 
+  // Original Language
+
   if (language) {
     params.set("with_original_language", language);
   }
+
+  // Request
 
   const response = await fetch(
     `${BASE_URL}/discover/${type}?${params.toString()}`,
