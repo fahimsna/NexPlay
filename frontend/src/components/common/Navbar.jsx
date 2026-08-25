@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   HiOutlineSearch,
   HiMenu,
   HiX,
   HiOutlineUserCircle,
+  HiChevronDown,
 } from "react-icons/hi";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -11,10 +12,41 @@ import useAuth from "../../hooks/useAuth";
 
 function Navbar() {
   const [open, setOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+
+  const moreRef = useRef(null);
+  const profileRef = useRef(null);
 
   const { isAuthenticated, logout } = useAuth();
 
   const navigate = useNavigate();
+
+  // =======================
+  // Close dropdowns
+  // =======================
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (moreRef.current && !moreRef.current.contains(event.target)) {
+        setMoreOpen(false);
+      }
+
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setProfileOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // =======================
+  // Main Menu
+  // =======================
 
   const menuItems = [
     {
@@ -37,6 +69,13 @@ function Navbar() {
       name: "Sports",
       path: "/sports",
     },
+  ];
+
+  // =======================
+  // More Menu
+  // =======================
+
+  const moreItems = [
     {
       name: "Upcoming",
       path: "/upcoming",
@@ -45,14 +84,39 @@ function Navbar() {
       name: "Top Rated",
       path: "/top-rated",
     },
+    {
+      name: "About",
+      path: "/about",
+    },
+    {
+      name: "Contact",
+      path: "/contact",
+    },
+    {
+      name: "Partner",
+      path: "/partner",
+    },
   ];
+
+  // =======================
+  // Logout
+  // =======================
 
   const handleLogout = () => {
     logout();
 
     setOpen(false);
+    setProfileOpen(false);
 
     navigate("/");
+  };
+
+  // =======================
+  // Close Mobile Menu
+  // =======================
+
+  const closeMobileMenu = () => {
+    setOpen(false);
   };
 
   return (
@@ -73,8 +137,8 @@ function Navbar() {
           mx-auto
           px-5
           sm:px-8
-          lg:px-12
-          py-5
+          lg:px-10
+          py-4
           flex
           items-center
           justify-between
@@ -90,6 +154,7 @@ function Navbar() {
             text-3xl
             font-black
             tracking-tight
+            shrink-0
             hover:opacity-90
             transition
           "
@@ -100,7 +165,7 @@ function Navbar() {
         </Link>
 
         {/* =======================
-            Desktop Menu
+            Desktop Navigation
         ======================= */}
 
         <div
@@ -108,18 +173,23 @@ function Navbar() {
             hidden
             lg:flex
             items-center
-            gap-8
-            text-sm
-            font-medium
-            text-gray-300
+            gap-6
+            ml-8
+            flex-1
           "
         >
+          {/* Main Links */}
+
           {menuItems.map((item) => (
             <Link
               key={item.name}
               to={item.path}
               className="
+                text-sm
+                font-medium
+                text-gray-300
                 hover:text-[#D4A017]
+                whitespace-nowrap
                 transition
               "
             >
@@ -127,30 +197,87 @@ function Navbar() {
             </Link>
           ))}
 
-          {/* My Reviews */}
+          {/* =======================
+              More Dropdown
+          ======================= */}
 
-          {isAuthenticated && (
-            <Link
-              to="/my-reviews"
+          <div ref={moreRef} className="relative">
+            <button
+              onClick={() => {
+                setMoreOpen((prev) => !prev);
+                setProfileOpen(false);
+              }}
               className="
+                flex
+                items-center
+                gap-1
+                text-sm
+                font-medium
+                text-gray-300
                 hover:text-[#D4A017]
                 transition
               "
             >
-              My Reviews
-            </Link>
-          )}
+              More
+              <HiChevronDown
+                size={17}
+                className={`
+                  transition-transform
+                  ${moreOpen ? "rotate-180" : ""}
+                `}
+              />
+            </button>
+
+            {moreOpen && (
+              <div
+                className="
+                  absolute
+                  top-10
+                  left-0
+                  w-48
+                  bg-[#24272D]
+                  border
+                  border-white/10
+                  rounded-2xl
+                  shadow-2xl
+                  p-2
+                "
+              >
+                {moreItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    to={item.path}
+                    onClick={() => setMoreOpen(false)}
+                    className="
+                      block
+                      px-4
+                      py-3
+                      rounded-xl
+                      text-sm
+                      text-gray-300
+                      hover:bg-[#393E46]
+                      hover:text-[#D4A017]
+                      transition
+                    "
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* =======================
-            Desktop Actions
+            Right Side
         ======================= */}
 
         <div
           className="
             flex
             items-center
-            gap-4
+            gap-3
+            ml-auto
           "
         >
           {/* Search */}
@@ -176,22 +303,22 @@ function Navbar() {
           >
             <HiOutlineSearch size={18} />
 
-            Search
+            <span className="hidden xl:inline">Search</span>
           </Link>
 
           {/* =======================
-              Logged In
+              Profile Dropdown
           ======================= */}
 
           {isAuthenticated ? (
-            <>
-              {/* Profile */}
-
-              <Link
-                to="/profile"
+            <div ref={profileRef} className="relative hidden sm:block">
+              <button
+                onClick={() => {
+                  setProfileOpen((prev) => !prev);
+                  setMoreOpen(false);
+                }}
                 className="
-                  hidden
-                  sm:flex
+                  flex
                   items-center
                   gap-2
                   px-4
@@ -208,41 +335,132 @@ function Navbar() {
               >
                 <HiOutlineUserCircle size={20} />
 
-                Profile
-              </Link>
+                <span>Profile</span>
 
-              {/* Logout */}
-
-              <button
-                onClick={handleLogout}
-                className="
-                  hidden
-                  sm:inline-flex
-                  px-6
-                  py-2.5
-                  rounded-full
-                  bg-[#D4A017]
-                  text-[#17191D]
-                  font-semibold
-                  hover:scale-105
-                  transition
-                "
-              >
-                Logout
+                <HiChevronDown
+                  size={16}
+                  className={`
+                    transition-transform
+                    ${profileOpen ? "rotate-180" : ""}
+                  `}
+                />
               </button>
-            </>
+
+              {profileOpen && (
+                <div
+                  className="
+                    absolute
+                    right-0
+                    top-12
+                    w-52
+                    bg-[#24272D]
+                    border
+                    border-white/10
+                    rounded-2xl
+                    shadow-2xl
+                    p-2
+                  "
+                >
+                  {/* Profile */}
+
+                  <Link
+                    to="/profile"
+                    onClick={() => setProfileOpen(false)}
+                    className="
+                      block
+                      px-4
+                      py-3
+                      rounded-xl
+                      text-sm
+                      text-gray-300
+                      hover:bg-[#393E46]
+                      hover:text-[#D4A017]
+                      transition
+                    "
+                  >
+                    My Profile
+                  </Link>
+
+                  {/* My Reviews */}
+
+                  <Link
+                    to="/my-reviews"
+                    onClick={() => setProfileOpen(false)}
+                    className="
+                      block
+                      px-4
+                      py-3
+                      rounded-xl
+                      text-sm
+                      text-gray-300
+                      hover:bg-[#393E46]
+                      hover:text-[#D4A017]
+                      transition
+                    "
+                  >
+                    My Reviews
+                  </Link>
+
+                  {/* Watchlist */}
+
+                  <Link
+                    to="/watchlist"
+                    onClick={() => setProfileOpen(false)}
+                    className="
+                      block
+                      px-4
+                      py-3
+                      rounded-xl
+                      text-sm
+                      text-gray-300
+                      hover:bg-[#393E46]
+                      hover:text-[#D4A017]
+                      transition
+                    "
+                  >
+                    Watchlist
+                  </Link>
+
+                  {/* Divider */}
+
+                  <div className="my-2 border-t border-white/10" />
+
+                  {/* Logout */}
+
+                  <button
+                    onClick={handleLogout}
+                    className="
+                      w-full
+                      text-left
+                      px-4
+                      py-3
+                      rounded-xl
+                      text-sm
+                      text-red-400
+                      hover:bg-red-500/10
+                      transition
+                    "
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             /* Login */
 
             <Link
               to="/login"
               className="
-                px-6
+                hidden
+                sm:inline-flex
+                px-5
                 py-2.5
                 rounded-full
                 bg-[#D4A017]
                 text-[#17191D]
                 font-semibold
+                text-sm
                 hover:scale-105
                 transition
               "
@@ -256,7 +474,7 @@ function Navbar() {
           ======================= */}
 
           <button
-            onClick={() => setOpen(!open)}
+            onClick={() => setOpen((prev) => !prev)}
             className="
               lg:hidden
               text-white
@@ -265,7 +483,7 @@ function Navbar() {
             "
             aria-label="Toggle menu"
           >
-            {open ? <HiX size={28} /> : <HiMenu size={28} />}
+            {open ? <HiX size={29} /> : <HiMenu size={29} />}
           </button>
         </div>
       </div>
@@ -289,18 +507,22 @@ function Navbar() {
             className="
               flex
               flex-col
-              gap-5
-              text-gray-300
+              gap-2
             "
           >
-            {/* Main Menu */}
+            {/* Main Links */}
 
             {menuItems.map((item) => (
               <Link
                 key={item.name}
                 to={item.path}
-                onClick={() => setOpen(false)}
+                onClick={closeMobileMenu}
                 className="
+                  px-4
+                  py-3
+                  rounded-xl
+                  text-gray-300
+                  hover:bg-[#393E46]
                   hover:text-[#D4A017]
                   transition
                 "
@@ -309,95 +531,199 @@ function Navbar() {
               </Link>
             ))}
 
-            {/* My Reviews */}
+            {/* More Section */}
 
-            {isAuthenticated && (
-              <Link
-                to="/my-reviews"
-                onClick={() => setOpen(false)}
+            <div className="mt-2 pt-4 border-t border-white/10">
+              <p
                 className="
-                  hover:text-[#D4A017]
-                  transition
+                  px-4
+                  mb-2
+                  text-xs
+                  uppercase
+                  tracking-widest
+                  text-gray-500
                 "
               >
-                My Reviews
-              </Link>
-            )}
+                More
+              </p>
 
-            {/* Profile */}
+              {moreItems.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  onClick={closeMobileMenu}
+                  className="
+                    block
+                    px-4
+                    py-3
+                    rounded-xl
+                    text-gray-300
+                    hover:bg-[#393E46]
+                    hover:text-[#D4A017]
+                    transition
+                  "
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </div>
 
-            {isAuthenticated && (
-              <Link
-                to="/profile"
-                onClick={() => setOpen(false)}
-                className="
-                  flex
-                  items-center
-                  gap-2
-                  hover:text-[#D4A017]
-                  transition
-                "
-              >
-                <HiOutlineUserCircle size={20} />
+            {/* User Section */}
 
-                Profile
-              </Link>
-            )}
+            <div className="mt-2 pt-4 border-t border-white/10">
+              {isAuthenticated ? (
+                <>
+                  <p
+                    className="
+                      px-4
+                      mb-2
+                      text-xs
+                      uppercase
+                      tracking-widest
+                      text-gray-500
+                    "
+                  >
+                    Account
+                  </p>
 
-            {/* Search */}
+                  <Link
+                    to="/profile"
+                    onClick={closeMobileMenu}
+                    className="
+                      block
+                      px-4
+                      py-3
+                      rounded-xl
+                      text-gray-300
+                      hover:bg-[#393E46]
+                      hover:text-[#D4A017]
+                      transition
+                    "
+                  >
+                    My Profile
+                  </Link>
 
-            <Link
-              to="/browse"
-              onClick={() => setOpen(false)}
-              className="
-                flex
-                items-center
-                gap-2
-                hover:text-[#D4A017]
-                transition
-              "
-            >
-              <HiOutlineSearch />
+                  <Link
+                    to="/my-reviews"
+                    onClick={closeMobileMenu}
+                    className="
+                      block
+                      px-4
+                      py-3
+                      rounded-xl
+                      text-gray-300
+                      hover:bg-[#393E46]
+                      hover:text-[#D4A017]
+                      transition
+                    "
+                  >
+                    My Reviews
+                  </Link>
 
-              Search
-            </Link>
+                  <Link
+                    to="/watchlist"
+                    onClick={closeMobileMenu}
+                    className="
+                      block
+                      px-4
+                      py-3
+                      rounded-xl
+                      text-gray-300
+                      hover:bg-[#393E46]
+                      hover:text-[#D4A017]
+                      transition
+                    "
+                  >
+                    Watchlist
+                  </Link>
 
-            {/* Login / Logout */}
+                  {/* Search */}
 
-            {isAuthenticated ? (
-              <button
-                onClick={handleLogout}
-                className="
-                  text-center
-                  py-2.5
-                  rounded-full
-                  bg-[#D4A017]
-                  text-[#17191D]
-                  font-semibold
-                  hover:opacity-90
-                  transition
-                "
-              >
-                Logout
-              </button>
-            ) : (
-              <Link
-                to="/login"
-                onClick={() => setOpen(false)}
-                className="
-                  text-center
-                  py-2.5
-                  rounded-full
-                  bg-[#D4A017]
-                  text-[#17191D]
-                  font-semibold
-                  hover:opacity-90
-                  transition
-                "
-              >
-                Login
-              </Link>
-            )}
+                  <Link
+                    to="/browse"
+                    onClick={closeMobileMenu}
+                    className="
+                      flex
+                      items-center
+                      gap-2
+                      px-4
+                      py-3
+                      rounded-xl
+                      text-gray-300
+                      hover:bg-[#393E46]
+                      hover:text-[#D4A017]
+                      transition
+                    "
+                  >
+                    <HiOutlineSearch size={19} />
+                    Search
+                  </Link>
+
+                  {/* Logout */}
+
+                  <button
+                    onClick={handleLogout}
+                    className="
+                      w-full
+                      text-left
+                      px-4
+                      py-3
+                      rounded-xl
+                      text-red-400
+                      hover:bg-red-500/10
+                      transition
+                    "
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  {/* Search */}
+
+                  <Link
+                    to="/browse"
+                    onClick={closeMobileMenu}
+                    className="
+                      flex
+                      items-center
+                      gap-2
+                      px-4
+                      py-3
+                      rounded-xl
+                      text-gray-300
+                      hover:bg-[#393E46]
+                      hover:text-[#D4A017]
+                      transition
+                    "
+                  >
+                    <HiOutlineSearch size={19} />
+                    Search
+                  </Link>
+
+                  {/* Login */}
+
+                  <Link
+                    to="/login"
+                    onClick={closeMobileMenu}
+                    className="
+                      block
+                      mt-3
+                      text-center
+                      py-3
+                      rounded-full
+                      bg-[#D4A017]
+                      text-[#17191D]
+                      font-semibold
+                      hover:opacity-90
+                      transition
+                    "
+                  >
+                    Login
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}
