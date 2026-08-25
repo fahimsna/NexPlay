@@ -53,6 +53,12 @@ const adminRoutes = require("./routes/adminRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
 
 // =======================
+// SPRINT 4 - USER ROUTES
+// =======================
+
+const userRoutes = require("./routes/userRoutes");
+
+// =======================
 // API ROUTES
 // =======================
 
@@ -78,10 +84,21 @@ app.use("/api/admin", adminRoutes);
 
 app.use("/api/reviews", reviewRoutes);
 
-// Sprint 4
+// =======================
+// SPRINT 4
 // User Activity History
+// =======================
 
 app.use("/api/activity", activityRoutes);
+
+// =======================
+// SPRINT 4
+// User Profile
+// Favourite Genres
+// Favourite Sports
+// =======================
+
+app.use("/api/users", userRoutes);
 
 // =======================
 // ROOT ROUTE

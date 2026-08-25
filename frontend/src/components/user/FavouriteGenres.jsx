@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { HiOutlinePencil, HiOutlineCheck } from "react-icons/hi2";
 
 const AVAILABLE_GENRES = [
@@ -23,7 +23,13 @@ const AVAILABLE_GENRES = [
 
 function FavouriteGenres({ favouriteGenres = [], onSave }) {
   const [editing, setEditing] = useState(false);
+
   const [selectedGenres, setSelectedGenres] = useState(favouriteGenres);
+
+  // Keep local state synchronized with saved profile data
+  useEffect(() => {
+    setSelectedGenres(Array.isArray(favouriteGenres) ? favouriteGenres : []);
+  }, [favouriteGenres]);
 
   const toggleGenre = (genre) => {
     setSelectedGenres((current) => {

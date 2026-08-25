@@ -1,16 +1,27 @@
 import { useEffect, useState } from "react";
 
 import UserProfileCard from "../../components/user/UserProfileCard";
+
 import ProfileStats from "../../components/user/ProfileStats";
+
 import RecentlyViewed from "../../components/user/RecentlyViewed";
+
 import ActivityHistory from "../../components/user/ActivityHistory";
+
 import FavouriteGenres from "../../components/user/FavouriteGenres";
+
 import FavouriteSports from "../../components/user/FavouriteSports";
 
 import {
   getRecentActivity,
   getActivityHistory,
 } from "../../services/activityService";
+
+import {
+  getUserProfile,
+  updateFavouriteGenres,
+  updateFavouriteSports,
+} from "../../services/userService";
 
 function UserProfile() {
   // =======================
@@ -52,6 +63,34 @@ function UserProfile() {
   const [favouriteSports, setFavouriteSports] = useState([]);
 
   // =======================
+  // Load User Profile
+  // =======================
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    loadUserProfile();
+  }, []);
+
+  async function loadUserProfile() {
+    try {
+      const profile = await getUserProfile();
+
+      setFavouriteGenres(
+        Array.isArray(profile?.favouriteGenres) ? profile.favouriteGenres : [],
+      );
+
+      setFavouriteSports(
+        Array.isArray(profile?.favouriteSports) ? profile.favouriteSports : [],
+      );
+    } catch (error) {
+      console.error("Failed to load user profile:", error);
+    }
+  }
+
+  // =======================
   // Load Activity
   // =======================
 
@@ -67,6 +106,7 @@ function UserProfile() {
   async function loadActivity() {
     try {
       setActivityLoading(true);
+
       setActivityError("");
 
       const [recentData, historyData] = await Promise.all([
@@ -75,8 +115,11 @@ function UserProfile() {
       ]);
 
       /*
-       * Normalize backend activity data so the existing
-       * UI components receive a consistent structure.
+       * The existing activity service already returns
+       * response.data.activities.
+       *
+       * We normalize the backend fields here so that
+       * the existing UI components remain untouched.
        */
 
       const normalizedRecent = normalizeActivities(recentData);
@@ -84,6 +127,7 @@ function UserProfile() {
       const normalizedHistory = normalizeActivities(historyData);
 
       setRecentlyViewed(normalizedRecent);
+
       setActivities(normalizedHistory);
     } catch (error) {
       console.error("Failed to load activity:", error);
@@ -94,6 +138,7 @@ function UserProfile() {
       );
 
       setRecentlyViewed([]);
+
       setActivities([]);
     } finally {
       setActivityLoading(false);
@@ -105,10 +150,6 @@ function UserProfile() {
   // =======================
 
   function normalizeActivities(items = []) {
-    if (!Array.isArray(items)) {
-      return [];
-    }
-
     return items.map((activity) => ({
       id: activity.contentId || activity.id,
 
@@ -138,14 +179,14 @@ function UserProfile() {
       (activity) => activity.type === "series" || activity.type === "tv",
     ).length,
 
-    sportsViewed: activities.filter(
-      (activity) => activity.type === "sports" || activity.type === "sport",
-    ).length,
+    sportsViewed: activities.filter((activity) => activity.type === "sports")
+      .length,
 
     /*
-     * Review count will be connected to the existing
-     * review system separately.
+     * Reviews are handled by the existing review system.
+     * We will connect the real review count separately.
      */
+
     reviews: 0,
 
     totalActivity: activities.length,
@@ -157,9 +198,9 @@ function UserProfile() {
 
   const handleSaveGenres = async (genres) => {
     try {
-      console.log("Favourite genres:", genres);
+      const savedGenres = await updateFavouriteGenres(genres);
 
-      setFavouriteGenres(genres);
+      setFavouriteGenres(savedGenres);
     } catch (error) {
       console.error("Failed to save favourite genres:", error);
 
@@ -173,9 +214,9 @@ function UserProfile() {
 
   const handleSaveSports = async (sports) => {
     try {
-      console.log("Favourite sports:", sports);
+      const savedSports = await updateFavouriteSports(sports);
 
-      setFavouriteSports(sports);
+      setFavouriteSports(savedSports);
     } catch (error) {
       console.error("Failed to save favourite sports:", error);
 

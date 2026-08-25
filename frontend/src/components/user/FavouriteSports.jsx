@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { HiOutlinePencil, HiOutlineCheck } from "react-icons/hi2";
 
 const AVAILABLE_SPORTS = [
@@ -22,7 +22,13 @@ const AVAILABLE_SPORTS = [
 
 function FavouriteSports({ favouriteSports = [], onSave }) {
   const [editing, setEditing] = useState(false);
+
   const [selectedSports, setSelectedSports] = useState(favouriteSports);
+
+  // Keep local state synchronized with saved profile data
+  useEffect(() => {
+    setSelectedSports(Array.isArray(favouriteSports) ? favouriteSports : []);
+  }, [favouriteSports]);
 
   const toggleSport = (sport) => {
     setSelectedSports((current) => {
