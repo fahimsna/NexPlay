@@ -7,6 +7,7 @@ import {
   HiCalendarDays,
   HiClock,
   HiGlobeAlt,
+  HiArrowTopRightOnSquare,
 } from "react-icons/hi2";
 
 import {
@@ -23,7 +24,7 @@ function Details() {
 
   const [movie, setMovie] = useState(null);
 
-  const [watchProviders, setWatchProviders] = useState(null);
+  const [watchProviders, setWatchProviders] = useState({});
 
   const [loading, setLoading] = useState(true);
 
@@ -41,10 +42,10 @@ function Details() {
       const [movieData, providerData] = await Promise.all([
         getMovieDetails(id),
 
-        getMovieWatchProviders(id, "BD").catch((providerError) => {
+        getMovieWatchProviders(id).catch((providerError) => {
           console.error("Failed to load watch providers:", providerError);
 
-          return null;
+          return {};
         }),
       ]);
 
@@ -93,6 +94,34 @@ function Details() {
       </div>
     );
   }
+
+  // =======================
+  // Watch Providers
+  // =======================
+
+  // Bangladesh first.
+  // If Bangladesh has no provider information,
+  // we don't show providers from another country
+  // because that could be misleading.
+
+  const bdProviders = watchProviders?.BD;
+
+  const streamingProviders = bdProviders?.flatrate || [];
+
+  const rentProviders = bdProviders?.rent || [];
+
+  const buyProviders = bdProviders?.buy || [];
+
+  // Remove duplicate providers between
+  // streaming / rent / buy sections.
+
+  const uniqueProviders = Array.from(
+    new Map(
+      [...streamingProviders, ...rentProviders, ...buyProviders].map(
+        (provider) => [provider.provider_id, provider],
+      ),
+    ).values(),
+  );
 
   return (
     <section
@@ -395,7 +424,9 @@ function Details() {
               </div>
             </div>
 
-            {/* Where to Watch */}
+            {/* =======================
+                Where to Watch
+            ======================= */}
 
             <div
               className="
@@ -407,166 +438,313 @@ function Details() {
                 p-8
               "
             >
-              <h2 className="text-3xl font-bold">Where to Watch</h2>
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-3xl font-bold">Where to Watch</h2>
 
-              <p className="text-gray-400 mt-3 leading-7">
-                Streaming availability in Bangladesh. Availability may change
-                over time and can differ by region.
-              </p>
+                  <p className="text-gray-400 mt-3 leading-7">
+                    Streaming availability in Bangladesh. Availability may
+                    change over time.
+                  </p>
+                </div>
 
-              {/* Subscription */}
+                <span
+                  className="
+                    hidden
+                    sm:block
+                    px-3
+                    py-1
+                    rounded-full
+                    bg-[#17191D]
+                    border
+                    border-white/10
+                    text-sm
+                    text-gray-400
+                  "
+                >
+                  🇧🇩 Bangladesh
+                </span>
+              </div>
 
-              {watchProviders?.flatrate?.length > 0 && (
-                <div className="mt-6">
-                  <h3 className="text-sm font-semibold text-gray-400 mb-4">
-                    Stream with Subscription
-                  </h3>
+              {uniqueProviders.length > 0 ? (
+                <>
+                  {/* Streaming */}
 
-                  <div className="flex flex-wrap gap-3">
-                    {watchProviders.flatrate.map((provider) => (
-                      <div
-                        key={provider.provider_id}
+                  {streamingProviders.length > 0 && (
+                    <div className="mt-7">
+                      <h3 className="text-sm font-semibold text-gray-400 mb-4">
+                        Stream with Subscription
+                      </h3>
+
+                      <div className="flex flex-wrap gap-4">
+                        {streamingProviders.map((provider) => (
+                          <a
+                            key={`stream-${provider.provider_id}`}
+                            href={bdProviders.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={`Watch ${movie.title} on ${provider.provider_name}`}
+                            className="
+                              group
+                              flex
+                              items-center
+                              gap-3
+                              px-4
+                              py-3
+                              rounded-2xl
+                              bg-[#17191D]
+                              border
+                              border-white/10
+                              hover:border-[#D4A017]
+                              hover:-translate-y-1
+                              transition-all
+                              duration-200
+                            "
+                          >
+                            {provider.logo_path && (
+                              <img
+                                src={`${IMAGE_BASE_URL}${provider.logo_path}`}
+                                alt={provider.provider_name}
+                                className="
+                                  w-11
+                                  h-11
+                                  rounded-xl
+                                  object-cover
+                                "
+                              />
+                            )}
+
+                            <div>
+                              <p className="font-semibold">
+                                {provider.provider_name}
+                              </p>
+
+                              <p
+                                className="
+                                  text-xs
+                                  text-gray-500
+                                  group-hover:text-[#D4A017]
+                                  transition
+                                "
+                              >
+                                Watch now
+                              </p>
+                            </div>
+
+                            <HiArrowTopRightOnSquare
+                              className="
+                                text-gray-500
+                                group-hover:text-[#D4A017]
+                                transition
+                              "
+                            />
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Rent */}
+
+                  {rentProviders.length > 0 && (
+                    <div className="mt-8">
+                      <h3 className="text-sm font-semibold text-gray-400 mb-4">
+                        Rent
+                      </h3>
+
+                      <div className="flex flex-wrap gap-4">
+                        {rentProviders.map((provider) => (
+                          <a
+                            key={`rent-${provider.provider_id}`}
+                            href={bdProviders.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={`Rent ${movie.title} from ${provider.provider_name}`}
+                            className="
+                              group
+                              flex
+                              items-center
+                              gap-3
+                              px-4
+                              py-3
+                              rounded-2xl
+                              bg-[#17191D]
+                              border
+                              border-white/10
+                              hover:border-[#D4A017]
+                              hover:-translate-y-1
+                              transition-all
+                              duration-200
+                            "
+                          >
+                            {provider.logo_path && (
+                              <img
+                                src={`${IMAGE_BASE_URL}${provider.logo_path}`}
+                                alt={provider.provider_name}
+                                className="
+                                  w-11
+                                  h-11
+                                  rounded-xl
+                                  object-cover
+                                "
+                              />
+                            )}
+
+                            <div>
+                              <p className="font-semibold">
+                                {provider.provider_name}
+                              </p>
+
+                              <p
+                                className="
+                                  text-xs
+                                  text-gray-500
+                                  group-hover:text-[#D4A017]
+                                  transition
+                                "
+                              >
+                                Rent
+                              </p>
+                            </div>
+
+                            <HiArrowTopRightOnSquare
+                              className="
+                                text-gray-500
+                                group-hover:text-[#D4A017]
+                                transition
+                              "
+                            />
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Buy */}
+
+                  {buyProviders.length > 0 && (
+                    <div className="mt-8">
+                      <h3 className="text-sm font-semibold text-gray-400 mb-4">
+                        Buy
+                      </h3>
+
+                      <div className="flex flex-wrap gap-4">
+                        {buyProviders.map((provider) => (
+                          <a
+                            key={`buy-${provider.provider_id}`}
+                            href={bdProviders.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={`Buy ${movie.title} from ${provider.provider_name}`}
+                            className="
+                              group
+                              flex
+                              items-center
+                              gap-3
+                              px-4
+                              py-3
+                              rounded-2xl
+                              bg-[#17191D]
+                              border
+                              border-white/10
+                              hover:border-[#D4A017]
+                              hover:-translate-y-1
+                              transition-all
+                              duration-200
+                            "
+                          >
+                            {provider.logo_path && (
+                              <img
+                                src={`${IMAGE_BASE_URL}${provider.logo_path}`}
+                                alt={provider.provider_name}
+                                className="
+                                  w-11
+                                  h-11
+                                  rounded-xl
+                                  object-cover
+                                "
+                              />
+                            )}
+
+                            <div>
+                              <p className="font-semibold">
+                                {provider.provider_name}
+                              </p>
+
+                              <p
+                                className="
+                                  text-xs
+                                  text-gray-500
+                                  group-hover:text-[#D4A017]
+                                  transition
+                                "
+                              >
+                                Buy
+                              </p>
+                            </div>
+
+                            <HiArrowTopRightOnSquare
+                              className="
+                                text-gray-500
+                                group-hover:text-[#D4A017]
+                                transition
+                              "
+                            />
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* View all */}
+
+                  {bdProviders.link && (
+                    <div className="mt-8 pt-6 border-t border-white/10">
+                      <a
+                        href={bdProviders.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="
-                          flex
+                          inline-flex
                           items-center
-                          gap-3
-                          px-3
-                          py-2
-                          rounded-2xl
-                          bg-[#17191D]
-                          border
-                          border-white/10
-                          hover:border-[#D4A017]
+                          gap-2
+                          text-[#D4A017]
+                          hover:text-[#e7bb3c]
+                          font-semibold
                           transition
                         "
                       >
-                        {provider.logo_path && (
-                          <img
-                            src={`${IMAGE_BASE_URL}${provider.logo_path}`}
-                            alt={provider.provider_name}
-                            className="
-                              w-10
-                              h-10
-                              rounded-lg
-                              object-cover
-                            "
-                          />
-                        )}
+                        View all watch options
+                        <HiArrowTopRightOnSquare />
+                      </a>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div
+                  className="
+                    mt-7
+                    p-5
+                    rounded-2xl
+                    bg-[#17191D]
+                    border
+                    border-white/10
+                  "
+                >
+                  <p className="text-gray-400">
+                    No streaming, rental, or purchase providers are currently
+                    listed for this movie in Bangladesh.
+                  </p>
 
-                        <span>{provider.provider_name}</span>
-                      </div>
-                    ))}
-                  </div>
+                  <p className="text-sm text-gray-500 mt-2">
+                    Provider availability is supplied by TMDB and may vary by
+                    region and time.
+                  </p>
                 </div>
               )}
-
-              {/* Rent */}
-
-              {watchProviders?.rent?.length > 0 && (
-                <div className="mt-8">
-                  <h3 className="text-sm font-semibold text-gray-400 mb-4">
-                    Rent
-                  </h3>
-
-                  <div className="flex flex-wrap gap-3">
-                    {watchProviders.rent.map((provider) => (
-                      <div
-                        key={provider.provider_id}
-                        className="
-                          flex
-                          items-center
-                          gap-3
-                          px-3
-                          py-2
-                          rounded-2xl
-                          bg-[#17191D]
-                          border
-                          border-white/10
-                          hover:border-[#D4A017]
-                          transition
-                        "
-                      >
-                        {provider.logo_path && (
-                          <img
-                            src={`${IMAGE_BASE_URL}${provider.logo_path}`}
-                            alt={provider.provider_name}
-                            className="
-                              w-10
-                              h-10
-                              rounded-lg
-                              object-cover
-                            "
-                          />
-                        )}
-
-                        <span>{provider.provider_name}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Buy */}
-
-              {watchProviders?.buy?.length > 0 && (
-                <div className="mt-8">
-                  <h3 className="text-sm font-semibold text-gray-400 mb-4">
-                    Buy
-                  </h3>
-
-                  <div className="flex flex-wrap gap-3">
-                    {watchProviders.buy.map((provider) => (
-                      <div
-                        key={provider.provider_id}
-                        className="
-                          flex
-                          items-center
-                          gap-3
-                          px-3
-                          py-2
-                          rounded-2xl
-                          bg-[#17191D]
-                          border
-                          border-white/10
-                          hover:border-[#D4A017]
-                          transition
-                        "
-                      >
-                        {provider.logo_path && (
-                          <img
-                            src={`${IMAGE_BASE_URL}${provider.logo_path}`}
-                            alt={provider.provider_name}
-                            className="
-                              w-10
-                              h-10
-                              rounded-lg
-                              object-cover
-                            "
-                          />
-                        )}
-
-                        <span>{provider.provider_name}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* No Providers */}
-
-              {!watchProviders?.flatrate?.length &&
-                !watchProviders?.rent?.length &&
-                !watchProviders?.buy?.length && (
-                  <div className="mt-6">
-                    <p className="text-gray-400">
-                      No streaming, rental, or purchase providers are currently
-                      listed for this movie in Bangladesh.
-                    </p>
-                  </div>
-                )}
             </div>
 
-            {/* Ratings & Reviews (Sprint 4) */}
+            {/* Ratings & Reviews */}
 
             <ReviewsSection
               contentId={movie.id}
