@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import {
@@ -16,6 +16,7 @@ import {
 } from "../services/tmdbService";
 
 import { recordActivity } from "../services/activityService";
+import useAuth from "../hooks/useAuth";
 
 import ReviewsSection from "../components/reviews/ReviewsSection";
 
@@ -23,6 +24,12 @@ const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
 function Details() {
   const { id } = useParams();
+
+  const { isAuthenticated } = useAuth();
+
+  // Prevent duplicate activity recording
+  // caused by React StrictMode / repeated effects.
+  const activityRecorded = useRef(false);
 
   const [movie, setMovie] = useState(null);
 
@@ -33,8 +40,11 @@ function Details() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    // Reset when opening a different movie.
+    activityRecorded.current = false;
+
     fetchMovie();
-  }, [id]);
+  }, [id, isAuthenticated]);
 
   async function fetchMovie() {
     try {
@@ -56,30 +66,32 @@ function Details() {
       setWatchProviders(providerData);
 
       // =======================
-      // Sprint 4
-      // Record Recently Viewed
+      // Record User Activity
       // =======================
 
-      const storedUser = localStorage.getItem("user");
+      if (isAuthenticated && movieData && !activityRecorded.current) {
+        // Set immediately so StrictMode / repeated renders
+        // cannot send the request twice.
+        activityRecorded.current = true;
 
-      if (storedUser) {
         try {
           await recordActivity({
             contentId: movieData.id,
             contentType: "movie",
             title: movieData.title,
             posterPath: movieData.poster_path,
+
             metadata: {
               releaseDate: movieData.release_date,
+              rating: movieData.vote_average,
               genres: movieData.genres?.map((genre) => genre.name) || [],
             },
           });
         } catch (activityError) {
-          /*
-           * Activity tracking should never
-           * break the Details page.
-           */
-          console.error("Failed to record movie activity:", activityError);
+          console.error("Failed to record viewing activity:", activityError);
+
+          // Allow retry if the API request actually failed.
+          activityRecorded.current = false;
         }
       }
     } catch (err) {
@@ -90,6 +102,10 @@ function Details() {
       setLoading(false);
     }
   }
+
+  // =======================
+  // Loading
+  // =======================
 
   if (loading) {
     return (
@@ -107,6 +123,10 @@ function Details() {
       </div>
     );
   }
+
+  // =======================
+  // Error
+  // =======================
 
   if (error || !movie) {
     return (
@@ -129,28 +149,6 @@ function Details() {
   // Watch Providers
   // =======================
 
-  /*
-    TMDB returns providers grouped by region.
-
-    Example:
-
-    {
-      US: {
-        link: "...",
-        flatrate: [...],
-        rent: [...],
-        buy: [...]
-      },
-
-      GB: {
-        link: "...",
-        flatrate: [...]
-      }
-    }
-
-    We collect providers from ALL regions.
-  */
-
   const allRegions = Object.entries(watchProviders || {});
 
   const streamingProviders = [];
@@ -160,7 +158,7 @@ function Details() {
   const buyProviders = [];
 
   // =======================
-  // Collect Streaming
+  // Streaming Providers
   // =======================
 
   allRegions.forEach(([regionCode, regionData]) => {
@@ -176,7 +174,7 @@ function Details() {
   });
 
   // =======================
-  // Collect Rental
+  // Rental Providers
   // =======================
 
   allRegions.forEach(([regionCode, regionData]) => {
@@ -192,7 +190,7 @@ function Details() {
   });
 
   // =======================
-  // Collect Purchase
+  // Purchase Providers
   // =======================
 
   allRegions.forEach(([regionCode, regionData]) => {
@@ -235,7 +233,7 @@ function Details() {
     uniqueBuyProviders.length > 0;
 
   // =======================
-  // Get Country Name
+  // Country Name
   // =======================
 
   function getRegionName(regionCode) {
