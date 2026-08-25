@@ -1,21 +1,18 @@
 import { useEffect, useState } from "react";
 
 import UserProfileCard from "../../components/user/UserProfileCard";
-
 import ProfileStats from "../../components/user/ProfileStats";
-
 import RecentlyViewed from "../../components/user/RecentlyViewed";
-
 import ActivityHistory from "../../components/user/ActivityHistory";
-
 import FavouriteGenres from "../../components/user/FavouriteGenres";
-
 import FavouriteSports from "../../components/user/FavouriteSports";
 
 import {
   getRecentActivity,
   getActivityHistory,
 } from "../../services/activityService";
+
+import axios from "../../api/axiosInstance";
 
 function UserProfile() {
   // =======================
@@ -57,17 +54,69 @@ function UserProfile() {
   const [favouriteSports, setFavouriteSports] = useState([]);
 
   // =======================
-  // Load Activity
+  // Profile Loading
+  // =======================
+
+  const [profileLoading, setProfileLoading] = useState(true);
+
+  const [profileError, setProfileError] = useState("");
+
+  // =======================
+  // Load Profile + Activity
   // =======================
 
   useEffect(() => {
     if (!user) {
       setActivityLoading(false);
+      setProfileLoading(false);
       return;
     }
 
+    loadProfile();
     loadActivity();
   }, []);
+
+  // =======================
+  // Load User Profile
+  // =======================
+
+  async function loadProfile() {
+    try {
+      setProfileLoading(true);
+      setProfileError("");
+
+      const response = await axios.get("/users/profile");
+
+      const profileUser = response.data?.user;
+
+      if (!profileUser) {
+        throw new Error("User profile was not returned.");
+      }
+
+      setFavouriteGenres(profileUser.favouriteGenres || []);
+
+      setFavouriteSports(profileUser.favouriteSports || []);
+
+      /*
+       * Keep localStorage user information synchronized
+       * with the latest backend profile.
+       */
+      localStorage.setItem("user", JSON.stringify(profileUser));
+    } catch (error) {
+      console.error("Failed to load user profile:", error);
+
+      setProfileError(
+        error.response?.data?.message ||
+          "Unable to load your profile preferences right now.",
+      );
+    } finally {
+      setProfileLoading(false);
+    }
+  }
+
+  // =======================
+  // Load Activity
+  // =======================
 
   async function loadActivity() {
     try {
@@ -81,11 +130,11 @@ function UserProfile() {
       ]);
 
       /*
-       * The existing activity service already returns
+       * The activity service already returns
        * response.data.activities.
        *
-       * We normalize the backend fields here so that
-       * the existing UI components remain untouched.
+       * Normalize backend fields here so
+       * existing UI components stay untouched.
        */
 
       const normalizedRecent = normalizeActivities(recentData);
@@ -149,8 +198,8 @@ function UserProfile() {
       .length,
 
     /*
-     * Reviews are handled by the existing review system.
-     * We will connect the real review count separately.
+     * Reviews are still handled by the
+     * existing review system.
      */
     reviews: 0,
 
@@ -158,23 +207,69 @@ function UserProfile() {
   };
 
   // =======================
-  // Favourite Genres
+  // Save Favourite Genres
   // =======================
 
   const handleSaveGenres = async (genres) => {
-    console.log("Favourite genres:", genres);
+    try {
+      const response = await axios.put("/users/favourites/genres", {
+        genres,
+      });
 
-    setFavouriteGenres(genres);
+      const savedGenres = response.data?.favouriteGenres || genres;
+
+      setFavouriteGenres(savedGenres);
+
+      /*
+       * Keep localStorage synchronized.
+       */
+      const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          ...currentUser,
+          favouriteGenres: savedGenres,
+        }),
+      );
+    } catch (error) {
+      console.error("Failed to save favourite genres:", error);
+
+      throw error;
+    }
   };
 
   // =======================
-  // Favourite Sports
+  // Save Favourite Sports
   // =======================
 
   const handleSaveSports = async (sports) => {
-    console.log("Favourite sports:", sports);
+    try {
+      const response = await axios.put("/users/favourites/sports", {
+        sports,
+      });
 
-    setFavouriteSports(sports);
+      const savedSports = response.data?.favouriteSports || sports;
+
+      setFavouriteSports(savedSports);
+
+      /*
+       * Keep localStorage synchronized.
+       */
+      const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          ...currentUser,
+          favouriteSports: savedSports,
+        }),
+      );
+    } catch (error) {
+      console.error("Failed to save favourite sports:", error);
+
+      throw error;
+    }
   };
 
   // =======================
@@ -278,6 +373,72 @@ function UserProfile() {
         )}
 
         {/* =======================
+            PROFILE ERROR
+        ======================= */}
+
+        {profileError && (
+          <div
+            className="
+              bg-red-500/10
+              border
+              border-red-500/20
+              rounded-2xl
+              px-5
+              py-4
+              text-red-400
+            "
+          >
+            {profileError}
+          </div>
+        )}
+
+        {/* =======================
+            PROFILE PREFERENCES LOADING
+        ======================= */}
+
+        {profileLoading ? (
+          <div
+            className="
+              bg-[#24272D]
+              border
+              border-white/10
+              rounded-3xl
+              p-8
+              text-center
+              text-gray-400
+            "
+          >
+            Loading your preferences...
+          </div>
+        ) : (
+          <>
+            {/* =======================
+                PROFILE STATISTICS
+            ======================= */}
+
+            <ProfileStats stats={stats} />
+
+            {/* =======================
+                FAVOURITE GENRES
+            ======================= */}
+
+            <FavouriteGenres
+              favouriteGenres={favouriteGenres}
+              onSave={handleSaveGenres}
+            />
+
+            {/* =======================
+                FAVOURITE SPORTS
+            ======================= */}
+
+            <FavouriteSports
+              favouriteSports={favouriteSports}
+              onSave={handleSaveSports}
+            />
+          </>
+        )}
+
+        {/* =======================
             ACTIVITY ERROR
         ======================= */}
 
@@ -296,24 +457,6 @@ function UserProfile() {
             {activityError}
           </div>
         )}
-
-        {/* =======================
-            PROFILE STATISTICS
-        ======================= */}
-
-        <ProfileStats stats={stats} />
-
-        {/* =======================
-            FAVOURITE GENRES
-        ======================= */}
-
-        <FavouriteGenres genres={favouriteGenres} onSave={handleSaveGenres} />
-
-        {/* =======================
-            FAVOURITE SPORTS
-        ======================= */}
-
-        <FavouriteSports sports={favouriteSports} onSave={handleSaveSports} />
 
         {/* =======================
             RECENTLY VIEWED
