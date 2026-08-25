@@ -55,9 +55,9 @@ function Login() {
   return (
     <div className="min-h-screen bg-[#0b0f14] text-white flex items-center justify-center px-5 py-10 relative overflow-hidden">
       {/* Background Glow */}
-      <div className="absolute -top-48 -left-48 w-[500px] h-[500px] bg-[#D4A017]/10 rounded-full blur-[120px]" />
+      <div className="absolute -top-48 -left-48 w-125 h-125 bg-[#D4A017]/10 rounded-full blur-[120px]" />
 
-      <div className="absolute -bottom-48 -right-48 w-[500px] h-[500px] bg-[#D4A017]/10 rounded-full blur-[120px]" />
+      <div className="absolute -bottom-48 -right-48 w-125 h-125 bg-[#D4A017]/10 rounded-full blur-[120px]" />
 
       <div className="relative w-full max-w-md">
         {/* Brand */}
