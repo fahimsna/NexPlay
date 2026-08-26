@@ -1,241 +1,295 @@
-import CompanyDashboardLayout from "../../layouts/CompanyDashboardLayout";
+import { useState } from "react";
 
-import { HiLockClosed, HiBell, HiTrash, HiUserCircle } from "react-icons/hi2";
+import {
+  HiUserCircle,
+  HiLockClosed,
+  HiBell,
+  HiBuildingOffice2,
+  HiCheck,
+} from "react-icons/hi2";
 
 function CompanySettings() {
+  const [activeTab, setActiveTab] = useState("profile");
+
+  const tabs = [
+    {
+      id: "profile",
+      name: "Profile Settings",
+      icon: <HiBuildingOffice2 size={22} />,
+    },
+    {
+      id: "account",
+      name: "Account Security",
+      icon: <HiLockClosed size={22} />,
+    },
+    {
+      id: "notification",
+      name: "Notifications",
+      icon: <HiBell size={22} />,
+    },
+  ];
+
   return (
-    <CompanyDashboardLayout>
-      <div className="space-y-8">
-        {/* Header */}
+    <div className="space-y-8">
+      {/* HEADER */}
 
-        <div>
-          <h1
-            className="
-              text-3xl
-              font-bold
-              text-white
-            "
-          >
-            Settings
-          </h1>
+      <div>
+        <h1
+          className="
+          text-3xl
+          md:text-4xl
+          font-bold
+          text-white
+          "
+        >
+          Settings
+        </h1>
 
-          <p
-            className="
-              text-gray-400
-              mt-2
-            "
-          >
-            Manage your company preferences and account settings
-          </p>
+        <p className="text-gray-400 mt-2">
+          Manage your company account preferences
+        </p>
+      </div>
+
+      {/* SETTINGS AREA */}
+
+      <div
+        className="
+        grid
+        grid-cols-1
+        lg:grid-cols-4
+        gap-6
+        "
+      >
+        {/* LEFT MENU */}
+
+        <div
+          className="
+          bg-[#393E46]
+          rounded-3xl
+          p-4
+          border
+          border-white/10
+          h-fit
+          "
+        >
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`
+              w-full
+              flex
+              items-center
+              gap-3
+              px-4
+              py-3
+              rounded-xl
+              mb-2
+              transition
+
+              ${
+                activeTab === tab.id
+                  ? "bg-[#D4A017] text-[#222831]"
+                  : "text-gray-300 hover:bg-white/5"
+              }
+
+              `}
+            >
+              {tab.icon}
+
+              <span>{tab.name}</span>
+            </button>
+          ))}
         </div>
 
-        {/* Account Settings */}
+        {/* RIGHT CONTENT */}
 
-        <section
+        <div
           className="
-            bg-[#1B1D22]
-            rounded-3xl
-            p-6
-            sm:p-8
-            border
-            border-white/5
+          lg:col-span-3
+          bg-[#393E46]
+          rounded-3xl
+          p-6
+          md:p-8
+          border
+          border-white/10
           "
         >
-          <div className="flex items-center gap-3 mb-6">
-            <HiUserCircle size={28} className="text-[#D4A017]" />
+          {/* PROFILE */}
 
-            <h2
-              className="
-                text-xl
-                font-bold
-                text-white
-              "
-            >
-              Account Settings
-            </h2>
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <label className="text-gray-400 text-sm">Company Email</label>
-
-              <input
-                type="email"
-                placeholder="company@email.com"
+          {activeTab === "profile" && (
+            <div className="space-y-6">
+              <h2
                 className="
-                  mt-2
-                  w-full
-                  bg-[#17191D]
-                  border
-                  border-white/10
-                  rounded-xl
-                  p-4
-                  text-white
-                  outline-none
+                text-xl
+                font-semibold
+                text-white
                 "
-              />
-            </div>
+              >
+                Company Profile
+              </h2>
 
-            <div>
-              <label className="text-gray-400 text-sm">Company Name</label>
+              <div className="space-y-4">
+                <Input label="Company Name" value="Your Company" />
 
-              <input
-                type="text"
-                placeholder="NexPlay Studios"
+                <Input label="Email" value="company@email.com" />
+
+                <Input label="Website" value="https://company.com" />
+              </div>
+
+              <button
                 className="
-                  mt-2
-                  w-full
-                  bg-[#17191D]
-                  border
-                  border-white/10
-                  rounded-xl
-                  p-4
-                  text-white
-                  outline-none
-                "
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* Security */}
-
-        <section
-          className="
-            bg-[#1B1D22]
-            rounded-3xl
-            p-6
-            sm:p-8
-            border
-            border-white/5
-          "
-        >
-          <div className="flex items-center gap-3 mb-6">
-            <HiLockClosed size={28} className="text-[#D4A017]" />
-
-            <h2
-              className="
-                text-xl
-                font-bold
-                text-white
-              "
-            >
-              Security
-            </h2>
-          </div>
-
-          <button
-            className="
-              bg-[#D4A017]
-              text-[#17191D]
-              px-6
-              py-3
-              rounded-xl
-              font-semibold
-            "
-          >
-            Change Password
-          </button>
-        </section>
-
-        {/* Notification */}
-
-        <section
-          className="
-            bg-[#1B1D22]
-            rounded-3xl
-            p-6
-            sm:p-8
-            border
-            border-white/5
-          "
-        >
-          <div className="flex items-center gap-3 mb-6">
-            <HiBell size={28} className="text-[#D4A017]" />
-
-            <h2
-              className="
-                text-xl
-                font-bold
-                text-white
-              "
-            >
-              Notifications
-            </h2>
-          </div>
-
-          <div
-            className="
               flex
-              justify-between
               items-center
-              bg-[#17191D]
-              p-4
-              rounded-xl
-            "
-          >
-            <div>
-              <p className="text-white font-semibold">Email Notifications</p>
-
-              <p className="text-gray-400 text-sm mt-1">
-                Receive updates about campaigns and content
-              </p>
-            </div>
-
-            <input
-              type="checkbox"
-              defaultChecked
-              className="
-                w-5
-                h-5
-                accent-[#D4A017]
-              "
-            />
-          </div>
-        </section>
-
-        {/* Danger Zone */}
-
-        <section
-          className="
-            bg-[#1B1D22]
-            rounded-3xl
-            p-6
-            sm:p-8
-            border
-            border-red-500/20
-          "
-        >
-          <div className="flex items-center gap-3 mb-6">
-            <HiTrash size={28} className="text-red-400" />
-
-            <h2
-              className="
-                text-xl
-                font-bold
-                text-white
-              "
-            >
-              Danger Zone
-            </h2>
-          </div>
-
-          <button
-            className="
-              bg-red-500/20
-              text-red-400
+              gap-2
               px-6
               py-3
-              rounded-xl
-              hover:bg-red-500/30
-              transition
-            "
-          >
-            Delete Company Profile
-          </button>
-        </section>
+              rounded-full
+              bg-[#D4A017]
+              text-[#222831]
+              font-semibold
+              "
+              >
+                <HiCheck />
+                Save Changes
+              </button>
+            </div>
+          )}
+
+          {/* SECURITY */}
+
+          {activeTab === "account" && (
+            <div className="space-y-6">
+              <h2
+                className="
+              text-xl
+              text-white
+              font-semibold
+              "
+              >
+                Change Password
+              </h2>
+
+              <Input label="Current Password" type="password" />
+
+              <Input label="New Password" type="password" />
+
+              <Input label="Confirm Password" type="password" />
+
+              <button
+                className="
+              px-6
+              py-3
+              rounded-full
+              bg-[#D4A017]
+              text-[#222831]
+              font-semibold
+              "
+              >
+                Update Password
+              </button>
+            </div>
+          )}
+
+          {/* NOTIFICATION */}
+
+          {activeTab === "notification" && (
+            <div>
+              <h2
+                className="
+              text-xl
+              text-white
+              font-semibold
+              "
+              >
+                Notification Preferences
+              </h2>
+
+              <div
+                className="
+              mt-6
+              space-y-4
+              "
+              >
+                <Toggle text="Campaign Approval Updates" />
+
+                <Toggle text="Advertisement Performance Reports" />
+
+                <Toggle text="System Notifications" />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </CompanyDashboardLayout>
+    </div>
+  );
+}
+
+function Input({ label, value = "", type = "text" }) {
+  return (
+    <div>
+      <label
+        className="
+text-sm
+text-gray-400
+"
+      >
+        {label}
+      </label>
+
+      <input
+        type={type}
+        defaultValue={value}
+        className="
+mt-2
+w-full
+px-4
+py-3
+rounded-xl
+
+bg-[#222831]
+
+border
+border-white/10
+
+text-white
+
+outline-none
+
+focus:border-[#D4A017]
+
+"
+      />
+    </div>
+  );
+}
+
+function Toggle({ text }) {
+  return (
+    <div
+      className="
+flex
+items-center
+justify-between
+
+bg-[#222831]
+
+p-4
+
+rounded-xl
+"
+    >
+      <span className="text-gray-300">{text}</span>
+
+      <input
+        type="checkbox"
+        className="
+w-5
+h-5
+accent-[#D4A017]
+"
+      />
+    </div>
   );
 }
 

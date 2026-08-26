@@ -1,0 +1,267 @@
+import { useEffect, useState } from "react";
+import { HiOutlinePencil, HiOutlineCheck } from "react-icons/hi2";
+
+const AVAILABLE_SPORTS = [
+  "Football",
+  "Basketball",
+  "Cricket",
+  "Tennis",
+  "Formula 1",
+  "Baseball",
+  "Ice Hockey",
+  "Golf",
+  "Boxing",
+  "MMA",
+  "Rugby",
+  "Volleyball",
+  "Badminton",
+  "Athletics",
+  "Cycling",
+  "Wrestling",
+];
+
+function FavouriteSports({ favouriteSports = [], onSave }) {
+  const [editing, setEditing] = useState(false);
+
+  const [selectedSports, setSelectedSports] = useState(favouriteSports);
+
+  // Keep local state synchronized with saved profile data
+  useEffect(() => {
+    setSelectedSports(Array.isArray(favouriteSports) ? favouriteSports : []);
+  }, [favouriteSports]);
+
+  const toggleSport = (sport) => {
+    setSelectedSports((current) => {
+      if (current.includes(sport)) {
+        return current.filter((item) => item !== sport);
+      }
+
+      return [...current, sport];
+    });
+  };
+
+  const handleSave = async () => {
+    try {
+      if (onSave) {
+        await onSave(selectedSports);
+      }
+
+      setEditing(false);
+    } catch (error) {
+      console.error("Failed to save favourite sports:", error);
+    }
+  };
+
+  const handleCancel = () => {
+    setSelectedSports(favouriteSports);
+    setEditing(false);
+  };
+
+  return (
+    <section className="mt-10">
+      {/* Header */}
+
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-white">Favourite Sports</h2>
+
+          <p className="mt-2 text-sm text-gray-400">
+            Select the sports you follow
+          </p>
+        </div>
+
+        {!editing && (
+          <button
+            type="button"
+            onClick={() => setEditing(true)}
+            className="
+              inline-flex
+              items-center
+              gap-2
+              px-4
+              py-2
+              rounded-full
+              bg-white/5
+              border
+              border-white/10
+              text-gray-300
+              hover:text-[#D4A017]
+              hover:border-[#D4A017]
+              transition
+            "
+          >
+            <HiOutlinePencil />
+            Edit
+          </button>
+        )}
+      </div>
+
+      {/* =========================
+          Edit Mode
+      ========================= */}
+
+      {editing ? (
+        <div
+          className="
+            mt-6
+            bg-[#24272D]
+            border
+            border-white/10
+            rounded-3xl
+            p-6
+          "
+        >
+          <p className="text-sm text-gray-400 mb-5">
+            Select the sports you follow. You can choose multiple sports.
+          </p>
+
+          <div className="flex flex-wrap gap-3">
+            {AVAILABLE_SPORTS.map((sport) => {
+              const selected = selectedSports.includes(sport);
+
+              return (
+                <button
+                  key={sport}
+                  type="button"
+                  onClick={() => toggleSport(sport)}
+                  className={`
+                    px-4
+                    py-2
+                    rounded-full
+                    border
+                    transition
+                    ${
+                      selected
+                        ? "bg-[#D4A017] border-[#D4A017] text-[#17191D] font-semibold"
+                        : "bg-[#17191D] border-white/10 text-gray-300 hover:border-[#D4A017] hover:text-[#D4A017]"
+                    }
+                  `}
+                >
+                  {sport}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Actions */}
+
+          <div className="flex flex-wrap gap-3 mt-7">
+            <button
+              type="button"
+              onClick={handleSave}
+              className="
+                inline-flex
+                items-center
+                gap-2
+                px-6
+                py-2.5
+                rounded-full
+                bg-[#D4A017]
+                text-[#17191D]
+                font-semibold
+                hover:scale-105
+                transition
+              "
+            >
+              <HiOutlineCheck />
+              Save Sports
+            </button>
+
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="
+                px-6
+                py-2.5
+                rounded-full
+                bg-white/5
+                border
+                border-white/10
+                text-gray-300
+                hover:border-white/20
+                transition
+              "
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        /* =========================
+           Display Mode
+        ========================= */
+
+        <div
+          className="
+            mt-6
+            bg-[#24272D]
+            border
+            border-white/10
+            rounded-3xl
+            p-6
+          "
+        >
+          {selectedSports.length > 0 ? (
+            <div className="flex flex-wrap gap-3">
+              {selectedSports.map((sport) => (
+                <span
+                  key={sport}
+                  className="
+                    px-4
+                    py-2
+                    rounded-full
+                    bg-[#17191D]
+                    border
+                    border-[#D4A017]/30
+                    text-[#D4A017]
+                    text-sm
+                  "
+                >
+                  {sport}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <div
+                className="
+                  mx-auto
+                  w-12
+                  h-12
+                  rounded-full
+                  bg-[#17191D]
+                  border
+                  border-white/10
+                  flex
+                  items-center
+                  justify-center
+                "
+              >
+                <HiOutlinePencil className="text-gray-500" />
+              </div>
+
+              <p className="mt-4 text-gray-400">
+                You haven't selected any favourite sports yet.
+              </p>
+
+              <button
+                type="button"
+                onClick={() => setEditing(true)}
+                className="
+                  mt-4
+                  text-sm
+                  text-[#D4A017]
+                  hover:underline
+                "
+              >
+                Choose your favourite sports
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
+
+export default FavouriteSports;

@@ -2,29 +2,34 @@ const express = require("express");
 
 const router = express.Router();
 
+const authMiddleware = require("../middleware/authMiddleware");
+const roleMiddleware = require("../middleware/roleMiddleware");
 const upload = require("../middleware/upload");
 
 const {
-  createCompany,
-  getCompanies,
-  getCompany,
-  updateCompany,
-  deleteCompany,
+  createMyCompany,
+  getMyCompany,
+  updateMyCompany,
 } = require("../controllers/companyController");
 
-// Create Company
-router.post("/", upload.single("logo"), createCompany);
+// CREATE COMPANY PROFILE
+router.post(
+  "/profile",
+  authMiddleware,
+  roleMiddleware("company"),
+  createMyCompany,
+);
 
-// Get All Companies
-router.get("/", getCompanies);
+// GET COMPANY PROFILE
+router.get("/profile", authMiddleware, roleMiddleware("company"), getMyCompany);
 
-// Get Single Company
-router.get("/:id", getCompany);
-
-// Update Company
-router.put("/:id", upload.single("logo"), updateCompany);
-
-// Delete Company
-router.delete("/:id", deleteCompany);
+// UPDATE COMPANY PROFILE WITH LOGO
+router.put(
+  "/profile",
+  authMiddleware,
+  roleMiddleware("company"),
+  upload.single("logo"),
+  updateMyCompany,
+);
 
 module.exports = router;

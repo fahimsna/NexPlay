@@ -1,20 +1,15 @@
-import Navbar from "../components/common/Navbar";
 import Hero from "../components/common/Hero";
-import Footer from "../components/common/Footer";
 import Browse from "./Browse";
+import FeaturedContent from "../components/discovery/FeaturedContent";
 
 function Home() {
   return (
     <>
-      <Navbar />
+      <Hero />
 
-      <main>
-        <Hero />
+      <FeaturedContent />
 
-        <Browse />
-      </main>
-
-      <Footer />
+      <Browse />
     </>
   );
 }

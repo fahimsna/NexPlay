@@ -186,7 +186,7 @@ text-gray-300
             >
               <HiGlobeAlt className="text-[#D4A017]" />
 
-              <span className="truncate max-w-[220px]">
+              <span className="truncate max-w-55">
                 {company.website || "No website"}
               </span>
             </div>

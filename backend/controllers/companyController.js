@@ -1,24 +1,39 @@
 const Company = require("../models/Company");
 
-// CREATE COMPANY
-const createCompany = async (req, res) => {
+// =====================================
+// CREATE COMPANY PROFILE
+// =====================================
+const createMyCompany = async (req, res) => {
   try {
-    const companyData = {
-      companyName: req.body.companyName,
-      website: req.body.website,
-      industry: req.body.industry,
-      description: req.body.description,
-    };
+    const existingCompany = await Company.findOne({
+      ownerId: req.user.id,
+    });
 
-    // Save uploaded logo path
-    if (req.file) {
-      companyData.logo = `/uploads/${req.file.filename}`;
+    if (existingCompany) {
+      return res.status(400).json({
+        message: "Company profile already exists",
+      });
     }
 
-    const company = await Company.create(companyData);
+    const company = await Company.create({
+      ownerId: req.user.id,
+
+      companyName: req.body.companyName,
+
+      description: req.body.description || "",
+
+      website: req.body.website || "",
+
+      industry: req.body.industry || "Entertainment",
+
+      location: req.body.location || "",
+
+      logo: "",
+    });
 
     res.status(201).json({
-      message: "Company created successfully",
+      message: "Company profile created",
+
       company,
     });
   } catch (error) {
@@ -28,31 +43,24 @@ const createCompany = async (req, res) => {
   }
 };
 
-// GET ALL COMPANIES
-const getCompanies = async (req, res) => {
+// =====================================
+// GET LOGGED-IN COMPANY PROFILE
+// =====================================
+const getMyCompany = async (req, res) => {
   try {
-    const companies = await Company.find();
-
-    res.status(200).json(companies);
-  } catch (error) {
-    res.status(500).json({
-      message: error.message,
+    const company = await Company.findOne({
+      ownerId: req.user.id,
     });
-  }
-};
-
-// GET SINGLE COMPANY
-const getCompany = async (req, res) => {
-  try {
-    const company = await Company.findById(req.params.id);
 
     if (!company) {
       return res.status(404).json({
-        message: "Company not found",
+        message: "Company profile not found",
       });
     }
 
-    res.status(200).json(company);
+    res.status(200).json({
+      company,
+    });
   } catch (error) {
     res.status(500).json({
       message: error.message,
@@ -60,55 +68,54 @@ const getCompany = async (req, res) => {
   }
 };
 
-// UPDATE COMPANY
-const updateCompany = async (req, res) => {
+// =====================================
+// UPDATE COMPANY PROFILE + LOGO
+// =====================================
+const updateMyCompany = async (req, res) => {
   try {
+    console.log("BODY:", req.body);
+
+    console.log("FILE:", req.file);
+
     const updateData = {
       companyName: req.body.companyName,
-      website: req.body.website,
-      industry: req.body.industry,
+
       description: req.body.description,
+
+      website: req.body.website,
+
+      industry: req.body.industry,
+
+      location: req.body.location,
     };
 
-    // Update logo if a new one is uploaded
+    // SAVE LOGO NAME
     if (req.file) {
-      updateData.logo = `/uploads/${req.file.filename}`;
+      updateData.logo = req.file.filename;
     }
 
-    const company = await Company.findByIdAndUpdate(req.params.id, updateData, {
-      new: true,
-    });
+    const company = await Company.findOneAndUpdate(
+      {
+        ownerId: req.user.id,
+      },
+
+      updateData,
+
+      {
+        new: true,
+      },
+    );
 
     if (!company) {
       return res.status(404).json({
-        message: "Company not found",
+        message: "Company profile not found",
       });
     }
 
     res.status(200).json({
-      message: "Company updated successfully",
+      message: "Company profile updated successfully",
+
       company,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
-  }
-};
-
-// DELETE COMPANY
-const deleteCompany = async (req, res) => {
-  try {
-    const company = await Company.findByIdAndDelete(req.params.id);
-
-    if (!company) {
-      return res.status(404).json({
-        message: "Company not found",
-      });
-    }
-
-    res.status(200).json({
-      message: "Company deleted successfully",
     });
   } catch (error) {
     res.status(500).json({
@@ -118,9 +125,9 @@ const deleteCompany = async (req, res) => {
 };
 
 module.exports = {
-  createCompany,
-  getCompanies,
-  getCompany,
-  updateCompany,
-  deleteCompany,
+  createMyCompany,
+
+  getMyCompany,
+
+  updateMyCompany,
 };

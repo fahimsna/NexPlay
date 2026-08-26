@@ -1,308 +1,234 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
-import CompanyDashboardLayout from "../../layouts/CompanyDashboardLayout";
-import "./AdvertisementManagement.css";
 
-const STORAGE_KEY = "nexplayAdvertisements";
+import AdvertisementCard from "../../components/company/advertisement/AdvertisementCard";
+import AdvertisementForm from "../../components/company/advertisement/AdvertisementForm";
+import AdvertisementStats from "../../components/company/advertisement/AdvertisementStats";
+import EmptyState from "../../components/company/advertisement/EmptyState";
 
-function getSavedAdvertisements() {
-  try {
-    const savedAdvertisements = localStorage.getItem(STORAGE_KEY);
+import {
+  getMyAdvertisements,
+  createAdvertisement,
+  updateAdvertisement,
+  deleteAdvertisement,
+} from "../../services/advertisementService";
 
-    if (savedAdvertisements) {
-      const parsedAdvertisements = JSON.parse(savedAdvertisements);
+import { HiPlus } from "react-icons/hi2";
 
-      return Array.isArray(parsedAdvertisements) ? parsedAdvertisements : [];
-    }
-  } catch (error) {
-    console.error("Could not read saved advertisements:", error);
-  }
+import toast from "react-hot-toast";
 
-  return [];
-}
+const IMAGE_URL = "http://localhost:8000/uploads/";
 
 function AdvertisementManagement() {
-  const location = useLocation();
+  const [advertisements, setAdvertisements] = useState([]);
 
-  const isManagementPage = location.pathname === "/company/advertisements";
+  const [loading, setLoading] = useState(true);
 
-  const [ads, setAds] = useState(getSavedAdvertisements);
+  const [saving, setSaving] = useState(false);
+
   const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState(null);
 
-  const [formData, setFormData] = useState({
-    title: "",
-    startDate: "",
-    endDate: "",
-    status: "Active",
-  });
+  const [editingAdvertisement, setEditingAdvertisement] = useState(null);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(ads));
+    fetchAdvertisements();
+  }, []);
 
-    window.dispatchEvent(new Event("dashboardDataChanged"));
-  }, [ads]);
+  const fetchAdvertisements = async () => {
+    try {
+      setLoading(true);
 
-  const handleInputChange = (event) => {
-    const { name, value } = event.target;
+      const data = await getMyAdvertisements();
 
-    setFormData((previousData) => ({
-      ...previousData,
-      [name]: value,
-    }));
+      const formatted = data.map((ad) => ({
+        ...ad,
+
+        image: ad.image ? IMAGE_URL + ad.image : "",
+      }));
+
+      setAdvertisements(formatted);
+    } catch (error) {
+      console.log(error);
+
+      toast.error("Failed to load advertisements");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const resetForm = () => {
-    setFormData({
-      title: "",
-      startDate: "",
-      endDate: "",
-      status: "Active",
-    });
+  const handleCreateClick = () => {
+    setEditingAdvertisement(null);
 
-    setEditingId(null);
-    setShowForm(false);
-  };
-
-  const openCreateForm = () => {
-    setFormData({
-      title: "",
-      startDate: "",
-      endDate: "",
-      status: "Active",
-    });
-
-    setEditingId(null);
     setShowForm(true);
   };
 
-  const saveAdvertisement = (event) => {
-    event.preventDefault();
+  const handleEditClick = (ad) => {
+    setEditingAdvertisement(ad);
 
-    if (editingId !== null) {
-      setAds((previousAds) =>
-        previousAds.map((ad) =>
-          ad.id === editingId
-            ? {
-                ...ad,
-                ...formData,
-              }
-            : ad,
-        ),
-      );
-    } else {
-      const newAdvertisement = {
-        id: Date.now(),
-        ...formData,
-      };
-
-      setAds((previousAds) => [...previousAds, newAdvertisement]);
-    }
-
-    resetForm();
-  };
-
-  const editAdvertisement = (ad) => {
-    setFormData({
-      title: ad.title,
-      startDate: ad.startDate,
-      endDate: ad.endDate,
-      status: ad.status,
-    });
-
-    setEditingId(ad.id);
     setShowForm(true);
   };
 
-  const deleteAdvertisement = (id) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this advertisement?",
-    );
+  const handleSubmit = async (data) => {
+    try {
+      setSaving(true);
 
-    if (!confirmed) {
-      return;
-    }
+      if (editingAdvertisement) {
+        await updateAdvertisement(editingAdvertisement._id, data);
 
-    setAds((previousAds) => previousAds.filter((ad) => ad.id !== id));
+        toast.success("Advertisement updated");
+      } else {
+        await createAdvertisement(data);
 
-    if (editingId === id) {
-      resetForm();
+        toast.success("Advertisement created");
+      }
+
+      setShowForm(false);
+
+      setEditingAdvertisement(null);
+
+      fetchAdvertisements();
+    } catch (error) {
+      console.log(error);
+
+      toast.error(error.response?.data?.message || "Something went wrong");
+    } finally {
+      setSaving(false);
     }
   };
 
-  const changeAdvertisementStatus = (id, newStatus) => {
-    setAds((previousAds) =>
-      previousAds.map((ad) =>
-        ad.id === id
-          ? {
-              ...ad,
-              status: newStatus,
-            }
-          : ad,
-      ),
-    );
+  const handleDelete = async (id) => {
+    try {
+      await deleteAdvertisement(id);
+
+      toast.success("Advertisement deleted");
+
+      fetchAdvertisements();
+    } catch (error) {
+      console.log(error);
+
+      toast.error("Delete failed");
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="text-white text-center py-20">
+        Loading advertisements...
+      </div>
+    );
+  }
 
   return (
-    <CompanyDashboardLayout>
-      <div className="advertisement-page">
-        <h1>Advertisement Management</h1>
+    <div className="w-full">
+      {/* HEADER */}
 
-        {/* Create button appears only from the sidebar page */}
-        {isManagementPage && (
-          <button
-            type="button"
-            className="create-ad-button"
-            onClick={() => {
-              if (showForm) {
-                resetForm();
-              } else {
-                openCreateForm();
-              }
-            }}
+      <div
+        className="
+flex
+flex-col
+sm:flex-row
+sm:items-center
+sm:justify-between
+gap-5
+mb-8
+"
+      >
+        <div>
+          <h1
+            className="
+text-2xl
+sm:text-3xl
+font-bold
+text-white
+"
           >
-            {showForm ? "Close Form" : "Create New Advertisement"}
-          </button>
-        )}
+            Advertisement Management
+          </h1>
 
-        {showForm && (
-          <form className="advertisement-form" onSubmit={saveAdvertisement}>
-            <h2>
-              {editingId !== null
-                ? "Edit Advertisement"
-                : "Create Advertisement"}
-            </h2>
-
-            <label htmlFor="title">Advertisement Title</label>
-
-            <input
-              id="title"
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleInputChange}
-              placeholder="Enter advertisement title"
-              required
-            />
-
-            <label htmlFor="startDate">Start Date</label>
-
-            <input
-              id="startDate"
-              type="date"
-              name="startDate"
-              value={formData.startDate}
-              onChange={handleInputChange}
-              required
-            />
-
-            <label htmlFor="endDate">End Date</label>
-
-            <input
-              id="endDate"
-              type="date"
-              name="endDate"
-              value={formData.endDate}
-              onChange={handleInputChange}
-              required
-            />
-
-            <label htmlFor="status">Status</label>
-
-            <select
-              id="status"
-              name="status"
-              value={formData.status}
-              onChange={handleInputChange}
-            >
-              <option value="Active">Active</option>
-              <option value="Scheduled">Scheduled</option>
-              <option value="Paused">Paused</option>
-              <option value="Inactive">Inactive</option>
-              <option value="Ended">Ended</option>
-            </select>
-
-            <button type="submit" className="save-ad-button">
-              {editingId !== null
-                ? "Update Advertisement"
-                : "Save Advertisement"}
-            </button>
-          </form>
-        )}
-
-        <div className="advertisement-list">
-          {ads.length === 0 ? (
-            <p>No advertisements created yet.</p>
-          ) : (
-            ads.map((ad) => (
-              <div className="advertisement-card" key={ad.id}>
-                <h2>{ad.title}</h2>
-
-                <p>
-                  <strong>Start Date:</strong> {ad.startDate}
-                </p>
-
-                <p>
-                  <strong>End Date:</strong> {ad.endDate}
-                </p>
-
-                <p>
-                  <strong>Status:</strong> {ad.status}
-                </p>
-
-                <div className="action-buttons">
-                  {ad.status !== "Active" && (
-                    <button
-                      type="button"
-                      className="edit-button"
-                      onClick={() => changeAdvertisementStatus(ad.id, "Active")}
-                    >
-                      Start
-                    </button>
-                  )}
-
-                  {ad.status === "Active" && (
-                    <button
-                      type="button"
-                      className="edit-button"
-                      onClick={() => changeAdvertisementStatus(ad.id, "Paused")}
-                    >
-                      Pause
-                    </button>
-                  )}
-
-                  {ad.status !== "Ended" && (
-                    <button
-                      type="button"
-                      className="delete-button"
-                      onClick={() => changeAdvertisementStatus(ad.id, "Ended")}
-                    >
-                      End
-                    </button>
-                  )}
-
-                  <button
-                    type="button"
-                    className="edit-button"
-                    onClick={() => editAdvertisement(ad)}
-                  >
-                    Edit
-                  </button>
-
-                  <button
-                    type="button"
-                    className="delete-button"
-                    onClick={() => deleteAdvertisement(ad.id)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
+          <p
+            className="
+text-gray-400
+mt-2
+text-sm
+sm:text-base
+"
+          >
+            Create and manage advertisements
+          </p>
         </div>
+
+        <button
+          onClick={handleCreateClick}
+          className="
+bg-[#D4A017]
+text-black
+px-5
+py-3
+rounded-xl
+font-bold
+flex
+items-center
+justify-center
+gap-2
+w-full
+sm:w-auto
+"
+        >
+          <HiPlus size={22} />
+          New Advertisement
+        </button>
       </div>
-    </CompanyDashboardLayout>
+
+      {/* STATS */}
+
+      <AdvertisementStats advertisements={advertisements} />
+
+      {/* FORM */}
+
+      {showForm && (
+        <div className="mt-8">
+          <AdvertisementForm
+            initialData={editingAdvertisement}
+            onSubmit={handleSubmit}
+            onCancel={() => {
+              setShowForm(false);
+
+              setEditingAdvertisement(null);
+            }}
+            loading={saving}
+          />
+        </div>
+      )}
+
+      {/* EMPTY */}
+
+      {!showForm && advertisements.length === 0 && (
+        <EmptyState onCreate={handleCreateClick} />
+      )}
+
+      {/* CARDS */}
+
+      {advertisements.length > 0 && (
+        <div
+          className="
+grid
+grid-cols-1
+sm:grid-cols-2
+xl:grid-cols-3
+gap-5
+mt-8
+"
+        >
+          {advertisements.map((ad) => (
+            <AdvertisementCard
+              key={ad._id}
+              advertisement={ad}
+              onEdit={handleEditClick}
+              onDelete={handleDelete}
+            />
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
