@@ -1,4 +1,6 @@
+import LiveVisitor from "../../components/LiveVisitor";
 import { useEffect, useState } from "react";
+
 
 import UserProfileCard from "../../components/user/UserProfileCard";
 
@@ -16,6 +18,10 @@ import {
   getRecentActivity,
   getActivityHistory,
 } from "../../services/activityService";
+
+import {
+  getUserEngagement,
+} from "../../services/engagementService";
 
 import {
   getUserProfile,
@@ -64,6 +70,14 @@ function UserProfile() {
   const [activityLoading, setActivityLoading] = useState(true);
 
   const [activityError, setActivityError] = useState("");
+
+  // =======================
+  // Engagement / XP State
+  // =======================
+
+  const [engagement, setEngagement] = useState(null);
+
+  const [engagementLoading, setEngagementLoading] = useState(true);
 
   // =======================
   // Favourite Genres
@@ -220,6 +234,57 @@ function UserProfile() {
 
     loadActivity();
   }, []);
+
+  // =======================
+  // Load Engagement Data
+  // =======================
+
+  useEffect(() => {
+    if (!user && !initialUser) {
+      setEngagementLoading(false);
+      return;
+    }
+
+    loadEngagement();
+  }, [user]);
+
+  async function loadEngagement() {
+    try {
+      setEngagementLoading(true);
+
+      console.log("Loading current user engagement...");
+
+      const currentUser = user || initialUser;
+
+      console.log("CURRENT USER:", currentUser);
+
+      const userId = currentUser?._id || currentUser?.id;
+
+      console.log("ENGAGEMENT USER ID:", userId);
+
+      if (!userId) {
+        console.error("No user id found for engagement");
+        setEngagement(null);
+        return;
+      }
+
+      const data = await getUserEngagement(userId);
+
+      console.log("ENGAGEMENT RESPONSE:", data);
+
+      setEngagement(data);
+
+    } catch (error) {
+      console.error(
+        "Failed to load engagement:",
+        error?.response?.data || error.message
+      );
+
+      setEngagement(null);
+    } finally {
+      setEngagementLoading(false);
+    }
+  }
 
   async function loadActivity() {
     try {
@@ -659,6 +724,67 @@ function UserProfile() {
             PROFILE STATISTICS
         ======================= */}
 
+        {/* =======================
+            XP & LEVEL PROGRESS
+        ======================= */}
+
+        <section
+          className="
+            bg-[#24272D]
+            border
+            border-white/10
+            rounded-3xl
+            p-6
+            sm:p-8
+          "
+        >
+          <div>
+            <p className="text-[#D4A017] text-sm font-semibold uppercase tracking-wider">
+              Achievement
+            </p>
+
+            <h2 className="text-2xl sm:text-3xl font-black mt-1">
+              XP & Level Progress
+            </h2>
+          </div>
+
+          {engagementLoading ? (
+            <p className="text-gray-400 mt-5">Loading progress...</p>
+          ) : engagement ? (
+            <div className="grid sm:grid-cols-4 gap-5 mt-6">
+              <div className="bg-[#17191D] rounded-2xl p-5">
+                <p className="text-gray-400 text-sm">Level</p>
+                <h3 className="text-3xl font-black text-[#D4A017] mt-2">
+                  {engagement.level}
+                </h3>
+              </div>
+
+              <div className="bg-[#17191D] rounded-2xl p-5">
+                <p className="text-gray-400 text-sm">XP</p>
+                <h3 className="text-3xl font-black mt-2">
+                  {engagement.xp}
+                </h3>
+              </div>
+
+              <div className="bg-[#17191D] rounded-2xl p-5">
+                <p className="text-gray-400 text-sm">Activities</p>
+                <h3 className="text-3xl font-black mt-2">
+                  {engagement.totalActivities}
+                </h3>
+              </div>
+
+              <div className="bg-[#17191D] rounded-2xl p-5">
+                <p className="text-gray-400 text-sm">Score</p>
+                <h3 className="text-3xl font-black mt-2">
+                  {engagement.engagementScore}
+                </h3>
+              </div>
+            </div>
+          ) : (
+            <p className="text-gray-400 mt-5">No engagement data found. Check console for engagement API response.</p>
+          )}
+        </section>
+
         <ProfileStats stats={stats} />
 
         {/* =======================
@@ -776,7 +902,11 @@ function UserProfile() {
             </div>
           </section>
         ) : (
-          <ActivityHistory activities={activities} />
+          <>
+
+             <LiveVisitor />
+             <ActivityHistory activities={activities} />
+          </>
         )}
       </div>
     </main>
@@ -784,3 +914,4 @@ function UserProfile() {
 }
 
 export default UserProfile;
+

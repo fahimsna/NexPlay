@@ -78,10 +78,11 @@ function Details() {
 
         try {
           await recordActivity({
+            userId: "6a8d06dbec780e2f4e2ddbe5",
+            activityType: "watch",
             contentId: movieData.id,
             contentType: "movie",
             title: movieData.title,
-            posterPath: movieData.poster_path,
 
             metadata: {
               releaseDate: movieData.release_date,
