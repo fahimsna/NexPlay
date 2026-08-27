@@ -15,7 +15,6 @@ import TopRated from "../pages/TopRated";
 import UserProfile from "../pages/user/UserProfile";
 import SearchResults from "../pages/SearchResults";
 import Notifications from "../pages/Notifications";
-import ActivityHistory from "../pages/ActivityHistory";
 
 import CompanySettings from "../pages/company/CompanySettings";
 
@@ -113,16 +112,6 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <UserProfile />
-            </ProtectedRoute>
-          }
-        />
-
-
-        <Route
-          path="/activity-history"
-          element={
-            <ProtectedRoute>
-              <ActivityHistory />
             </ProtectedRoute>
           }
         />

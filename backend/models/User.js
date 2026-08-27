@@ -1,378 +1,216 @@
 const mongoose = require("mongoose");
 
-
 const userSchema = new mongoose.Schema(
+  {
+    fullName: {
+      type: String,
+      required: [true, "Full name is required"],
+      trim: true,
+    },
 
-{
-  // =======================
-  // Basic Information
-  // =======================
+    username: {
+      type: String,
+      required: [true, "Username is required"],
+      unique: true,
+      trim: true,
+    },
 
-  fullName: {
-    type: String,
-    required: [true, "Full name is required"],
-    trim: true,
-  },
+    email: {
+      type: String,
+      required: [true, "Email is required"],
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
 
+    password: {
+      type: String,
+      required: [true, "Password is required"],
+    },
 
-  username: {
-    type: String,
-    required: [true, "Username is required"],
-    unique: true,
-    trim: true,
-  },
-
-
-  email: {
-    type: String,
-    required: [true, "Email is required"],
-    unique: true,
-    lowercase: true,
-    trim: true,
-  },
-
-
-  password: {
-    type: String,
-    required: [true, "Password is required"],
-  },
+    role: {
+      type: String,
+      enum: ["admin", "company", "user"],
+      default: "user",
+    },
 
 
-  role: {
-    type: String,
-    enum: [
-      "admin",
-      "company",
-      "user"
-    ],
-    default: "user",
-  },
+    // =======================
+    // Sprint 2
+    // Favourite Genres
+    // =======================
+
+    favouriteGenres: {
+      type: [String],
+      default: [],
+    },
 
 
+    // =======================
+    // Sprint 3
+    // Favourite Sports
+    // =======================
 
-  // =======================
-  // Favourite Genres
-  // =======================
-
-  favouriteGenres: {
-
-    type: [String],
-
-    default: [],
-
-  },
+    favouriteSports: {
+      type: [String],
+      default: [],
+    },
 
 
+    // =======================
+    // Sprint 3
+    // Favourite Teams
+    // =======================
 
-  // =======================
-  // Favourite Sports
-  // =======================
-
-  favouriteSports: {
-
-    type: [String],
-
-    default: [],
-
-  },
+    favouriteTeams: {
+      type: [String],
+      default: [],
+    },
 
 
+    // =======================
+    // Sprint 3
+    // Favourite Tournaments
+    // =======================
 
-  // =======================
-  // Favourite Teams
-  // =======================
-
-  favouriteTeams: {
-
-    type: [String],
-
-    default: [],
-
-  },
+    favouriteTournaments: {
+      type: [String],
+      default: [],
+    },
 
 
+    // =======================
+    // Sprint 3
+    // Match Reminders
+    // =======================
 
-  // =======================
-  // Favourite Tournaments
-  // =======================
+    matchReminders: [
+      {
+        matchId: {
+          type: String,
+        },
 
-  favouriteTournaments: {
+        matchName: {
+          type: String,
+        },
 
-    type: [String],
-
-    default: [],
-
-  },
-
-
-
-  // =======================
-  // Match Reminders
-  // =======================
-
-  matchReminders: [
-
-    {
-
-      matchId: {
-        type: String,
+        reminderTime: {
+          type: Date,
+        },
       },
-
-
-      matchName: {
-        type: String,
-      },
-
-
-      reminderTime: {
-        type: Date,
-      },
-
-    }
-
-  ],
-
-
-
-  // =======================
-  // Watchlist
-  // =======================
-
-  watchlist: [
-
-    {
-
-      tmdbId: {
-
-        type: Number,
-
-        required: true,
-
-      },
-
-
-      title: {
-
-        type: String,
-
-        required: true,
-
-      },
-
-
-      posterPath: {
-
-        type: String,
-
-        default: null,
-
-      },
-
-
-      backdropPath: {
-
-        type: String,
-
-        default: null,
-
-      },
-
-
-      overview: {
-
-        type: String,
-
-        default: "",
-
-      },
-
-
-      releaseDate: {
-
-        type: String,
-
-        default: "",
-
-      },
-
-
-      rating: {
-
-        type: Number,
-
-        default: 0,
-
-      },
-
-
-      contentType: {
-
-        type: String,
-
-        enum: [
-          "movie",
-          "tv"
-        ],
-
-        default: "movie",
-
-      },
-
-
-      addedAt: {
-
-        type: Date,
-
-        default: Date.now,
-
-      },
-
-
-    }
-
-  ],
-  // =======================
-  // Activity Points
-  // =======================
-
-  activityPoints: {
-
-    type: Number,
-
-    default: 0,
-
-  },
-
-
-
-  // =======================
-  // User Level
-  // =======================
-
-  level: {
-
-    type: String,
-
-    enum: [
-
-      "Bronze",
-
-      "Silver",
-
-      "Gold",
-
-      "Platinum"
-
     ],
 
-    default: "Bronze",
+
+    // =======================
+    // Sprint 4
+    // Watchlist
+    // =======================
+
+    watchlist: [
+      {
+        tmdbId: {
+          type: Number,
+          required: true,
+        },
+
+        title: {
+          type: String,
+          required: true,
+        },
+
+        posterPath: {
+          type: String,
+          default: null,
+        },
+
+        backdropPath: {
+          type: String,
+          default: null,
+        },
+
+        overview: {
+          type: String,
+          default: "",
+        },
+
+        releaseDate: {
+          type: String,
+          default: "",
+        },
+
+        rating: {
+          type: Number,
+          default: 0,
+        },
+
+        contentType: {
+          type: String,
+          enum: ["movie", "tv"],
+          default: "movie",
+        },
+
+        addedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+
+
+    // =======================
+    // Sprint 4
+    // Activity Points
+    // =======================
+
+    activityPoints: {
+      type: Number,
+      default: 0,
+    },
+
+
+    // =======================
+    // Sprint 4
+    // User Level
+    // =======================
+
+    level: {
+      type: String,
+      enum: [
+        "Bronze",
+        "Silver",
+        "Gold",
+        "Platinum"
+      ],
+      default: "Bronze",
+    },
+
+
+    // =======================
+    // Sprint 4
+    // Achievement Badges
+    // =======================
+
+    badges: {
+      type: [String],
+      default: [],
+    },
+
+
+    // =======================
+    // Sprint 4
+    // Notification Settings
+    // =======================
+
+    notificationsEnabled: {
+      type: Boolean,
+      default: true,
+    },
 
   },
-
-
-
-  // =======================
-  // Achievement Badges
-  // =======================
-
-  badges: {
-
-    type: [String],
-
-    default: [],
-
-  },
-
-
-
-  // =======================
-  // Notification Settings
-  // =======================
-
-  notificationsEnabled: {
-
-    type: Boolean,
-
-    default: true,
-
-  },
-
-
-
-  // =======================
-  // Referral System (Fixed)
-  // =======================
-
-
-  referralCode: {
-
-    type: String,
-
-    unique: true,
-
-    sparse: true,
-
-    default: null,
-
-  },
-
-
-
-  referredBy: {
-
-    type: mongoose.Schema.Types.ObjectId,
-
-    ref: "User",
-
-    default: null,
-
-  },
-
-
-
-  referrals: [
-
-    {
-
-      type: mongoose.Schema.Types.ObjectId,
-
-      ref: "User",
-
-    }
-
-  ],
-
-
-
-  referralCount: {
-
-    type: Number,
-
-    default: 0,
-
-  },
-
-
-},
-
-{
-
-
-  timestamps: true,
-
-
-}
-
+  {
+    timestamps: true,
+  }
 );
 
 
-
-
-
-module.exports = mongoose.model(
-
-  "User",
-
-  userSchema
-
-);
+module.exports = mongoose.model("User", userSchema);
