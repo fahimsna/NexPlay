@@ -9,9 +9,9 @@ import Watchlist from "../pages/Watchlist";
 import About from "../pages/About";
 import Contact from "../pages/Contact";
 import Partner from "../pages/Partner";
-<<<<<<< HEAD
+
 import UpcomingContent from "../pages/UpcomingContent";
-=======
+
 import Advertise from "../pages/Advertise";
 import UpcomingReleaseCalendar from "../pages/UpcomingReleaseCalendar";
 import TopRated from "../pages/TopRated";
@@ -20,14 +20,14 @@ import SearchResults from "../pages/SearchResults";
 import Notifications from "../pages/Notifications";
 
 import CompanySettings from "../pages/company/CompanySettings";
->>>>>>> dev
+
 
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 
 import CompanyDashboard from "../pages/company/CompanyDashboard";
 import CompanyProfile from "../pages/company/CompanyProfile";
-<<<<<<< HEAD
+
 import CompanySettings from "../pages/company/CompanySettings";
 import CampaignManagement from "../pages/company/CampaignManagement";
 import AdvertisementManagement from "../pages/company/AdvertisementManagement";
@@ -74,7 +74,7 @@ function AppRoutes() {
         </Route>
       </Routes>
     </BrowserRouter>
-=======
+
 import AdvertisementManagement from "../pages/company/AdvertisementManagement";
 import CampaignManagement from "../pages/company/CampaignManagement";
 import CompanyAnalytics from "../pages/company/CompanyAnalytics";
@@ -104,9 +104,9 @@ import MyReviews from "../pages/user/MyReviews";
 function AppRoutes() {
   return (
     <Routes>
-      {/* =======================
+      {/* ==
           PUBLIC WEBSITE
-      ======================= */}
+      == */}
 
       <Route element={<PublicLayout />}>
         <Route path="/" element={<Home />} />
@@ -179,17 +179,17 @@ function AppRoutes() {
         />
       </Route>
 
-      {/* =======================
+      {/* ==
           AUTH
-      ======================= */}
+      == */}
 
       <Route path="/login" element={<Login />} />
 
       <Route path="/register" element={<Register />} />
 
-      {/* =======================
+      {/* ==
           COMPANY DASHBOARD
-      ======================= */}
+      == */}
 
       <Route
         path="/company"
@@ -216,10 +216,10 @@ function AppRoutes() {
         <Route path="content" element={<CompanyUpcomingContent />} />
       </Route>
 
-      {/* =======================
+      {/* ==
           ADMIN DASHBOARD
           Sprint 1
-      ======================= */}
+      == */}
 
       <Route
         path="/admin"
@@ -239,7 +239,7 @@ function AppRoutes() {
         <Route path="discussion-moderation" element={<CommentModeration />} />
       </Route>
     </Routes>
->>>>>>> dev
+
   );
 }
 
