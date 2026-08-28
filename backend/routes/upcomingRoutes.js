@@ -1,26 +1,4 @@
 const express = require("express");
-<<<<<<< HEAD
-const router = express.Router();
-
-const {
-  getUpcomingContent,
-  addUpcomingContent,
-  updateUpcomingContent,
-  deleteUpcomingContent,
-} = require("../controllers/upcomingController");
-
-// Get all upcoming content
-router.get("/", getUpcomingContent);
-
-// Add new upcoming content
-router.post("/", addUpcomingContent);
-
-// Update content
-router.put("/:id", updateUpcomingContent);
-
-// Delete content
-router.delete("/:id", deleteUpcomingContent);
-=======
 
 const router = express.Router();
 
@@ -36,48 +14,56 @@ const {
   deleteUpcoming,
 } = require("../controllers/upcomingController");
 
+
 // =======================
 // COMPANY
 // =======================
 
-// Get upcoming releases created by the logged-in company
+// Get upcoming releases created by logged-in company
 router.get(
   "/my",
   authMiddleware,
   roleMiddleware(ROLES.COMPANY),
-  getMyUpcoming,
+  getMyUpcoming
 );
 
-// Create an upcoming release
+
+// Create upcoming release
 router.post(
   "/",
   authMiddleware,
   roleMiddleware(ROLES.COMPANY),
-  createUpcoming,
+  createUpcoming
 );
 
-// Update an upcoming release
+
+// Update upcoming release
 router.put(
   "/:id",
   authMiddleware,
   roleMiddleware(ROLES.COMPANY),
-  updateUpcoming,
+  updateUpcoming
 );
 
-// Delete an upcoming release
+
+// Delete upcoming release
 router.delete(
   "/:id",
   authMiddleware,
   roleMiddleware(ROLES.COMPANY),
-  deleteUpcoming,
+  deleteUpcoming
 );
+
 
 // =======================
 // PUBLIC
 // =======================
 
 // Get all upcoming releases
-router.get("/", getUpcoming);
->>>>>>> dev
+router.get(
+  "/",
+  getUpcoming
+);
+
 
 module.exports = router;

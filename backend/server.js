@@ -1,4 +1,7 @@
 const express = require("express");
+const dns = require("dns");
+
+dns.setDefaultResultOrder("ipv4first");
 console.log("MY SERVER FILE RUNNING");
 
 const dotenv = require("dotenv");
@@ -7,31 +10,17 @@ const path = require("path");
 const http = require("http");
 const { Server } = require("socket.io");
 
-
-// =======================
-// LOAD ENV
-// =======================
-
-// Load environment variables
 dotenv.config();
 
 console.log("SERVER FILE:", __filename);
 console.log("CURRENT MONGO URI:", process.env.MONGO_URI);
 
 
-
-// =======================
 // DATABASE
-// =======================
-
 const connectDB = require("./config/db");
 
 
-
-// =======================
-// ROUTES IMPORT
-// =======================
-
+// ROUTES
 const settingsRoutes = require("./routes/settingsRoutes");
 const sportsRoutes = require("./routes/sportsRoutes");
 const activityRoutes = require("./routes/activityRoutes");
@@ -53,448 +42,196 @@ const commentRoutes = require("./routes/commentRoutes");
 const userRoutes = require("./routes/userRoutes");
 const watchlistRoutes = require("./routes/watchlistRoutes");
 
-
-// NEW FEATURE
-
 const engagementRoutes = require("./routes/engagementRoutes");
 
 console.log("ENGAGEMENT ROUTE LOADED");
 
 
-
-// =======================
 // APP
-// =======================
 
 const app = express();
 
 
-
-// =======================
-// DATABASE CONNECT
-// =======================
-
-connectDB();
+// DATABASE
 
 
 
-// =======================
+
 // MIDDLEWARE
-// =======================
-
 
 app.use(
-
-cors({
-
-origin:[
-
-"http://localhost:5173",
-
-"http://localhost:5174"
-
-],
-
-credentials:true,
-
-})
-
+    cors({
+        origin:[
+            "http://localhost:5173",
+            "http://localhost:5174"
+        ],
+        credentials:true
+    })
 );
-
 
 
 app.use(express.json());
 
+app.use(
+    express.urlencoded({
+        extended:true
+    })
+);
 
-<<<<<<< HEAD
-// Routes
-const companyRoutes = require("./routes/companyRoutes");
-const upcomingRoutes = require("./routes/upcomingRoutes");
+
+// STATIC FILES
+
+app.use(
+    "/uploads",
+    express.static(
+        path.join(__dirname,"uploads")
+    )
+);
+
+
+// API ROUTES
+
+app.use("/api/auth", authRoutes);
 
 app.use("/api/company", companyRoutes);
+
+app.use("/api/advertisements", advertisementRoutes);
+
+app.use("/api/campaigns", campaignRoutes);
+
+app.use("/api/dashboard", dashboardRoutes);
+
+app.use("/api/analytics", analyticsRoutes);
+
 app.use("/api/upcoming", upcomingRoutes);
-=======
-app.use(
 
-express.urlencoded({
+app.use("/api/settings", settingsRoutes);
 
-extended:true,
+app.use("/api/sports", sportsRoutes);
 
-})
+app.use("/api/admin", adminRoutes);
 
-);
+app.use("/api/reviews", reviewRoutes);
 
+app.use("/api/featured-content", featuredContentRoutes);
 
+app.use("/api/streaming-platforms", streamingPlatformRoutes);
 
-// =======================
-// STATIC FILES
-// =======================
+app.use("/api/streaming-availability", streamingAvailabilityRoutes);
 
+app.use("/api/comments", commentRoutes);
 
-app.use(
 
-"/uploads",
+// Sprint 4
 
-express.static(
+app.use("/api/activity", activityRoutes);
 
-path.join(__dirname,"uploads")
+app.use("/api/users", userRoutes);
 
-)
+app.use("/api/watchlist", watchlistRoutes);
 
-);
 
+// Engagement Feature
 
+app.use("/api/engagement", engagementRoutes);
 
-// =======================
-// API ROUTES
-// =======================
 
-
-app.use(
-
-"/api/auth",
-
-authRoutes
-
-);
-
-
-app.use(
-
-"/api/company",
-
-companyRoutes
-
-);
-
-
-app.use(
-
-"/api/advertisements",
-
-advertisementRoutes
-
-);
-
-
-app.use(
-
-"/api/campaigns",
-
-campaignRoutes
-
-);
-
-
-app.use(
-
-"/api/dashboard",
-
-dashboardRoutes
-
-);
-
-
-app.use(
-
-"/api/analytics",
-
-analyticsRoutes
-
-);
-
-
-app.use(
-
-"/api/upcoming",
-
-upcomingRoutes
-
-);
-
-
-app.use(
-
-"/api/settings",
-
-settingsRoutes
-
-);
-
-
-app.use(
-
-"/api/sports",
-
-sportsRoutes
-
-);
-
-
-app.use(
-
-"/api/admin",
-
-adminRoutes
-
-);
-
-
-app.use(
-
-"/api/reviews",
-
-reviewRoutes
-
-);
-// =======================
-// CONTINUE API ROUTES
-// =======================
-
-
-app.use(
-
-"/api/featured-content",
-
-featuredContentRoutes
-
-);
-
-
-app.use(
-
-"/api/streaming-platforms",
-
-streamingPlatformRoutes
-
-);
-
-
-app.use(
-
-"/api/streaming-availability",
-
-streamingAvailabilityRoutes
-
-);
-
-
-app.use(
-
-"/api/comments",
-
-commentRoutes
-
-);
-
-
-
-
-// =======================
-// SPRINT 4 ROUTES
-// =======================
-
-
-app.use(
-
-"/api/activity",
-
-activityRoutes
-
-);
-
-
-app.use(
-
-"/api/users",
-
-userRoutes
-
-);
-
-
-app.use(
-
-"/api/watchlist",
-
-watchlistRoutes
-
-);
-
-
-
-
-// =======================
-// USER ENGAGEMENT SYSTEM
-// =======================
-
-
-app.use(
-
-"/api/engagement",
-
-engagementRoutes
-
-);
-
-
-
-
-// =======================
 // ROOT
-// =======================
-
 
 app.get("/",(req,res)=>{
-
-
-res.send(
-
-"NexPlay Backend Running"
-
-);
-
->>>>>>> dev
-
+    res.send("NexPlay Backend Running");
 });
 
 
-
-
-
-// =======================
-// SOCKET.IO LIVE VISITOR
-// =======================
-
+// SERVER + SOCKET.IO
 
 const server = http.createServer(app);
 
 
-
 const io = new Server(server,{
-
-cors:{
-
-origin:[
-
-"http://localhost:5173",
-
-"http://localhost:5174"
-
-],
-
-credentials:true
-
-}
-
+    cors:{
+        origin:[
+            "http://localhost:5173",
+            "http://localhost:5174"
+        ],
+        credentials:true
+    }
 });
-
-
-
 
 
 const visitors = new Set();
 
 
-
-
-
 io.on("connection",(socket)=>{
 
+    visitors.add(socket.id);
 
-visitors.add(socket.id);
-
-
-
-console.log(
-
-"Visitor Connected:",
-
-socket.id
-
-);
+    console.log(
+        "Visitor Connected:",
+        socket.id
+    );
 
 
+    io.emit(
+        "visitorCount",
+        visitors.size
+    );
 
-io.emit(
 
-"visitorCount",
+    socket.on("getVisitorCount",()=>{
 
-visitors.size
+        socket.emit(
+            "visitorCount",
+            visitors.size
+        );
 
-);
-socket.on("getVisitorCount",()=>{
-
-  socket.emit(
-    "visitorCount",
-    visitors.size
-  );
-
-});
+    });
 
 
 
+    socket.on("disconnect",()=>{
+
+        visitors.delete(socket.id);
 
 
-socket.on("disconnect",()=>{
+        console.log(
+            "Visitor Disconnected:",
+            socket.id
+        );
 
 
-visitors.delete(socket.id);
+        io.emit(
+            "visitorCount",
+            visitors.size
+        );
 
-
-
-console.log(
-
-"Visitor Disconnected:",
-
-socket.id
-
-);
-
-
-
-io.emit(
-
-"visitorCount",
-
-visitors.size
-
-);
-
+    });
 
 
 });
 
 
-});
-
-
-
-
-
-
-// =======================
-// SERVER START
-// =======================
-
+// START SERVER
 
 const PORT = process.env.PORT || 8000;
 
-<<<<<<< HEAD
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-=======
+connectDB()
+.then(()=>{
 
+    server.listen(PORT,()=>{
 
-server.listen(PORT,()=>{
+        console.log(
+            `Server running on port ${PORT}`
+        );
 
+    });
 
-console.log(
+})
+.catch((error)=>{
 
-`Server running on port ${PORT}`
+    console.log(
+        "Database connection failed:",
+        error.message
+    );
 
-);
-
-
->>>>>>> dev
 });

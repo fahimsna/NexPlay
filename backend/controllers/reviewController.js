@@ -1,3 +1,4 @@
+const addEngagement = require("../services/engagementService");
 const Review = require("../models/Review");
 
 /*
@@ -51,6 +52,7 @@ const createReview = async (req, res) => {
       rating,
       comment: comment || "",
     });
+    await addEngagement(userId,"review");
 
     res.status(201).json({
       message: "Review submitted",

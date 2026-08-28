@@ -1,6 +1,88 @@
 const mongoose = require("mongoose");
 
 
+// =====================================
+// REWARD SCHEMA
+// =====================================
+
+const rewardSchema = new mongoose.Schema(
+{
+  rewardId: {
+
+    type: String,
+
+    required: true,
+
+  },
+
+
+  name: {
+
+    type: String,
+
+    required: true,
+
+  },
+
+
+  requiredCoins: {
+
+    type: Number,
+
+    required: true,
+
+  },
+
+
+  unlocked: {
+
+    type: Boolean,
+
+    default: false,
+
+  },
+
+
+  claimed: {
+
+    type: Boolean,
+
+    default: false,
+
+  },
+
+
+  claimedAt: {
+
+    type: Date,
+
+    default: null,
+
+  },
+
+
+  unlockedAt: {
+
+    type: Date,
+
+    default: null,
+
+  },
+
+
+},
+{
+  _id:false
+});
+
+
+
+
+
+// =====================================
+// USER ENGAGEMENT SCHEMA
+// =====================================
+
 const userEngagementSchema = new mongoose.Schema(
 
 {
@@ -20,9 +102,8 @@ const userEngagementSchema = new mongoose.Schema(
 
 
   // =====================
-  // XP & LEVEL SYSTEM
+  // XP SYSTEM
   // =====================
-
 
   xp: {
 
@@ -47,7 +128,6 @@ const userEngagementSchema = new mongoose.Schema(
   // COIN SYSTEM
   // =====================
 
-
   coins: {
 
     type: Number,
@@ -59,9 +139,22 @@ const userEngagementSchema = new mongoose.Schema(
 
 
   // =====================
-  // ACTIVITY TRACKING
+  // REWARD SYSTEM
   // =====================
 
+  rewards: {
+
+    type: [rewardSchema],
+
+    default: [],
+
+  },
+
+
+
+  // =====================
+  // ACTIVITY SYSTEM
+  // =====================
 
   totalActivities: {
 
@@ -85,7 +178,6 @@ const userEngagementSchema = new mongoose.Schema(
   // =====================
   // LOGIN STREAK SYSTEM
   // =====================
-
 
   loginStreak: {
 
@@ -114,12 +206,11 @@ const userEngagementSchema = new mongoose.Schema(
   },
 
 
-
 },
 
 {
 
-  timestamps:true,
+  timestamps: true,
 
 }
 
@@ -131,8 +222,8 @@ const userEngagementSchema = new mongoose.Schema(
 
 module.exports = mongoose.model(
 
-"UserEngagement",
+  "UserEngagement",
 
-userEngagementSchema
+  userEngagementSchema
 
 );
