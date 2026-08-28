@@ -58,45 +58,31 @@ function AppRoutes() {
 
       <Route element={<PublicLayout />}>
         <Route path="/" element={<Home />} />
-
         <Route path="/browse" element={<Browse />} />
-
         <Route path="/movies" element={<Movies />} />
-
         <Route path="/series" element={<Series />} />
 
+        <Route path="/details/:mediaType/:id" element={<Details />} />
+        {/* Backward compatibility for old movie detail URLs */}
         <Route path="/details/:id" element={<Details />} />
 
         <Route path="/watchlist" element={<Watchlist />} />
-
         <Route path="/about" element={<About />} />
-
         <Route path="/contact" element={<Contact />} />
-
         <Route path="/partner" element={<Partner />} />
-
         {/* Public Advertising Page */}
         <Route path="/advertise" element={<Advertise />} />
-
         <Route path="/sports" element={<Sports />} />
-
         {/* Global search - movies, series, and sports teams/leagues */}
         <Route path="/search" element={<SearchResults />} />
-
         <Route path="/sports/league/:id" element={<SportsLeagueDetails />} />
-
         <Route path="/sports/team/:id" element={<SportsTeamDetails />} />
-
         <Route path="/sports/match/:id" element={<SportsMatchDetails />} />
-
         {/* Sprint 2: Upcoming Release Calendar */}
         <Route path="/calendar" element={<UpcomingReleaseCalendar />} />
-
         <Route path="/upcoming" element={<UpcomingReleaseCalendar />} />
-
         {/* Sprint 4: Top Rated Content */}
         <Route path="/top-rated" element={<TopRated />} />
-
         {/* Notifications: new releases + live sports */}
         <Route
           path="/notifications"
@@ -106,7 +92,6 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/profile"
           element={
@@ -115,7 +100,6 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
-
         {/* Sprint 4: My Reviews (any logged-in user) */}
         <Route
           path="/my-reviews"

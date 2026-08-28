@@ -12,7 +12,9 @@ import {
 
 import {
   getMovieDetails,
+  getTVShowDetails,
   getMovieWatchProviders,
+  getTVWatchProviders,
 } from "../services/tmdbService";
 
 import { recordActivity } from "../services/activityService";
@@ -25,46 +27,60 @@ import DiscussionForum from "../components/discussion/DiscussionForum";
 const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
 function Details() {
-  const { id } = useParams();
+  const { id, mediaType: routeMediaType } = useParams();
+
+  const mediaType = routeMediaType === "tv" ? "tv" : "movie";
 
   const { isAuthenticated } = useAuth();
 
-  // Prevent duplicate activity recording
-  // caused by React StrictMode / repeated effects.
   const activityRecorded = useRef(false);
 
   const [movie, setMovie] = useState(null);
-
   const [watchProviders, setWatchProviders] = useState({});
-
   const [loading, setLoading] = useState(true);
-
   const [error, setError] = useState("");
 
   useEffect(() => {
-    // Reset when opening a different movie.
     activityRecorded.current = false;
 
     fetchMovie();
-  }, [id, isAuthenticated]);
+  }, [id, mediaType, isAuthenticated]);
 
   async function fetchMovie() {
     try {
       setLoading(true);
       setError("");
 
-      const [movieData, providerData] = await Promise.all([
-        getMovieDetails(id),
+      let movieData;
+      let providerData = {};
 
-        getMovieWatchProviders(id).catch((providerError) => {
-          console.error("Failed to load watch providers:", providerError);
+      // =======================
+      // Fetch Movie / TV Details
+      // =======================
 
-          return {};
-        }),
-      ]);
+      if (mediaType === "tv") {
+        movieData = await getTVShowDetails(id);
+
+        try {
+          providerData = await getTVWatchProviders(id);
+        } catch (providerError) {
+          console.error("Failed to load TV watch providers:", providerError);
+
+          providerData = {};
+        }
+      } else {
+        movieData = await getMovieDetails(id);
+
+        try {
+          providerData = await getMovieWatchProviders(id);
+        } catch (providerError) {
+          console.error("Failed to load movie watch providers:", providerError);
+
+          providerData = {};
+        }
+      }
 
       setMovie(movieData);
-
       setWatchProviders(providerData);
 
       // =======================
@@ -72,34 +88,40 @@ function Details() {
       // =======================
 
       if (isAuthenticated && movieData && !activityRecorded.current) {
-        // Set immediately so StrictMode / repeated renders
-        // cannot send the request twice.
         activityRecorded.current = true;
 
         try {
           await recordActivity({
             contentId: movieData.id,
-            contentType: "movie",
-            title: movieData.title,
+            contentType: mediaType,
+            title: mediaType === "tv" ? movieData.name : movieData.title,
             posterPath: movieData.poster_path,
 
             metadata: {
-              releaseDate: movieData.release_date,
+              releaseDate:
+                mediaType === "tv"
+                  ? movieData.first_air_date
+                  : movieData.release_date,
+
               rating: movieData.vote_average,
+
               genres: movieData.genres?.map((genre) => genre.name) || [],
             },
           });
         } catch (activityError) {
           console.error("Failed to record viewing activity:", activityError);
 
-          // Allow retry if the API request actually failed.
           activityRecorded.current = false;
         }
       }
     } catch (err) {
-      console.error(err);
+      console.error("Failed to load details:", err);
 
-      setError("Failed to load movie.");
+      setError(
+        mediaType === "tv"
+          ? "Failed to load TV show."
+          : "Failed to load movie.",
+      );
     } finally {
       setLoading(false);
     }
@@ -140,12 +162,31 @@ function Details() {
           items-center
           justify-center
           text-red-400
+          px-5
+          text-center
         "
       >
-        <h1 className="text-2xl font-bold">{error || "Movie Not Found"}</h1>
+        <h1 className="text-2xl font-bold">
+          {error ||
+            (mediaType === "tv" ? "TV Show Not Found" : "Movie Not Found")}
+        </h1>
       </div>
     );
   }
+
+  // =======================
+  // Dynamic Movie / TV Data
+  // =======================
+
+  const title = mediaType === "tv" ? movie.name : movie.title;
+
+  const releaseDate =
+    mediaType === "tv" ? movie.first_air_date : movie.release_date;
+
+  const runtime =
+    mediaType === "tv" ? movie.episode_run_time?.[0] : movie.runtime;
+
+  const language = movie.original_language?.toUpperCase() || "N/A";
 
   // =======================
   // Watch Providers
@@ -154,9 +195,7 @@ function Details() {
   const allRegions = Object.entries(watchProviders || {});
 
   const streamingProviders = [];
-
   const rentProviders = [];
-
   const buyProviders = [];
 
   // =======================
@@ -268,7 +307,9 @@ function Details() {
           bg-center
         "
         style={{
-          backgroundImage: `url(${IMAGE_BASE_URL}${movie.backdrop_path})`,
+          backgroundImage: movie.backdrop_path
+            ? `url(${IMAGE_BASE_URL}${movie.backdrop_path})`
+            : "none",
         }}
       >
         {/* Dark Overlay */}
@@ -341,17 +382,36 @@ function Details() {
           ======================= */}
 
           <div>
-            <img
-              src={`${IMAGE_BASE_URL}${movie.poster_path}`}
-              alt={movie.title}
-              className="
-                w-full
-                rounded-3xl
-                border
-                border-white/10
-                shadow-2xl
-              "
-            />
+            {movie.poster_path ? (
+              <img
+                src={`${IMAGE_BASE_URL}${movie.poster_path}`}
+                alt={title}
+                className="
+                  w-full
+                  rounded-3xl
+                  border
+                  border-white/10
+                  shadow-2xl
+                "
+              />
+            ) : (
+              <div
+                className="
+                  w-full
+                  aspect-2/3
+                  rounded-3xl
+                  bg-[#24272D]
+                  border
+                  border-white/10
+                  flex
+                  items-center
+                  justify-center
+                  text-gray-500
+                "
+              >
+                No Poster Available
+              </div>
+            )}
           </div>
 
           {/* =======================
@@ -372,7 +432,7 @@ function Details() {
                 font-semibold
               "
             >
-              Movie
+              {mediaType === "tv" ? "TV Series" : "Movie"}
             </span>
 
             {/* Title */}
@@ -384,7 +444,7 @@ function Details() {
                 font-black
               "
             >
-              {movie.title}
+              {title}
             </h1>
 
             {/* =======================
@@ -419,12 +479,12 @@ function Details() {
                   <p className="text-gray-400 text-sm">Rating</p>
 
                   <h3 className="text-xl font-bold">
-                    {movie.vote_average.toFixed(1)}/10
+                    {Number(movie.vote_average || 0).toFixed(1)}/10
                   </h3>
                 </div>
               </div>
 
-              {/* Runtime */}
+              {/* Runtime / Episodes */}
 
               <div
                 className="
@@ -441,9 +501,13 @@ function Details() {
                 <HiClock className="text-[#D4A017] text-2xl" />
 
                 <div>
-                  <p className="text-gray-400 text-sm">Runtime</p>
+                  <p className="text-gray-400 text-sm">
+                    {mediaType === "tv" ? "Episode Runtime" : "Runtime"}
+                  </p>
 
-                  <h3 className="text-xl font-bold">{movie.runtime} min</h3>
+                  <h3 className="text-xl font-bold">
+                    {runtime ? `${runtime} min` : "N/A"}
+                  </h3>
                 </div>
               </div>
 
@@ -464,9 +528,11 @@ function Details() {
                 <HiCalendarDays className="text-[#D4A017] text-2xl" />
 
                 <div>
-                  <p className="text-gray-400 text-sm">Release</p>
+                  <p className="text-gray-400 text-sm">
+                    {mediaType === "tv" ? "First Air Date" : "Release"}
+                  </p>
 
-                  <h3 className="text-xl font-bold">{movie.release_date}</h3>
+                  <h3 className="text-xl font-bold">{releaseDate || "N/A"}</h3>
                 </div>
               </div>
 
@@ -489,9 +555,7 @@ function Details() {
                 <div>
                   <p className="text-gray-400 text-sm">Language</p>
 
-                  <h3 className="text-xl font-bold">
-                    {movie.original_language.toUpperCase()}
-                  </h3>
+                  <h3 className="text-xl font-bold">{language}</h3>
                 </div>
               </div>
             </div>
@@ -542,14 +606,36 @@ function Details() {
             </div>
 
             {/* =======================
-                Production Companies
+                Production Companies / Networks
             ======================= */}
 
             <div className="mt-12">
-              <h2 className="text-2xl font-bold">Production Companies</h2>
+              <h2 className="text-2xl font-bold">
+                {mediaType === "tv" ? "Networks" : "Production Companies"}
+              </h2>
 
               <div className="flex flex-wrap gap-3 mt-5">
-                {movie.production_companies?.length > 0 ? (
+                {mediaType === "tv" ? (
+                  movie.networks?.length > 0 ? (
+                    movie.networks.map((network) => (
+                      <span
+                        key={network.id}
+                        className="
+                          px-4
+                          py-2
+                          rounded-full
+                          bg-[#24272D]
+                          border
+                          border-white/10
+                        "
+                      >
+                        {network.name}
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-gray-400">Information unavailable.</p>
+                  )
+                ) : movie.production_companies?.length > 0 ? (
                   movie.production_companies.map((company) => (
                     <span
                       key={company.id}
@@ -572,7 +658,7 @@ function Details() {
             </div>
 
             {/* =======================
-                Where to Watch (TMDB / JustWatch providers)
+                Where to Watch
             ======================= */}
 
             <div
@@ -590,8 +676,8 @@ function Details() {
                   <h2 className="text-3xl font-bold">Where to Watch</h2>
 
                   <p className="text-gray-400 mt-3 leading-7">
-                    Streaming, rental, and purchase options available for this
-                    movie.
+                    Streaming, rental, and purchase options available for this{" "}
+                    {mediaType === "tv" ? "series" : "movie"}.
                   </p>
                 </div>
 
@@ -627,12 +713,12 @@ function Details() {
 
                       <div className="flex flex-wrap gap-4">
                         {uniqueStreamingProviders.map((provider) => (
-                         <a 
+                          <a
                             key={`stream-${provider.provider_id}`}
                             href={provider.regionLink || "#"}
                             target="_blank"
                             rel="noopener noreferrer"
-                            title={`Watch ${movie.title} on ${provider.provider_name}`}
+                            title={`Watch ${title} on ${provider.provider_name}`}
                             className="
                                 group
                                 flex
@@ -714,7 +800,7 @@ function Details() {
                             href={provider.regionLink || "#"}
                             target="_blank"
                             rel="noopener noreferrer"
-                            title={`Rent ${movie.title} from ${provider.provider_name}`}
+                            title={`Rent ${title} from ${provider.provider_name}`}
                             className="
                                 group
                                 flex
@@ -796,7 +882,7 @@ function Details() {
                             href={provider.regionLink || "#"}
                             target="_blank"
                             rel="noopener noreferrer"
-                            title={`Buy ${movie.title} from ${provider.provider_name}`}
+                            title={`Buy ${title} from ${provider.provider_name}`}
                             className="
                                 group
                                 flex
@@ -861,9 +947,7 @@ function Details() {
                     </div>
                   )}
 
-                  {/* =======================
-                      Attribution
-                  ======================= */}
+                  {/* Attribution */}
 
                   <div className="mt-8 pt-5 border-t border-white/10">
                     <p className="text-xs text-gray-500">
@@ -885,7 +969,7 @@ function Details() {
                 >
                   <p className="text-gray-400">
                     No streaming, rental, or purchase providers are currently
-                    listed for this movie.
+                    listed for this {mediaType === "tv" ? "series" : "movie"}.
                   </p>
 
                   <p className="text-sm text-gray-500 mt-2">
@@ -897,14 +981,20 @@ function Details() {
             </div>
 
             {/* =======================
-                Official Broadcaster / Watch Official Redirect
+                Official Broadcaster
             ======================= */}
 
-            <WhereToWatch tmdbId={movie.id} mediaType="movie" title={movie.title} />
+            <WhereToWatch
+              tmdbId={movie.id}
+              mediaType={mediaType}
+              title={title}
+            />
 
-            {/* Discussion Forum */}
+            {/* =======================
+                Discussion Forum
+            ======================= */}
 
-            <DiscussionForum tmdbId={movie.id} mediaType="movie" />
+            <DiscussionForum tmdbId={movie.id} mediaType={mediaType} />
 
             {/* =======================
                 Ratings & Reviews
@@ -912,8 +1002,8 @@ function Details() {
 
             <ReviewsSection
               contentId={movie.id}
-              contentType="movie"
-              contentTitle={movie.title}
+              contentType={mediaType}
+              contentTitle={title}
               contentPoster={movie.poster_path}
             />
           </div>

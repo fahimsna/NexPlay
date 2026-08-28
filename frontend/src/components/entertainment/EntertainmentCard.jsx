@@ -5,7 +5,13 @@ const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
 function EntertainmentCard({ movie }) {
   const title = movie.title || movie.name;
-  const rating = movie.vote_average;
+
+  // TMDB mixed results use media_type.
+  // TV results from the Series page normally have `name`.
+  const mediaType = movie.media_type || (movie.name ? "tv" : "movie");
+
+  const rating = movie.vote_average || 0;
+
   const image = movie.poster_path
     ? `${IMAGE_BASE_URL}${movie.poster_path}`
     : "https://via.placeholder.com/500x750?text=No+Image";
@@ -58,7 +64,7 @@ function EntertainmentCard({ movie }) {
             via-transparent
             to-transparent
           "
-        ></div>
+        />
 
         {/* Rating */}
 
@@ -88,7 +94,7 @@ function EntertainmentCard({ movie }) {
         {/* Details Button */}
 
         <Link
-          to={`/details/${movie.id}`}
+          to={`/details/${mediaType}/${movie.id}`}
           className="
             absolute
             bottom-5
@@ -152,7 +158,7 @@ function EntertainmentCard({ movie }) {
           </span>
 
           <span className="text-[#D4A017] font-semibold">
-            {movie.vote_count} Votes
+            {movie.vote_count || 0} Votes
           </span>
         </div>
       </div>
