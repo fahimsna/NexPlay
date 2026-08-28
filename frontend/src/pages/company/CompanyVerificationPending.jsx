@@ -20,7 +20,7 @@ function CompanyVerificationPending() {
     <div className="min-h-screen bg-[#17191D] text-white flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
         <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-[#24272D]">
-          <div className="h-1.5 bg-gradient-to-r from-[#D4A017]/60 via-[#D4A017]/30 to-[#D4A017]/60" />
+          <div className="h-1.5 bg-linear-to-r from-[#D4A017]/60 via-[#D4A017]/30 to-[#D4A017]/60" />
 
           <div className="p-8 text-center">
             <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-[#D4A017]/10 border border-[#D4A017]/20 flex items-center justify-center">

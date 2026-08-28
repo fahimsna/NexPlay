@@ -302,7 +302,7 @@ function SportsLeagueDetails() {
             </div>
           ) : (
             <div className="bg-[#24272D] border border-white/10 rounded-2xl overflow-x-auto">
-              <table className="w-full text-left min-w-[560px]">
+              <table className="w-full text-left min-w-140">
                 <thead className="bg-[#1B1E22] text-gray-500 text-xs uppercase">
                   <tr>
                     <th className="px-4 py-3">#</th>
@@ -502,7 +502,7 @@ function MatchCard({ event, upcoming }) {
 
         {/* SCORE */}
 
-        <div className="text-center min-w-[80px]">
+        <div className="text-center min-w-20">
           {upcoming ? (
             <div className="text-xs uppercase tracking-wider text-gray-500">
               vs

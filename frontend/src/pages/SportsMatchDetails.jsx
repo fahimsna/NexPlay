@@ -340,13 +340,13 @@ function SportsMatchDetails() {
                         key={row.label}
                         className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-3"
                       >
-                        <p className="min-w-0 text-right text-sm break-words">{row.home ?? "-"}</p>
+                        <p className="min-w-0 text-right text-sm wrap-break-words">{row.home ?? "-"}</p>
 
                         <p className="text-center text-xs uppercase tracking-wider text-gray-500 px-3">
                           {row.label}
                         </p>
 
-                        <p className="min-w-0 text-left text-sm break-words">{row.away ?? "-"}</p>
+                        <p className="min-w-0 text-left text-sm wrap-break-words">{row.away ?? "-"}</p>
                       </div>
                     );
                   })}

@@ -24,7 +24,7 @@ function StatsCard({ title, value, subtitle }) {
 
 group
 
-bg-gradient-to-br
+bg-linear-to-br
 
 from-[#24272D]
 

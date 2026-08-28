@@ -20,7 +20,7 @@ function CompanyVerificationRejected({ rejectionReason }) {
     <div className="min-h-screen bg-[#17191D] text-white flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
         <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-[#24272D]">
-          <div className="h-1.5 bg-gradient-to-r from-red-500/60 via-red-500/30 to-red-500/60" />
+          <div className="h-1.5 bg-linear-to-r from-red-500/60 via-red-500/30 to-red-500/60" />
 
           <div className="p-8 text-center">
             <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center">
