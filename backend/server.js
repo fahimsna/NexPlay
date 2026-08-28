@@ -1,4 +1,5 @@
 const express = require("express");
+<<<<<<< HEAD
 const dns = require("dns");
 
 dns.setDefaultResultOrder("ipv4first");
@@ -21,9 +22,51 @@ const connectDB = require("./config/db");
 
 
 // ROUTES
+=======
+const dotenv = require("dotenv");
+const cors = require("cors");
+const path = require("path");
+
+const connectDB = require("./config/db");
+
+>>>>>>> 4e27ec318c345f0fd0e7fd2bdd02b4ed28ee7b35
 const settingsRoutes = require("./routes/settingsRoutes");
 const sportsRoutes = require("./routes/sportsRoutes");
 const activityRoutes = require("./routes/activityRoutes");
+
+dotenv.config();
+
+const app = express();
+
+// =======================
+// DATABASE CONNECTION
+// =======================
+
+connectDB();
+
+// =======================
+// MIDDLEWARE
+// =======================
+
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "http://localhost:5174"],
+    credentials: true,
+  }),
+);
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// =======================
+// STATIC FILES
+// =======================
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// =======================
+// ROUTES
+// =======================
 
 const authRoutes = require("./routes/authRoutes");
 const companyRoutes = require("./routes/companyRoutes");
@@ -39,9 +82,19 @@ const streamingPlatformRoutes = require("./routes/streamingPlatformRoutes");
 const streamingAvailabilityRoutes = require("./routes/streamingAvailabilityRoutes");
 const commentRoutes = require("./routes/commentRoutes");
 
+// =======================
+// SPRINT 4 - USER ROUTES
+// =======================
+
 const userRoutes = require("./routes/userRoutes");
+
+// =======================
+// SPRINT 4 - WATCHLIST
+// =======================
+
 const watchlistRoutes = require("./routes/watchlistRoutes");
 
+<<<<<<< HEAD
 const engagementRoutes = require("./routes/engagementRoutes");
 
 console.log("ENGAGEMENT ROUTE LOADED");
@@ -89,6 +142,9 @@ app.use(
 );
 
 
+=======
+// =======================
+>>>>>>> 4e27ec318c345f0fd0e7fd2bdd02b4ed28ee7b35
 // API ROUTES
 
 app.use("/api/auth", authRoutes);
@@ -112,6 +168,7 @@ app.use("/api/sports", sportsRoutes);
 app.use("/api/admin", adminRoutes);
 
 app.use("/api/reviews", reviewRoutes);
+<<<<<<< HEAD
 
 app.use("/api/featured-content", featuredContentRoutes);
 
@@ -234,4 +291,50 @@ connectDB()
         error.message
     );
 
+=======
+app.use("/api/featured-content", featuredContentRoutes);
+app.use("/api/streaming-platforms", streamingPlatformRoutes);
+app.use("/api/streaming-availability", streamingAvailabilityRoutes);
+app.use("/api/comments", commentRoutes);
+
+// =======================
+// SPRINT 4
+// User Activity History
+// =======================
+
+app.use("/api/activity", activityRoutes);
+
+// =======================
+// SPRINT 4
+// User Profile
+// Favourite Genres
+// Favourite Sports
+// =======================
+
+app.use("/api/users", userRoutes);
+
+// =======================
+// SPRINT 4
+// Watchlist
+// =======================
+
+app.use("/api/watchlist", watchlistRoutes);
+
+// =======================
+// ROOT ROUTE
+// =======================
+
+app.get("/", (req, res) => {
+  res.send("NexPlay Backend Running");
+});
+
+// =======================
+// SERVER
+// =======================
+
+const PORT = process.env.PORT || 8000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+>>>>>>> 4e27ec318c345f0fd0e7fd2bdd02b4ed28ee7b35
 });
