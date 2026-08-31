@@ -1,14 +1,19 @@
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://nexplay-6jls.onrender.com/api";
+const API_ROOT =
+  import.meta.env.VITE_API_URL ||
+  "https://nexplay-6jls.onrender.com";
 
-const api = axios.create({
-  baseURL: `${API_URL}/api/upcoming`,
+const API_URL = `${API_ROOT.replace(/\/$/, "")}/api`;
+
+const upcomingApi = axios.create({
+  baseURL: API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
-// JWT TOKEN
-
-api.interceptors.request.use(
+upcomingApi.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
 
@@ -18,39 +23,7 @@ api.interceptors.request.use(
 
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  },
+  (error) => Promise.reject(error),
 );
 
-// GET COMPANY UPCOMING
-
-export const getUpcoming = async () => {
-  const response = await api.get("/my");
-
-  return response.data;
-};
-
-// CREATE
-
-export const createUpcoming = async (data) => {
-  const response = await api.post("/", data);
-
-  return response.data;
-};
-
-// UPDATE
-
-export const updateUpcoming = async (id, data) => {
-  const response = await api.put(`/${id}`, data);
-
-  return response.data;
-};
-
-// DELETE
-
-export const deleteUpcoming = async (id) => {
-  const response = await api.delete(`/${id}`);
-
-  return response.data;
-};
+export default upcomingApi;

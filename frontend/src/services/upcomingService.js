@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = "https://nexplay-6jls.onrender.com/api/upcoming";
+const API = `${(import.meta.env.VITE_API_URL || "https://nexplay-6jls.onrender.com").replace(/\/$/, "")}/api/upcoming`;
 
 const getToken = () => {
   return localStorage.getItem("token");

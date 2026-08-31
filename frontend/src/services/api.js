@@ -1,8 +1,15 @@
 import axios from "axios";
 
+const API_ROOT =
+  import.meta.env.VITE_API_URL ||
+  "https://nexplay-6jls.onrender.com";
+
 const API = axios.create({
-  baseURL: "https://nexplay-6jls.onrender.com/api",
+  baseURL: `${API_ROOT.replace(/\/$/, "")}/api`,
   withCredentials: true,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
 API.interceptors.request.use(
@@ -15,9 +22,7 @@ API.interceptors.request.use(
 
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  },
+  (error) => Promise.reject(error),
 );
 
 export default API;

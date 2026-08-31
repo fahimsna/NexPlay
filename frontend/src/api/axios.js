@@ -1,8 +1,10 @@
 import axios from "axios";
 
-const API_URL =
+const API_ROOT =
   import.meta.env.VITE_API_URL ||
-  "https://nexplay-6jls.onrender.com/api";
+  "https://nexplay-6jls.onrender.com";
+
+const API_URL = `${API_ROOT.replace(/\/$/, "")}/api`;
 
 const api = axios.create({
   baseURL: API_URL,
