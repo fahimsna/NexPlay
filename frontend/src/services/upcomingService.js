@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = "http://localhost:8000/api/upcoming";
+const API = "https://nexplay-6jls.onrender.com/api/upcoming";
 
 const getToken = () => {
   return localStorage.getItem("token");

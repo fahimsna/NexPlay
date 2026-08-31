@@ -16,7 +16,7 @@ import { HiPlus } from "react-icons/hi2";
 
 import toast from "react-hot-toast";
 
-const IMAGE_URL = "http://localhost:8000/uploads/";
+const IMAGE_URL = "https://nexplay-6jls.onrender.com/uploads/";
 
 function AdvertisementManagement() {
   const [advertisements, setAdvertisements] = useState([]);

@@ -48,7 +48,7 @@ function CompanyProfile() {
       });
 
       if (data.logo) {
-        setPreview(`http://localhost:8000/uploads/${data.logo}`);
+        setPreview(`https://nexplay-6jls.onrender.com/uploads/${data.logo}`);
       }
     } catch (error) {
       console.log(error.response?.data || error.message);

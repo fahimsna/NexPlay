@@ -10,7 +10,7 @@ import { Link } from "react-router-dom";
 function CompanyProfileSummary({ company, dashboard = false }) {
   if (!company) return null;
 
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+  const API_URL = import.meta.env.VITE_API_URL || "https://nexplay-6jls.onrender.com";
 
   const logo = company.logo ? `${API_URL}${company.logo}` : null;
 

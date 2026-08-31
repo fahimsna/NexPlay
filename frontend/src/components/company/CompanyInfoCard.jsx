@@ -3,7 +3,7 @@ import { HiGlobeAlt, HiBuildingOffice2, HiCheckBadge } from "react-icons/hi2";
 function CompanyInfoCard({ company }) {
   if (!company) return null;
 
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+  const API_URL = import.meta.env.VITE_API_URL || "https://nexplay-6jls.onrender.com";
 
   const logoURL = company.logo ? `${API_URL}${company.logo}` : null;
 
