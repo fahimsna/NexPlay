@@ -1,13 +1,16 @@
 import axios from "axios";
 
-const API_ROOT =
+const API_URL = (
   import.meta.env.VITE_API_URL ||
-  "https://nexplay-6jls.onrender.com";
+  "https://nexplay-6jls.onrender.com/api"
+).replace(/\/$/, "");
 
-const API_URL = `${API_ROOT.replace(/\/$/, "")}/api`;
+const BASE_URL = API_URL.endsWith("/api")
+  ? API_URL
+  : `${API_URL}/api`;
 
 const axiosInstance = axios.create({
-  baseURL: API_URL,
+  baseURL: BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -35,6 +38,7 @@ axiosInstance.interceptors.response.use(
       "API Error:",
       error.response?.data || error.message
     );
+
     return Promise.reject(error);
   },
 );
