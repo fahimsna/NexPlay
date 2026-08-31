@@ -1,5 +1,5 @@
 import CompanyDashboardLayout from "../../layouts/CompanyDashboardLayout";
-import AnalyticsCard from "../../components/analytics/AnalyticsCard";
+import AnalyticsCard from "../../components/company/analytics/AnalyticsCard";
 import {
   HiMegaphone,
   HiFilm,
