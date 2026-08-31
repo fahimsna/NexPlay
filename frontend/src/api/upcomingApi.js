@@ -6,14 +6,16 @@ const API_ROOT =
 
 const API_URL = `${API_ROOT.replace(/\/$/, "")}/api`;
 
-const upcomingApi = axios.create({
+const API = axios.create({
   baseURL: API_URL,
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true,
+  timeout: 15000,
 });
 
-upcomingApi.interceptors.request.use(
+API.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
 
@@ -26,4 +28,24 @@ upcomingApi.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
-export default upcomingApi;
+export const getUpcoming = async () => {
+  const response = await API.get("/upcoming");
+  return response.data;
+};
+
+export const createUpcoming = async (data) => {
+  const response = await API.post("/upcoming", data);
+  return response.data;
+};
+
+export const updateUpcoming = async (id, data) => {
+  const response = await API.put(`/upcoming/${id}`, data);
+  return response.data;
+};
+
+export const deleteUpcoming = async (id) => {
+  const response = await API.delete(`/upcoming/${id}`);
+  return response.data;
+};
+
+export default API;
